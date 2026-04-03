@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: gaphto_db
+    environment:
+      POSTGRES_USER: gaphto
+      POSTGRES_PASSWORD: gaphto_secret
+      POSTGRES_DB: gaphto
+    ports:
+      - "5432:5432"
+    volumes:
+      - gaphto_pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gaphto -d gaphto"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: gaphto_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gaphto.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  gaphto_pgdata:
+    name: gaphto_pgdata
