@@ -1,0 +1,165 @@
+'use client'
+
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useCallback, useRef } from 'react'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { MemberCard, type MemberCardProps } from '@/components/member/member-card'
+import { Search, Users } from 'lucide-react'
+
+const GHANA_REGIONS = [
+  'Ahafo',
+  'Ashanti',
+  'Bono',
+  'Bono East',
+  'Central',
+  'Eastern',
+  'Greater Accra',
+  'North East',
+  'Northern',
+  'Oti',
+  'Savannah',
+  'Upper East',
+  'Upper West',
+  'Volta',
+  'Western',
+  'Western North',
+]
+
+const SPECIALTIES = [
+  { value: 'disease-control', label: 'Disease Control' },
+  { value: 'health-information', label: 'Health Information Management' },
+  { value: 'nutrition', label: 'Nutrition' },
+]
+
+interface MemberDirectoryClientProps {
+  initialMembers: MemberCardProps[]
+  initialQ?: string
+  initialSpecialty?: string
+  initialRegion?: string
+}
+
+export function MemberDirectoryClient({
+  initialMembers,
+  initialQ = '',
+  initialSpecialty = '',
+  initialRegion = '',
+}: MemberDirectoryClientProps) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const buildUrl = useCallback(
+    (key: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (value) {
+        params.set(key, value)
+      } else {
+        params.delete(key)
+      }
+      return `${pathname}?${params.toString()}`
+    },
+    [pathname, searchParams],
+  )
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    debounceTimer.current = setTimeout(() => {
+      router.push(buildUrl('q', value))
+    }, 300)
+  }
+
+  const handleSpecialtyChange = (value: string) => {
+    router.push(buildUrl('specialty', value === 'all' ? '' : value))
+  }
+
+  const handleRegionChange = (value: string) => {
+    router.push(buildUrl('region', value === 'all' ? '' : value))
+  }
+
+  return (
+    <div>
+      {/* Filters */}
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
+          <Input
+            type="search"
+            placeholder="Search by name..."
+            defaultValue={initialQ}
+            onChange={handleSearchChange}
+            className="pl-9"
+          />
+        </div>
+
+        <Select
+          defaultValue={initialSpecialty || 'all'}
+          onValueChange={handleSpecialtyChange}
+        >
+          <SelectTrigger className="w-full sm:w-64">
+            <SelectValue placeholder="All Specialties" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Specialties</SelectItem>
+            {SPECIALTIES.map((s) => (
+              <SelectItem key={s.value} value={s.value}>
+                {s.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          defaultValue={initialRegion || 'all'}
+          onValueChange={handleRegionChange}
+        >
+          <SelectTrigger className="w-full sm:w-52">
+            <SelectValue placeholder="All Regions" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Regions</SelectItem>
+            {GHANA_REGIONS.map((r) => (
+              <SelectItem key={r} value={r}>
+                {r}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Results count */}
+      <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
+        <Users className="h-4 w-4" />
+        <span>
+          Showing <strong className="text-foreground">{initialMembers.length}</strong>{' '}
+          {initialMembers.length === 1 ? 'member' : 'members'}
+        </span>
+      </div>
+
+      {/* Member grid */}
+      {initialMembers.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-16 text-center">
+          <Users className="mb-3 h-10 w-10 text-muted-foreground/40" />
+          <p className="font-medium text-muted-foreground">No members found</p>
+          <p className="mt-1 text-sm text-muted-foreground/70">
+            Try adjusting your search or filters.
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {initialMembers.map((member) => (
+            <MemberCard key={member.id} {...member} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}

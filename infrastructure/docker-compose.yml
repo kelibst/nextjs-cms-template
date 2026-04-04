@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: gaphto_secret
       POSTGRES_DB: gaphto
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - gaphto_pgdata:/var/lib/postgresql/data
     restart: unless-stopped

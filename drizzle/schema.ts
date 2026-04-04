@@ -66,6 +66,8 @@ export const users = pgTable('users', {
   role: roleEnum('role').notNull().default('member'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  passwordResetToken: text('password_reset_token'),
+  passwordResetTokenExpiry: timestamp('password_reset_token_expiry'),
 })
 
 export const posts = pgTable('posts', {
@@ -131,6 +133,7 @@ export const eventRegistrations = pgTable('event_registrations', {
   email: text('email').notNull(),
   phone: text('phone'),
   paymentStatus: text('payment_status').notNull().default('pending'),
+  paymentReference: text('payment_reference'),
   registeredAt: timestamp('registered_at').notNull().defaultNow(),
 })
 
@@ -224,6 +227,24 @@ export const siteSettings = pgTable('site_settings', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
 
+export const fundApplications = pgTable('fund_applications', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').references(() => users.id).notNull(),
+  applicantName: text('applicant_name').notNull(),
+  email: text('email').notNull(),
+  phone: text('phone').notNull(),
+  region: text('region').notNull(),
+  facility: text('facility').notNull(),
+  loanAmount: numeric('loan_amount', { precision: 10, scale: 2 }).notNull(),
+  loanPurpose: text('loan_purpose').notNull(),
+  repaymentPeriodMonths: integer('repayment_period_months').notNull(),
+  status: text('status').notNull().default('pending'), // pending | reviewing | approved | rejected
+  reviewNotes: text('review_notes'),
+  submittedAt: timestamp('submitted_at').defaultNow(),
+  reviewedAt: timestamp('reviewed_at'),
+  reviewedBy: uuid('reviewed_by').references(() => users.id),
+})
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Type inference helpers
 // ─────────────────────────────────────────────────────────────────────────────
@@ -269,3 +290,6 @@ export type NewContactSubmission = typeof contactSubmissions.$inferInsert
 
 export type SiteSetting = typeof siteSettings.$inferSelect
 export type NewSiteSetting = typeof siteSettings.$inferInsert
+
+export type FundApplication = typeof fundApplications.$inferSelect
+export type NewFundApplication = typeof fundApplications.$inferInsert

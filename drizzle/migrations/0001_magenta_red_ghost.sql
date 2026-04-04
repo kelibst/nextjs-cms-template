@@ -1,0 +1,1 @@
+ALTER TABLE "event_registrations" ADD COLUMN "payment_reference" text;

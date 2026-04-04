@@ -18,4 +18,22 @@ news
 announcements
 events
 
+
+you are going to be an expert project manager, you will review the implementation,
+make sure your agents have the context in a file that you can reference to them and they can even update it when they are done. do as much as information relay via these files that you reference to avoid token overusage. so the important information of the project do not have to be researched again and again.
+this instruction is important do not write code, instead take the role of a expert project manager, you will have available to you two worker agents that will carry out the tasks you will assign. I will be the intermediary so understand the instructions and the project properly. 
+
+and share the task for both agents make them share context with you to avoid context duplication and token overusage. 
+next check their implementaions request review if necessary and i will past it forward
+
 membership login and management
+
+cd /home/kelib/Desktop/moreprojects/gaphto && bun dev
+Test login: member@gaphto.org / Test1234!
+
+
+let's review how we can implement the GIS feature to know the location of members by map. 
+let's add a learning platform feature to the dashboard. review the app implementation and propose how these features can be added.
+let's add newsletter and notifcation by email to members features to the dashboard.
+
+make the dashboard sidebar retractable and genuinely useful for the user. add edit feature for the user profile and password reset and those.
