@@ -4,22 +4,34 @@
 
 ---
 
-## COMPLETED TASK FILES (Phase 5 — Admin Content Management / CMS) ✅
+## ACTIVE TASKS — Page Builder Phases A/B/C/D/E ✅ ALL COMPLETE
 
 | File | Agent | Feature |
 |------|-------|---------|
-| `plans/TASK_PM5_AGENT1_BACKEND.md` | Agent 1 ✅ | Content actions + public page DB integration |
-| `plans/TASK_PM5_AGENT2_DASHBOARD.md` | Agent 2 ✅ | Dashboard content editor UI |
+| `plans/TASK_PB_A_FOUNDATION.md` | Agent ✅ | pageBlocks schema + migration + CRUD actions + seed |
+| `plans/TASK_PB_B1_BLOCK_EDITORS.md` | Agent 1 ✅ | Block editor components (10 files in block-editor/) |
+| `plans/TASK_PB_B2_PAGE_BUILDER_UI.md` | Agent 2 ✅ | Dashboard page builder UI + /content/[page] route |
+| `plans/TASK_PB_C_PUBLIC_PAGES.md` | Agent ✅ | Public pages render from pageBlocks with JSON fallback |
 
-**Phase 5 final facts (for future agents):**
-- `src/app/actions/content.ts` — `getPageContent(keys: string[])` + `savePageContent(values: Record<string,string>)`
-- `src/components/dashboard/homepage-content-form.tsx` — 18-field homepage editor (client component)
-- `src/components/dashboard/about-content-form.tsx` — about editor with Tiptap rich text + dynamic list editors
-- Dashboard routes: `/dashboard/content`, `/dashboard/content/homepage`, `/dashboard/content/about`
-- Sidebar: "Pages" group with `FileEdit` icon added in `src/components/dashboard/sidebar.tsx`
-- All pages role-gated to `['super_admin', 'admin']`; editor role redirected to `/dashboard`
-- Complex fields stored as JSON strings (objectives, timeline, practice_areas)
-- No DB migration was needed — used existing `siteSettings` table
+**Page Builder key facts:**
+- `pageBlocks` table: page, type (blockTypeEnum), sortOrder, content (JSON text), isVisible
+- `src/app/actions/blocks.ts` — getPageBlocks, upsertBlock, deleteBlock, reorderBlocks, toggleBlockVisibility
+- `src/lib/blocks.ts` — block content types + parseBlockContent<T>() helper
+- `src/lib/seed-blocks.ts` — seed: `bunx tsx src/lib/seed-blocks.ts` (9 homepage + 5 about blocks)
+- `src/components/dashboard/block-editor/` — all per-type editors + BlockEditorShell (index.ts)
+- `src/components/dashboard/page-builder-client.tsx` — reorder, add-block dialog client
+- Dashboard: `/dashboard/content` (hub) + `/dashboard/content/[page]` (builder)
+- `src/lib/data.ts` — `getBlocksForPage(page)` fetches visible+sorted blocks
+- Public pages: read from pageBlocks DB; full JSON fallback if DB empty
+- **Phase D (drag-to-reorder) ✅ DONE** — @dnd-kit installed; BlockEditorShell uses useSortable; page-builder-client uses DndContext + arrayMove
+- Block types: hero, stats_bar, rich_text, objectives_list, timeline, practice_areas_grid, news_preview, events_preview, leadership_preview, gallery_teaser, fund_cta, image_banner
+- Managed pages: homepage (9 blocks), about (5 blocks), fund (3 blocks), practice-areas (2 blocks)
+- Dashboard hub at /dashboard/content shows all 4 pages; /dashboard/content/[page] handles homepage|about|fund|practice-areas
+- src/components/home/image-banner.tsx — ImageBanner component (for image_banner blocks)
+- Homepage has catch-all renderer for extra rich_text + image_banner blocks admins add
+- About page Vision & Mission renders as full-width combined card when DB block exists
+- To seed a fresh DB: bunx tsx src/lib/seed-blocks.ts
+- **DO NOT reference Phase 5 CMS files** — all deleted in Phase A cleanup
 
 ---
 
@@ -48,6 +60,18 @@
 |------|-------|---------|
 | `plans/TASK_PM3_AGENT1_GIS.md` | Agent 1 | GIS Member Map (react-leaflet, Ghana regions, dashboard + directory) |
 | `plans/TASK_PM3_AGENT2_LEARN_NEWSLETTER.md` | Agent 2 | Learning Platform (courses/lessons/enrollments) + Newsletter/Email (Resend batch) |
+
+---
+
+## Page Builder Notes
+
+- `pageBlocks` table exists in DB — schema in `drizzle/schema.ts` (`blockTypeEnum` + `pageBlocks`)
+- Migration file: `drizzle/migrations/0007_magical_tempest.sql`
+- Seed script: `src/lib/seed-blocks.ts` (run with `bunx tsx src/lib/seed-blocks.ts`)
+- Block type definitions + `parseBlockContent` helper: `src/lib/blocks.ts`
+- Server actions (getPageBlocks, upsertBlock, deleteBlock, reorderBlocks, toggleBlockVisibility): `src/app/actions/blocks.ts`
+- 9 homepage blocks seeded (sortOrder 0–8); 5 about blocks seeded (sortOrder 0–4)
+- Public pages (`/`, `/about`) are back on JSON-only data — page builder UI in Phase B will wire them to DB blocks
 
 ---
 

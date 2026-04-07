@@ -207,16 +207,10 @@ export function postImagePath(localImage: string): string {
   return `/images/${localImage}`;
 }
 
-// ─── DB Content Map ───────────────────────────────────────────────────────────
+// ─── Page Builder ──────────────────────────────────────────────────────────────
 
-/**
- * Fetch multiple siteSettings keys from the DB.
- * Returns a key→value map; missing keys get an empty string.
- * This wraps the server action so pages can call it directly.
- */
-export async function getContentMap(
-  keys: string[]
-): Promise<Record<string, string>> {
-  const { getPageContent } = await import("@/app/actions/content");
-  return getPageContent(keys);
+export async function getBlocksForPage(page: string) {
+  const { getPageBlocks } = await import('@/app/actions/blocks')
+  const blocks = await getPageBlocks(page)
+  return blocks.filter(b => b.isVisible).sort((a, b) => a.sortOrder - b.sortOrder)
 }

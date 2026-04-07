@@ -380,3 +380,35 @@ export type NewNewsletter = typeof newsletters.$inferInsert
 
 export type EmailPreference = typeof emailPreferences.$inferSelect
 export type NewEmailPreference = typeof emailPreferences.$inferInsert
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Page Builder
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const blockTypeEnum = pgEnum('block_type', [
+  'hero',
+  'stats_bar',
+  'rich_text',
+  'objectives_list',
+  'timeline',
+  'practice_areas_grid',
+  'news_preview',
+  'events_preview',
+  'leadership_preview',
+  'gallery_teaser',
+  'fund_cta',
+  'image_banner',
+])
+
+export const pageBlocks = pgTable('page_blocks', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  page: text('page').notNull(),
+  type: blockTypeEnum('type').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
+  content: text('content').notNull().default('{}'),
+  isVisible: boolean('is_visible').notNull().default(true),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+})
+
+export type PageBlock = typeof pageBlocks.$inferSelect
+export type NewPageBlock = typeof pageBlocks.$inferInsert

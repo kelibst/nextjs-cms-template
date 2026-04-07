@@ -1,6 +1,7 @@
 import { sanitizeHtml } from "@/lib/utils";
 import type { Metadata } from "next";
-import { getPracticeAreas, decodeEntities } from "@/lib/data";
+import { getPracticeAreas, getBlocksForPage, decodeEntities } from "@/lib/data";
+import { parseBlockContent, HeroContent, PracticeAreasContent } from "@/lib/blocks";
 import { PageHeader } from "@/components/shared/page-header";
 
 export const metadata: Metadata = {
@@ -27,19 +28,34 @@ const ICONS: Record<string, React.ReactNode> = {
   ),
 };
 
-export default function PracticeAreasPage() {
-  const areas = getPracticeAreas();
+export default async function PracticeAreasPage() {
+  const paBlocks = await getBlocksForPage('practice-areas')
+
+  const heroBlock = paBlocks.find((b) => b.type === 'hero')
+  const heroContent = heroBlock
+    ? parseBlockContent<HeroContent>(heroBlock.content, { title: '', subtitle: '' })
+    : null
+
+  const gridBlock = paBlocks.find((b) => b.type === 'practice_areas_grid')
+  const gridContent = gridBlock
+    ? parseBlockContent<PracticeAreasContent>(gridBlock.content, { heading: '', items: [] })
+    : null
+
+  const fallbackAreas = getPracticeAreas()
 
   return (
     <>
       <PageHeader
-        title="Areas of Practice"
-        subtitle="GAPHTO members serve in three key disciplines of public health in Ghana."
+        title={heroContent?.title || "Areas of Practice"}
+        subtitle={heroContent?.subtitle || "GAPHTO members serve in three key disciplines of public health in Ghana."}
         breadcrumb={[{ label: "Home", href: "/" }, { label: "Practice Areas" }]}
       />
 
       <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8 space-y-16">
-        {areas.map((area, index) => (
+        {gridContent && gridContent.heading && (
+          <h2 className="text-2xl font-bold text-foreground">{gridContent.heading}</h2>
+        )}
+        {fallbackAreas.map((area, index) => (
           <section key={area.slug} id={area.slug}>
             <div className="flex items-start gap-5 mb-6">
               {/* Icon */}
@@ -89,7 +105,7 @@ export default function PracticeAreasPage() {
             )}
 
             {/* Divider between sections */}
-            {index < areas.length - 1 && (
+            {index < fallbackAreas.length - 1 && (
               <div className="mt-12 border-t border-border" />
             )}
           </section>

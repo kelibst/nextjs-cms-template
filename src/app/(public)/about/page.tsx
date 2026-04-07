@@ -1,7 +1,8 @@
 import { sanitizeHtml } from "@/lib/utils";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getAbout, getContentMap } from "@/lib/data";
+import { getAbout, getBlocksForPage } from "@/lib/data";
+import { parseBlockContent, type RichTextContent, type ObjectivesContent, type PracticeAreasContent, type TimelineContent } from "@/lib/blocks";
 import { PageHeader } from "@/components/shared/page-header";
 
 export const metadata: Metadata = {
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
     "Learn about the Ghana Association of Public Health Technical Officers — our history, vision, mission, and objectives.",
 };
 
-// ─── Default data (fallbacks when DB has no value) ───────────────────────────
+// ─── Default data ─────────────────────────────────────────────────────────────
 
 const TIMELINE_DEFAULTS = [
   { year: "1984", title: "Association Founded", description: "Association founded for Disease Control Officers and Field Technicians." },
@@ -34,24 +35,6 @@ const PRACTICE_AREAS_DEFAULTS = [
   },
 ]
 
-const OBJECTIVES_DEFAULTS = [
-  "a) To bring all Disease control officers, Nutrition officers, Health Information officers and Field Technicians in public, Christian Health Association of Ghana (CHAG), Non – Governmental Organisations (NGOs) and private institutions in Ghana and beyond into a unified professional association",
-  "b) To develop and recommend appropriate public health strategies to Ghana Health Service",
-  "c) To cooperate with GHS/MoH in the promotion of public health practice in Ghana",
-  "d) To promote the welfare of members and secure equitable and attractive conditions of service to retain them in the profession",
-  "e) To conduct health systems research to enhance public health care in Ghana",
-  "f) To network and collaborate with recognised stakeholders in public health care delivery locally and globally.",
-]
-
-const ABOUT_KEYS = [
-  'about.background',
-  'about.vision',
-  'about.mission',
-  'about.objectives',
-  'about.timeline',
-  'about.practice_areas',
-]
-
 // SVG icons for practice area cards
 const PRACTICE_AREA_ICONS = [
   (
@@ -73,42 +56,77 @@ const PRACTICE_AREA_ICONS = [
 
 export default async function AboutPage() {
   const about = getAbout();
-  const content = await getContentMap(ABOUT_KEYS);
 
-  // Background, vision, mission — fallback to JSON data
-  const background = content['about.background'] || about.background
-  const vision = content['about.vision'] || about.vision
-  const mission = content['about.mission'] || about.mission
+  // Fetch page blocks from DB (filtered to visible, sorted by sortOrder)
+  const aboutBlocks = await getBlocksForPage('about');
+  const hasBlocks = aboutBlocks.length > 0;
 
-  // Objectives — stored as JSON string array in DB
-  const objectives = (() => {
-    try {
-      const parsed = JSON.parse(content['about.objectives'] || '')
-      return Array.isArray(parsed) ? parsed as string[] : OBJECTIVES_DEFAULTS
-    } catch {
-      return about.objectives.length > 0 ? about.objectives : OBJECTIVES_DEFAULTS
+  // Helper: find a block by type, optionally matching its heading
+  function getBlock(type: string, heading?: string) {
+    if (heading) {
+      return aboutBlocks.find(b => {
+        if (b.type !== type) return false;
+        try {
+          return JSON.parse(b.content)?.heading === heading;
+        } catch {
+          return false;
+        }
+      });
     }
-  })()
+    return aboutBlocks.find(b => b.type === type);
+  }
 
-  // Timeline — stored as JSON string: {year, title, description}[]
-  const timeline = (() => {
-    try {
-      const parsed = JSON.parse(content['about.timeline'] || '')
-      return Array.isArray(parsed) ? parsed as { year: string; title: string; description: string }[] : TIMELINE_DEFAULTS
-    } catch {
-      return TIMELINE_DEFAULTS
-    }
-  })()
+  // ── Background ──────────────────────────────────────────────────────────────
+  const backgroundBlock = hasBlocks ? getBlock('rich_text', 'Background') : null;
+  const backgroundContent = backgroundBlock
+    ? parseBlockContent<RichTextContent>(backgroundBlock.content, { heading: 'Background', body: '' })
+    : null;
+  const background = backgroundContent?.body || about.background;
 
-  // Practice areas for about page — stored as JSON string: {title, description}[]
-  const practiceAreas = (() => {
-    try {
-      const parsed = JSON.parse(content['about.practice_areas'] || '')
-      return Array.isArray(parsed) ? parsed as { title: string; description: string }[] : PRACTICE_AREAS_DEFAULTS
-    } catch {
-      return PRACTICE_AREAS_DEFAULTS
-    }
-  })()
+  // ── Vision & Mission ────────────────────────────────────────────────────────
+  const visionMissionBlock = hasBlocks ? getBlock('rich_text', 'Vision & Mission') : null;
+  const visionMissionContent = visionMissionBlock
+    ? parseBlockContent<RichTextContent>(visionMissionBlock.content, { heading: 'Vision & Mission', body: '' })
+    : null;
+  // Fall back to JSON about data fields for vision/mission
+  const vision = visionMissionContent ? undefined : about.vision;
+  const mission = visionMissionContent ? undefined : about.mission;
+
+  // ── Objectives ──────────────────────────────────────────────────────────────
+  const objectivesBlock = hasBlocks ? getBlock('objectives_list') : null;
+  const objectivesContent = objectivesBlock
+    ? parseBlockContent<ObjectivesContent>(objectivesBlock.content, { heading: 'Aims & Objectives', items: [] })
+    : null;
+  const objectives = objectivesContent?.items.length
+    ? objectivesContent.items
+    : about.objectives.length > 0
+    ? about.objectives
+    : [
+        "a) To bring all Disease control officers, Nutrition officers, Health Information officers and Field Technicians in public, Christian Health Association of Ghana (CHAG), Non – Governmental Organisations (NGOs) and private institutions in Ghana and beyond into a unified professional association",
+        "b) To develop and recommend appropriate public health strategies to Ghana Health Service",
+        "c) To cooperate with GHS/MoH in the promotion of public health practice in Ghana",
+        "d) To promote the welfare of members and secure equitable and attractive conditions of service to retain them in the profession",
+        "e) To conduct health systems research to enhance public health care in Ghana",
+        "f) To network and collaborate with recognised stakeholders in public health care delivery locally and globally.",
+      ];
+
+  // ── Practice Areas ──────────────────────────────────────────────────────────
+  const practiceAreasBlock = hasBlocks ? getBlock('practice_areas_grid') : null;
+  const practiceAreasContent = practiceAreasBlock
+    ? parseBlockContent<PracticeAreasContent>(practiceAreasBlock.content, { heading: 'Areas of Practice', items: [] })
+    : null;
+  const practiceAreas = practiceAreasContent?.items.length
+    ? practiceAreasContent.items
+    : PRACTICE_AREAS_DEFAULTS;
+
+  // ── Timeline ────────────────────────────────────────────────────────────────
+  const timelineBlock = hasBlocks ? getBlock('timeline') : null;
+  const timelineContent = timelineBlock
+    ? parseBlockContent<TimelineContent>(timelineBlock.content, { heading: 'Our History', items: [] })
+    : null;
+  const timeline = timelineContent?.items.length
+    ? timelineContent.items
+    : TIMELINE_DEFAULTS;
 
   return (
     <>
@@ -131,8 +149,8 @@ export default async function AboutPage() {
         {/* Section 2: Vision & Mission */}
         <section>
           <h2 className="mb-6 text-2xl font-bold text-primary">Vision &amp; Mission</h2>
-          <div className="grid gap-6 sm:grid-cols-2">
-            {/* Vision */}
+          {visionMissionContent ? (
+            /* Combined card from DB block — spans full width */
             <div className="rounded-xl border border-primary-muted bg-primary-subtle p-6">
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary-muted text-primary">
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -140,21 +158,39 @@ export default async function AboutPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
               </div>
-              <h3 className="mb-2 text-lg font-bold text-primary/80">Our Vision</h3>
-              <p className="text-foreground/80 leading-relaxed">{vision}</p>
+              <h3 className="mb-2 text-lg font-bold text-primary/80">Vision &amp; Mission</h3>
+              <div
+                className="text-foreground/80 leading-relaxed prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(visionMissionContent.body) }}
+              />
             </div>
-
-            {/* Mission */}
-            <div className="rounded-xl border border-primary-muted bg-primary-subtle p-6">
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary-muted text-primary">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+          ) : (
+            /* Separate Vision / Mission cards from JSON fallback */
+            <div className="grid gap-6 sm:grid-cols-2">
+              {/* Vision */}
+              <div className="rounded-xl border border-primary-muted bg-primary-subtle p-6">
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary-muted text-primary">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </div>
+                <h3 className="mb-2 text-lg font-bold text-primary/80">Our Vision</h3>
+                <p className="text-foreground/80 leading-relaxed">{vision}</p>
               </div>
-              <h3 className="mb-2 text-lg font-bold text-primary/80">Our Mission</h3>
-              <p className="text-foreground/80 leading-relaxed">{mission}</p>
+
+              {/* Mission */}
+              <div className="rounded-xl border border-primary-muted bg-primary-subtle p-6">
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary-muted text-primary">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <h3 className="mb-2 text-lg font-bold text-primary/80">Our Mission</h3>
+                <p className="text-foreground/80 leading-relaxed">{mission}</p>
+              </div>
             </div>
-          </div>
+          )}
         </section>
 
         {/* Section 3: Objectives */}
@@ -221,9 +257,7 @@ export default async function AboutPage() {
                   </div>
                   <div>
                     <span className="text-sm font-bold text-primary">{item.year}</span>
-                    <p className="mt-0.5 text-sm text-foreground">
-                      {item.description || (item as unknown as { event?: string }).event || ''}
-                    </p>
+                    <p className="mt-0.5 text-sm text-foreground">{item.description}</p>
                   </div>
                 </div>
               ))}
