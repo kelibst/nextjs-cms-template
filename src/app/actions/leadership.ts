@@ -15,6 +15,8 @@ type LeadershipInput = {
   email?: string
   facebookUrl?: string
   twitterUrl?: string
+  linkedinUrl?: string
+  instagramUrl?: string
   imageUrl?: string
   isActive?: boolean
   termStart?: string | null
@@ -38,6 +40,8 @@ export async function createLeadership(data: LeadershipInput) {
     email: data.email ?? null,
     facebookUrl: data.facebookUrl ?? null,
     twitterUrl: data.twitterUrl ?? null,
+    linkedinUrl: data.linkedinUrl ?? null,
+    instagramUrl: data.instagramUrl ?? null,
     imageUrl: data.imageUrl ?? null,
     isActive: data.isActive ?? true,
     termStart: data.termStart ? new Date(data.termStart) : null,
@@ -61,6 +65,8 @@ export async function updateLeadership(id: string, data: LeadershipInput) {
     email: data.email ?? null,
     facebookUrl: data.facebookUrl ?? null,
     twitterUrl: data.twitterUrl ?? null,
+    linkedinUrl: data.linkedinUrl ?? null,
+    instagramUrl: data.instagramUrl ?? null,
     imageUrl: data.imageUrl ?? null,
     isActive: data.isActive ?? true,
     termStart: data.termStart ? new Date(data.termStart) : null,

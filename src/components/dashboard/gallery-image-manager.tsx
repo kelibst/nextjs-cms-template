@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { apiRequest } from '@/lib/api'
-import { addImageToAlbum, updateImageCaption, updateImageOrder } from '@/app/actions/gallery'
+import { addImageToAlbum, updateImageCaption, updateImageOrder, deleteGalleryImage } from '@/app/actions/gallery'
 import type { GalleryImage } from '../../../drizzle/schema'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -47,7 +47,7 @@ export function GalleryImageManager({ albumId, images: initialImages }: GalleryI
 
   const deleteMutation = useMutation({
     mutationFn: (imageId: string) =>
-      apiRequest(`/api/gallery/${albumId}/images/${imageId}`, { method: 'DELETE' }),
+      deleteGalleryImage(albumId, imageId),
     onSuccess: (_, imageId) => {
       setImages(prev => prev.filter(img => img.id !== imageId))
       toast.success('Image deleted')

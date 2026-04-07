@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { submitContactForm } from '@/app/actions/contact'
 
 interface FormState {
   name: string;
@@ -33,19 +34,13 @@ export function ContactForm() {
     setErrorMessage("");
 
     try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        setStatus("success");
-        setForm({ name: "", email: "", subject: "", message: "" });
+      const result = await submitContactForm(form)
+      if (result.success) {
+        setStatus('success')
+        setForm({ name: '', email: '', subject: '', message: '' })
       } else {
-        setStatus("error");
-        setErrorMessage(data.error ?? "Something went wrong. Please try again.");
+        setStatus('error')
+        setErrorMessage(result.error)
       }
     } catch {
       setStatus("error");

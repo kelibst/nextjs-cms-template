@@ -165,11 +165,15 @@ bun add -d @types/leaflet
 ---
 
 ## STATUS
-- [ ] Packages installed
-- [ ] Schema updated + migration run
-- [ ] `ghana-regions.ts` created
-- [ ] Map component created
-- [ ] Dashboard members page updated (tabs)
-- [ ] Member directory updated (toggle)
-- [ ] Verified no SSR errors
-- [ ] **Agent notes:** (add any deviations or findings here)
+- [x] Packages installed (`react-leaflet@5.0.0`, `leaflet@1.9.4`, `@types/leaflet@1.9.21`)
+- [x] Schema updated + migration run (`drizzle/migrations/0004_worried_siren.sql` — adds `latitude` + `longitude` numeric(10,6) to `members`)
+- [x] `ghana-regions.ts` created (`src/lib/ghana-regions.ts`)
+- [x] Map component created (`src/components/dashboard/members-map.tsx` + wrapper `members-map-wrapper.tsx`)
+- [x] Dashboard members page updated — added `src/components/dashboard/members-page-client.tsx` (client wrapper with Tabs: List / Map)
+- [x] Member directory updated — `MemberDirectoryClient` now has LayoutGrid / Map icon toggle; map renders `MembersMapWrapper` via `next/dynamic` with `ssr: false`
+- [x] Verified no SSR errors — `bun run build` passes cleanly (83 pages, 0 TypeScript errors)
+- [x] **Agent notes:**
+  - Dashboard members page is a server component so a thin client wrapper (`members-page-client.tsx`) was created to host the `<Tabs>` state; the server component renders the table JSX and passes it as `tableContent` prop (React node). This avoids converting the whole page to a client component.
+  - `MembersMapWrapper` is imported via `next/dynamic` inside `member-directory-client.tsx` directly (no extra wrapper file needed for the directory) to avoid double-dynamic-import layering.
+  - Leaflet default marker icon webpack issue resolved with `L.Icon.Default.mergeOptions` pattern; `CircleMarker` used for region clusters per task spec.
+  - All `h-[500px]` and `min-w-[160px]` arbitrary Tailwind classes replaced with canonical `h-125` / `min-w-40` per IDE linter hints.

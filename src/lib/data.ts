@@ -206,3 +206,17 @@ export function galleryImagePath(localPath: string): string {
 export function postImagePath(localImage: string): string {
   return `/images/${localImage}`;
 }
+
+// ─── DB Content Map ───────────────────────────────────────────────────────────
+
+/**
+ * Fetch multiple siteSettings keys from the DB.
+ * Returns a key→value map; missing keys get an empty string.
+ * This wraps the server action so pages can call it directly.
+ */
+export async function getContentMap(
+  keys: string[]
+): Promise<Record<string, string>> {
+  const { getPageContent } = await import("@/app/actions/content");
+  return getPageContent(keys);
+}

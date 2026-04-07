@@ -1,3 +1,4 @@
+import { sanitizeHtml } from "@/lib/utils";
 import type { Metadata } from "next";
 import { getPracticeAreas, decodeEntities } from "@/lib/data";
 import { PageHeader } from "@/components/shared/page-header";
@@ -65,7 +66,7 @@ export default function PracticeAreasPage() {
             {/* Content */}
             <div
               className="prose prose-green max-w-none"
-              dangerouslySetInnerHTML={{ __html: area.content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(area.content) }}
             />
 
             {/* Roles as badges */}

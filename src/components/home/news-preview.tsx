@@ -8,6 +8,7 @@ import { type Post } from '@/lib/data'
 
 interface Props {
   posts: Post[]
+  heading?: string
 }
 
 const categoryLabel: Record<string, string> = {
@@ -36,7 +37,7 @@ function stripHtml(html: string) {
   return html.replace(/<[^>]*>/g, '').replace(/&#[0-9]+;/g, '').replace(/&amp;/g, '&').replace(/&[a-z]+;/g, '')
 }
 
-export function NewsPreview({ posts }: Props) {
+export function NewsPreview({ posts, heading = 'Latest News' }: Props) {
   return (
     <section className="py-16 bg-muted/50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -49,7 +50,7 @@ export function NewsPreview({ posts }: Props) {
           className="flex items-center justify-between mb-10"
         >
           <div>
-            <h2 className="text-3xl font-bold text-foreground">Latest News</h2>
+            <h2 className="text-3xl font-bold text-foreground">{heading}</h2>
             <p className="text-muted-foreground mt-1">Stay informed with the latest from GAPHTO</p>
           </div>
           <Link

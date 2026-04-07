@@ -7,9 +7,10 @@ import { type LeadershipMember } from '@/lib/data'
 
 interface Props {
   leaders: LeadershipMember[]
+  heading?: string
 }
 
-export function LeadershipPreview({ leaders }: Props) {
+export function LeadershipPreview({ leaders, heading = 'Our Leadership' }: Props) {
   const featured = leaders.slice(0, 6)
 
   return (
@@ -22,7 +23,7 @@ export function LeadershipPreview({ leaders }: Props) {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl font-bold text-foreground">Our Leadership</h2>
+          <h2 className="text-3xl font-bold text-foreground">{heading}</h2>
           <p className="text-muted-foreground mt-2">
             The executives steering GAPHTO&apos;s mission forward
           </p>

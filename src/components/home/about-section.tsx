@@ -8,9 +8,10 @@ import { type About } from '@/lib/data'
 interface Props {
   about: About
   galleryImageSrc?: string
+  heading?: string
 }
 
-export function AboutSection({ about, galleryImageSrc }: Props) {
+export function AboutSection({ about, galleryImageSrc, heading = 'Building a Healthier Ghana Together' }: Props) {
   const imgSrc = galleryImageSrc || '/images/placeholder.jpg'
 
   return (
@@ -30,7 +31,7 @@ export function AboutSection({ about, galleryImageSrc }: Props) {
                 About GAPHTO
               </span>
               <h2 className="text-3xl font-bold text-foreground mt-2 leading-tight">
-                Building a Healthier Ghana Together
+                {heading}
               </h2>
             </div>
 

@@ -7,6 +7,7 @@ import { type GalleryAlbum } from '@/lib/data'
 
 interface Props {
   albums: GalleryAlbum[]
+  heading?: string
 }
 
 interface GalleryItem {
@@ -33,7 +34,7 @@ function getFirstSixImages(albums: GalleryAlbum[]): GalleryItem[] {
   return items
 }
 
-export function GalleryTeaser({ albums }: Props) {
+export function GalleryTeaser({ albums, heading = 'Gallery' }: Props) {
   const images = getFirstSixImages(albums)
 
   return (
@@ -47,7 +48,7 @@ export function GalleryTeaser({ albums }: Props) {
           className="flex items-center justify-between mb-10"
         >
           <div>
-            <h2 className="text-3xl font-bold text-foreground">Gallery</h2>
+            <h2 className="text-3xl font-bold text-foreground">{heading}</h2>
             <p className="text-muted-foreground mt-1">Moments from our events and conferences</p>
           </div>
           <Link

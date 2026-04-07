@@ -7,6 +7,7 @@ import { type PracticeArea } from '@/lib/data'
 
 interface Props {
   areas: PracticeArea[]
+  heading?: string
 }
 
 const icons: Record<string, React.ElementType> = {
@@ -19,7 +20,7 @@ function stripHtml(html: string, maxLen = 160) {
   return html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().slice(0, maxLen)
 }
 
-export function PracticeAreas({ areas }: Props) {
+export function PracticeAreas({ areas, heading = 'Our Areas of Practice' }: Props) {
   return (
     <section className="py-16 bg-muted/50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -30,7 +31,7 @@ export function PracticeAreas({ areas }: Props) {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl font-bold text-foreground">Our Areas of Practice</h2>
+          <h2 className="text-3xl font-bold text-foreground">{heading}</h2>
           <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">
             GAPHTO members serve Ghana across three core public health disciplines
           </p>

@@ -4,21 +4,50 @@
 
 ---
 
-## ACTIVE TASK FILES (Phase 3 — New Features)
+## COMPLETED TASK FILES (Phase 5 — Admin Content Management / CMS) ✅
+
+| File | Agent | Feature |
+|------|-------|---------|
+| `plans/TASK_PM5_AGENT1_BACKEND.md` | Agent 1 ✅ | Content actions + public page DB integration |
+| `plans/TASK_PM5_AGENT2_DASHBOARD.md` | Agent 2 ✅ | Dashboard content editor UI |
+
+**Phase 5 final facts (for future agents):**
+- `src/app/actions/content.ts` — `getPageContent(keys: string[])` + `savePageContent(values: Record<string,string>)`
+- `src/components/dashboard/homepage-content-form.tsx` — 18-field homepage editor (client component)
+- `src/components/dashboard/about-content-form.tsx` — about editor with Tiptap rich text + dynamic list editors
+- Dashboard routes: `/dashboard/content`, `/dashboard/content/homepage`, `/dashboard/content/about`
+- Sidebar: "Pages" group with `FileEdit` icon added in `src/components/dashboard/sidebar.tsx`
+- All pages role-gated to `['super_admin', 'admin']`; editor role redirected to `/dashboard`
+- Complex fields stored as JSON strings (objectives, timeline, practice_areas)
+- No DB migration was needed — used existing `siteSettings` table
+
+---
+
+## COMPLETED TASK FILES (Phase 4 — UX Polish)
+
+| File | Agent | Feature |
+|------|-------|---------|
+| `plans/TASK_PM4_AGENT1_SIDEBAR_PROFILE.md` | Agent 1 | Retractable sidebar + Profile edit + Password change |
+| `plans/TASK_PM4_AGENT2_LEADERSHIP_JOINLINK.md` | Agent 2 | Leadership social links + Profile page + Hero CTA fix |
+
+**Key shared facts for Phase 4:**
+- `bcryptjs` is already installed — import as `import bcrypt from 'bcryptjs'`
+- Dashboard sidebar is at `src/components/dashboard/sidebar.tsx` — already `'use client'`
+- Profile page is at `src/app/(member)/member-centre/profile/page.tsx`
+- Server actions go in `src/app/actions/auth.ts` (already has bcrypt + db imports)
+- Hero carousel is `'use client'` — pass session state as prop from `src/app/(public)/page.tsx` (make it async)
+- Leadership table already has `facebookUrl`, `twitterUrl`, `email` — adding `linkedinUrl`, `instagramUrl`
+- Drizzle migration: `bunx drizzle-kit generate --config=drizzle/drizzle.config.ts && bunx tsx drizzle/migrate.ts`
+- Public leadership page may use scraped JSON (`src/lib/data.ts`) — **Agent 2 must check this before Task 2**
+
+---
+
+## COMPLETED TASK FILES (Phase 3 — New Features)
 
 | File | Agent | Feature |
 |------|-------|---------|
 | `plans/TASK_PM3_AGENT1_GIS.md` | Agent 1 | GIS Member Map (react-leaflet, Ghana regions, dashboard + directory) |
 | `plans/TASK_PM3_AGENT2_LEARN_NEWSLETTER.md` | Agent 2 | Learning Platform (courses/lessons/enrollments) + Newsletter/Email (Resend batch) |
-
-**Key shared facts for Phase 3:**
-- `resend` is already installed (`src/lib/email.ts`) — lazy init pattern, follow existing style
-- TipTap editor is already installed — reference posts form for usage pattern
-- `src/lib/permissions.ts` has `can(role, action)` — add new permissions there
-- `src/components/dashboard/sidebar.tsx` needs nav items added for both features
-- Members table already has `region` field — GIS clusters by this field using static centroids
-- No Redis/queue — batch emails in a simple loop with per-error catch (don't abort full send)
-- Drizzle migration: `bunx drizzle-kit generate --config=drizzle/drizzle.config.ts && bunx tsx drizzle/migrate.ts`
 
 ---
 
@@ -314,6 +343,9 @@ src/app/news/**, src/app/leadership/**, src/app/gallery/**, src/app/about/**, sr
 | PM2 Phase 5D | Analytics + Sitemap update | DONE | @next/third-parties@16.2.2 installed. src/app/layout.tsx (GoogleAnalytics conditional on NEXT_PUBLIC_GA_ID). src/app/sitemap.ts (/fund/apply + /member-centre/directory routes added; /fund priority corrected to 0.7). src/lib/email.ts (lazy Resend init — fixed pre-existing build crash when RESEND_API_KEY absent). TSC: 0 errors. Build: ✓ 81 pages. |
 | PM2 Dashboard Agent 2 | Layout fix + Dark Mode + Profile Links | DONE | src/app/layout.tsx (stripped Header+Footer), src/app/(public)/layout.tsx (new: Header+main wrapper+Footer), all public dirs moved into (public)/ route group (page.tsx, news, about, leadership, gallery, events, contact, practice-areas, fund, publications). src/components/dashboard/topbar.tsx (ThemeToggle + DropdownMenu with avatar, My Profile, Settings, Sign Out). src/components/dashboard/sidebar.tsx (user prop added, user profile card with initials avatar above Back to site). src/app/(dashboard)/layout.tsx (passes user name+email to sidebar). Also fixed pre-existing build blocker: merged middleware.ts into proxy.ts (src/middleware.ts renamed .bak), eliminating Next.js 16 Turbopack dual-middleware conflict. Build: ✓ 83 pages, 0 errors. |
 | PM2 Auth Agent 1 | Forgot Password + Middleware | DONE | drizzle/schema.ts (passwordResetToken + passwordResetTokenExpiry columns added to users table), drizzle/migrations/0003_third_scalphunter.sql (generated + applied), src/lib/email.ts (sendPasswordResetEmail added), src/app/actions/auth.ts (requestPasswordReset + resetPassword server actions added), src/app/(auth)/forgot-password/page.tsx (NEW), src/app/(auth)/forgot-password/forgot-password-form.tsx (NEW — useMutation + green checkmark success state), src/app/(auth)/reset-password/page.tsx (NEW — reads token searchParam, shows error if missing), src/app/(auth)/reset-password/reset-password-form.tsx (NEW — show/hide password, confirm match, useMutation), src/app/(auth)/login/login-form.tsx (href="#" → href="/forgot-password"), src/middleware.ts (NEW — JWT route protection: /dashboard requires admin role, /member-centre + /publications + /fund/apply require session; fixed import to named { authConfig }). TSC: 0 errors. Build: ✓ 83 pages, 0 errors. |
+| API Cleanup Agent 1 | Delete 16 dead routes + gallery delete migration | DONE | Deleted src/app/api/{posts,events,leadership,publications,announcements,members,settings} and src/app/api/contact/[id] and entire src/app/api/gallery/. Migrated gallery-image-manager.tsx deleteMutation from apiRequest('/api/gallery/...') to deleteGalleryImage(albumId, imageId) server action. Added deleteGalleryImage to import from @/app/actions/gallery. Cleared stale .next/ cache (it held TS validator refs to deleted routes). TSC: 0 errors. Remaining API routes: auth/[...nextauth], auth/register, contact, payments/initialize, payments/verify, upload. |
+| API Cleanup Agent 2 | submitContactForm + registerUser server actions, migrate 2 forms, delete 2 routes | DONE | Added submitContactForm to src/app/actions/contact.ts (no auth, fires ack+notification emails fire-and-forget). Migrated src/app/(public)/contact/contact-form.tsx off fetch('/api/contact'). Added registerUser to src/app/actions/auth.ts (bcrypt hash, duplicate email check, inserts user+member rows; specialty cast to enum). Migrated src/app/(auth)/register/register-form.tsx off fetch('/api/auth/register'). Deleted src/app/api/contact/route.ts and src/app/api/auth/register/route.ts. TSC: 0 errors. Remaining API routes: auth/[...nextauth], payments/initialize, payments/verify, upload (4 files). |
+| Phase 5 Agent 1 | Content actions + public page DB integration | DONE | src/app/actions/content.ts (getPageContent + savePageContent), src/lib/data.ts (getContentMap added), src/app/(public)/page.tsx (async, fetches 18 homepage keys, passes props to all home sections), src/app/(public)/about/page.tsx (async, fetches 6 about keys, JSON.parse fallbacks for objectives/timeline/practice_areas), 9 home components updated with optional heading/content props (hero-carousel, stats-bar, news-preview, events-preview, practice-areas, leadership-preview, gallery-teaser, about-section, fund-cta). No DB migration needed. |
 
 ## PHASE 5 — COMPLETE (2026-04-04)
 All Phase 5 features shipped:
@@ -610,3 +642,66 @@ NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
 - `plans/TASK_PM2_PHASE5A_AGENT1.md` — SEO + Sitemap
 - `plans/TASK_PM2_PHASE5A_AGENT2.md` — Public Events + Registration
 - (Phase 5B-5D task files written after 5A completes)
+
+---
+
+## Phase 5 Notes — Admin Content Management / CMS
+
+### Status
+- AGENT 1 COMPLETE (2026-04-05)
+- AGENT 2 PENDING (dashboard editor UI)
+
+### savePageContent — Exact Signature
+```typescript
+// Import path: @/app/actions/content
+import { savePageContent, getPageContent } from '@/app/actions/content'
+
+export async function savePageContent(values: Record<string, string>): Promise<void>
+```
+- Requires `session.user.role` in `['super_admin', 'admin']`
+- Throws `new Error('Forbidden')` for unauthorized callers
+- After save: `revalidatePath('/', 'layout')` + `revalidatePath('/about')`
+
+### Complete Key Naming Convention
+```
+homepage.hero.title
+homepage.hero.subtitle
+homepage.stats.members_count
+homepage.stats.members_label
+homepage.stats.journals_count
+homepage.stats.journals_label
+homepage.stats.events_count
+homepage.stats.events_label
+homepage.stats.years_count
+homepage.stats.years_label
+homepage.sections.news_title
+homepage.sections.events_title
+homepage.sections.practice_areas_title
+homepage.sections.leadership_title
+homepage.sections.gallery_title
+homepage.sections.about_title
+homepage.sections.fund_cta_title
+homepage.sections.fund_cta_subtitle
+
+about.background
+about.vision
+about.mission
+about.objectives          ← JSON string: string[]
+about.timeline            ← JSON string: {year: string, title: string, description: string}[]
+about.practice_areas      ← JSON string: {title: string, description: string}[]
+```
+
+### Components with new optional props (Agent 2 note)
+All props are optional with hardcoded fallbacks — no breaking changes.
+
+| Component | New Props |
+|-----------|-----------|
+| `HeroCarousel` | `heroTitle?: string`, `heroSubtitle?: string` |
+| `StatsBar` | `membersCount`, `membersLabel`, `journalsCount`, `journalsLabel`, `eventsCount`, `eventsLabel`, `yearsCount`, `yearsLabel` (all `string?`) |
+| `NewsPreview` | `heading?: string` |
+| `EventsPreview` | `heading?: string` |
+| `PracticeAreas` | `heading?: string` |
+| `LeadershipPreview` | `heading?: string` |
+| `GalleryTeaser` | `heading?: string` |
+| `AboutSection` | `heading?: string` |
+| `FundCta` | `heading?: string`, `subtitle?: string` |

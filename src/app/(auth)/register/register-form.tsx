@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { registerUser } from '@/app/actions/auth'
 import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -61,27 +62,20 @@ export function RegisterForm() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name.trim(),
-          email: formData.email.trim().toLowerCase(),
-          password: formData.password,
-          specialty: formData.specialty,
-        }),
-      });
+      const result = await registerUser({
+        name: formData.name.trim(),
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password,
+        specialty: formData.specialty,
+      })
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Registration failed. Please try again.");
-        setLoading(false);
-        return;
+      if (!result.success) {
+        setError(result.error)
+        setLoading(false)
+        return
       }
 
-      // Success — redirect to login
-      router.push("/login?registered=true");
+      router.push('/login?registered=true')
     } catch {
       setError("Network error. Please try again.");
       setLoading(false);

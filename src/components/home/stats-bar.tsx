@@ -9,12 +9,16 @@ interface Stat {
   label: string
 }
 
-const stats: Stat[] = [
-  { value: 500, suffix: '+', label: 'Members Nationwide' },
-  { value: 42, suffix: '+', label: 'Years Active' },
-  { value: 3, suffix: '', label: 'Practice Areas' },
-  { value: 16, suffix: '', label: 'Regions Covered' },
-]
+interface Props {
+  membersCount?: string
+  membersLabel?: string
+  journalsCount?: string
+  journalsLabel?: string
+  eventsCount?: string
+  eventsLabel?: string
+  yearsCount?: string
+  yearsLabel?: string
+}
 
 function Counter({ value, suffix }: { value: number; suffix: string }) {
   const ref = useRef<HTMLSpanElement>(null)
@@ -36,7 +40,32 @@ function Counter({ value, suffix }: { value: number; suffix: string }) {
   )
 }
 
-export function StatsBar() {
+function parseStatValue(raw: string): { value: number; suffix: string } {
+  const trimmed = raw.trim()
+  const match = trimmed.match(/^(\d+)(.*)$/)
+  if (match) {
+    return { value: parseInt(match[1], 10), suffix: match[2] }
+  }
+  return { value: 0, suffix: trimmed }
+}
+
+export function StatsBar({
+  membersCount = '500+',
+  membersLabel = 'Members Nationwide',
+  journalsCount = '42+',
+  journalsLabel = 'Years Active',
+  eventsCount = '3',
+  eventsLabel = 'Practice Areas',
+  yearsCount = '16',
+  yearsLabel = 'Regions Covered',
+}: Props) {
+  const stats: Stat[] = [
+    { ...parseStatValue(membersCount), label: membersLabel },
+    { ...parseStatValue(journalsCount), label: journalsLabel },
+    { ...parseStatValue(eventsCount), label: eventsLabel },
+    { ...parseStatValue(yearsCount), label: yearsLabel },
+  ]
+
   return (
     <section className="bg-primary-hover text-primary-foreground py-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

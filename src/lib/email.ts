@@ -72,6 +72,59 @@ export async function sendPasswordResetEmail(to: string, name: string, resetUrl:
   })
 }
 
+// Send newsletter to a single recipient (called in batch loop)
+export async function sendNewsletterEmail(
+  to: string,
+  name: string,
+  subject: string,
+  htmlContent: string,
+  unsubscribeUrl: string
+) {
+  await getResend().emails.send({
+    from: FROM,
+    to,
+    subject,
+    html: `
+      <div style="max-width:600px;margin:0 auto;font-family:sans-serif;">
+        <div style="background:#166534;padding:20px;text-align:center;">
+          <h1 style="color:white;margin:0;">GAPHTO Newsletter</h1>
+        </div>
+        <div style="padding:24px;">
+          <p>Dear ${name},</p>
+          ${htmlContent}
+        </div>
+        <div style="padding:16px;text-align:center;font-size:12px;color:#666;border-top:1px solid #eee;">
+          <p>You are receiving this because you are a GAPHTO member.<br/>
+          <a href="${unsubscribeUrl}">Unsubscribe from newsletters</a></p>
+        </div>
+      </div>
+    `,
+  })
+}
+
+// Send event announcement to opted-in members (single recipient)
+export async function sendEventAlertEmail(
+  to: string,
+  name: string,
+  eventTitle: string,
+  eventDate: string,
+  eventSlug: string,
+  appUrl: string
+) {
+  await getResend().emails.send({
+    from: FROM,
+    to,
+    subject: `Upcoming GAPHTO Event: ${eventTitle}`,
+    html: `
+      <p>Hi ${name},</p>
+      <p>A new GAPHTO event has been scheduled: <strong>${eventTitle}</strong></p>
+      <p>Date: ${eventDate}</p>
+      <p><a href="${appUrl}/events/${eventSlug}" style="background:#166534;color:white;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">View Event Details</a></p>
+      <p>— GAPHTO Team</p>
+    `,
+  })
+}
+
 // Sent to event registrant after successful registration
 export async function sendEventRegistrationConfirmation(params: {
   to: string

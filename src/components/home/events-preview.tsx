@@ -8,6 +8,7 @@ import { type Event } from '@/lib/data'
 
 interface Props {
   events: Event[]
+  heading?: string
 }
 
 function formatEventDate(dateStr: string | null) {
@@ -28,7 +29,7 @@ function stripHtml(html: string) {
   return html.replace(/<[^>]*>/g, '').replace(/&#[0-9]+;/g, '').replace(/&amp;/g, '&').replace(/&[a-z]+;/g, '').trim()
 }
 
-export function EventsPreview({ events }: Props) {
+export function EventsPreview({ events, heading = 'Events & Programs' }: Props) {
   return (
     <section className="py-16 bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -40,7 +41,7 @@ export function EventsPreview({ events }: Props) {
           className="flex items-center justify-between mb-10"
         >
           <div>
-            <h2 className="text-3xl font-bold text-foreground">Events &amp; Programs</h2>
+            <h2 className="text-3xl font-bold text-foreground">{heading}</h2>
             <p className="text-muted-foreground mt-1">Upcoming CPDs, conferences, and training opportunities</p>
           </div>
           <Link

@@ -53,6 +53,11 @@ export const memberStatusEnum = pgEnum('member_status', [
   'suspended',
 ])
 
+export const courseLevelEnum = pgEnum('course_level', ['beginner', 'intermediate', 'advanced'])
+export const courseStatusEnum = pgEnum('course_status', ['draft', 'published', 'archived'])
+export const lessonStatusEnum = pgEnum('lesson_status', ['draft', 'published'])
+export const newsletterStatusEnum = pgEnum('newsletter_status', ['draft', 'sent'])
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Tables
 // ─────────────────────────────────────────────────────────────────────────────
@@ -145,6 +150,8 @@ export const leadership = pgTable('leadership', {
   bio: text('bio'),
   facebookUrl: text('facebook_url'),
   twitterUrl: text('twitter_url'),
+  linkedinUrl: text('linkedin_url'),
+  instagramUrl: text('instagram_url'),
   email: text('email'),
   sortOrder: integer('sort_order').notNull().default(0),
   termStart: timestamp('term_start'),
@@ -195,6 +202,8 @@ export const members = pgTable('members', {
   specialty: memberSpecialtyEnum('specialty'),
   region: text('region'),
   facility: text('facility'),
+  latitude:  numeric('latitude',  { precision: 10, scale: 6 }),
+  longitude: numeric('longitude', { precision: 10, scale: 6 }),
   joinedDate: timestamp('joined_date'),
   membershipStatus: memberStatusEnum('membership_status').notNull().default('active'),
   duesPaidUntil: timestamp('dues_paid_until'),
@@ -245,6 +254,66 @@ export const fundApplications = pgTable('fund_applications', {
   reviewedBy: uuid('reviewed_by').references(() => users.id),
 })
 
+export const courses = pgTable('courses', {
+  id:          uuid('id').primaryKey().defaultRandom(),
+  title:       text('title').notNull(),
+  slug:        text('slug').notNull().unique(),
+  description: text('description'),
+  thumbnail:   text('thumbnail_url'),
+  level:       courseLevelEnum('level').default('beginner'),
+  category:    text('category'),
+  status:      courseStatusEnum('status').default('draft'),
+  instructorId: uuid('instructor_id').references(() => users.id, { onDelete: 'set null' }),
+  createdAt:   timestamp('created_at').defaultNow(),
+  updatedAt:   timestamp('updated_at').defaultNow(),
+})
+
+export const lessons = pgTable('lessons', {
+  id:          uuid('id').primaryKey().defaultRandom(),
+  courseId:    uuid('course_id').notNull().references(() => courses.id, { onDelete: 'cascade' }),
+  title:       text('title').notNull(),
+  slug:        text('slug').notNull(),
+  content:     text('content'),
+  sortOrder:   integer('sort_order').default(0),
+  durationMin: integer('duration_minutes'),
+  status:      lessonStatusEnum('status').default('draft'),
+  createdAt:   timestamp('created_at').defaultNow(),
+})
+
+export const courseEnrollments = pgTable('course_enrollments', {
+  id:          uuid('id').primaryKey().defaultRandom(),
+  userId:      uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  courseId:    uuid('course_id').notNull().references(() => courses.id, { onDelete: 'cascade' }),
+  enrolledAt:  timestamp('enrolled_at').defaultNow(),
+  completedAt: timestamp('completed_at'),
+})
+
+export const lessonCompletions = pgTable('lesson_completions', {
+  id:          uuid('id').primaryKey().defaultRandom(),
+  userId:      uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  lessonId:    uuid('lesson_id').notNull().references(() => lessons.id, { onDelete: 'cascade' }),
+  completedAt: timestamp('completed_at').defaultNow(),
+})
+
+export const newsletters = pgTable('newsletters', {
+  id:             uuid('id').primaryKey().defaultRandom(),
+  subject:        text('subject').notNull(),
+  content:        text('content').notNull(),
+  status:         newsletterStatusEnum('status').default('draft'),
+  recipientCount: integer('recipient_count').default(0),
+  sentAt:         timestamp('sent_at'),
+  createdBy:      uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt:      timestamp('created_at').defaultNow(),
+})
+
+export const emailPreferences = pgTable('email_preferences', {
+  id:                  uuid('id').primaryKey().defaultRandom(),
+  userId:              uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }).unique(),
+  receiveNewsletter:   boolean('receive_newsletter').default(true),
+  receiveEventAlerts:  boolean('receive_event_alerts').default(true),
+  updatedAt:           timestamp('updated_at').defaultNow(),
+})
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Type inference helpers
 // ─────────────────────────────────────────────────────────────────────────────
@@ -293,3 +362,21 @@ export type NewSiteSetting = typeof siteSettings.$inferInsert
 
 export type FundApplication = typeof fundApplications.$inferSelect
 export type NewFundApplication = typeof fundApplications.$inferInsert
+
+export type Course = typeof courses.$inferSelect
+export type NewCourse = typeof courses.$inferInsert
+
+export type Lesson = typeof lessons.$inferSelect
+export type NewLesson = typeof lessons.$inferInsert
+
+export type CourseEnrollment = typeof courseEnrollments.$inferSelect
+export type NewCourseEnrollment = typeof courseEnrollments.$inferInsert
+
+export type LessonCompletion = typeof lessonCompletions.$inferSelect
+export type NewLessonCompletion = typeof lessonCompletions.$inferInsert
+
+export type Newsletter = typeof newsletters.$inferSelect
+export type NewNewsletter = typeof newsletters.$inferInsert
+
+export type EmailPreference = typeof emailPreferences.$inferSelect
+export type NewEmailPreference = typeof emailPreferences.$inferInsert

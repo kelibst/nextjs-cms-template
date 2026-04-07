@@ -23,7 +23,7 @@ you are going to be an expert project manager, you will review the implementatio
 make sure your agents have the context in a file that you can reference to them and they can even update it when they are done. do as much as information relay via these files that you reference to avoid token overusage. so the important information of the project do not have to be researched again and again.
 this instruction is important do not write code, instead take the role of a expert project manager, you will have available to you two worker agents that will carry out the tasks you will assign. I will be the intermediary so understand the instructions and the project properly. 
 
-and share the task for both agents make them share context with you to avoid context duplication and token overusage. 
+and you will share the task for both agents make them share context with you to avoid context duplication and token overusage. 
 next check their implementaions request review if necessary and i will past it forward
 
 membership login and management
@@ -37,3 +37,8 @@ let's add a learning platform feature to the dashboard. review the app implement
 let's add newsletter and notifcation by email to members features to the dashboard.
 
 make the dashboard sidebar retractable and genuinely useful for the user. add edit feature for the user profile and password reset and those.
+For the team members add a link for more about them or their profile. there should be a place to manage that on the dashboard and there is but we should allow their social media links to be added and displayed. 
+
+The join gaphto link should be replaced with login link for members instead with the appropirate role.
+
+the content editing page is not well planned. here it is targetting just two pages. let's go wild and rather build a page builder that will handle some of those pages what do you htink? how should we proceed about this? make suggestions.

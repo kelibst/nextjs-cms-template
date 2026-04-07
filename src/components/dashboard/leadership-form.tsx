@@ -25,6 +25,8 @@ export function LeadershipForm({ leader }: LeadershipFormProps) {
   const [email, setEmail] = useState(leader?.email ?? '')
   const [facebookUrl, setFacebookUrl] = useState(leader?.facebookUrl ?? '')
   const [twitterUrl, setTwitterUrl] = useState(leader?.twitterUrl ?? '')
+  const [linkedinUrl, setLinkedinUrl] = useState(leader?.linkedinUrl ?? '')
+  const [instagramUrl, setInstagramUrl] = useState(leader?.instagramUrl ?? '')
   const [imageUrl, setImageUrl] = useState(leader?.imageUrl ?? '')
   const [isActive, setIsActive] = useState(leader?.isActive ?? true)
   const [termStart, setTermStart] = useState(
@@ -38,7 +40,7 @@ export function LeadershipForm({ leader }: LeadershipFormProps) {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const body = { name, role, sortOrder, bio, email, facebookUrl, twitterUrl, imageUrl, isActive, termStart: termStart || null, termEnd: termEnd || null }
+      const body = { name, role, sortOrder, bio, email, facebookUrl, twitterUrl, linkedinUrl, instagramUrl, imageUrl, isActive, termStart: termStart || null, termEnd: termEnd || null }
       if (leader) {
         return updateLeadership(leader.id, body)
       } else {
@@ -109,6 +111,16 @@ export function LeadershipForm({ leader }: LeadershipFormProps) {
         <div className="space-y-1">
           <label className="text-sm font-medium">Twitter/X URL</label>
           <Input value={twitterUrl} onChange={(e) => setTwitterUrl(e.target.value)} placeholder="https://x.com/…" />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <label className="text-sm font-medium">LinkedIn URL</label>
+          <Input value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/..." />
+        </div>
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Instagram URL</label>
+          <Input value={instagramUrl} onChange={(e) => setInstagramUrl(e.target.value)} placeholder="https://instagram.com/..." />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">

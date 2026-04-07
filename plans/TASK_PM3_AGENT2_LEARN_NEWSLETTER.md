@@ -381,23 +381,33 @@ In the existing `createEvent` server action (`src/app/actions/events.ts`), after
 
 ## STATUS
 ### Feature A — Learning Platform
-- [ ] Schema tables added + migration run
-- [ ] Permissions updated
-- [ ] Server actions created
-- [ ] Dashboard: sidebar nav item added
-- [ ] Dashboard: Course list, new, edit pages built
-- [ ] Dashboard: Lesson list, new, edit pages built
-- [ ] Member centre: sidebar nav item added
-- [ ] Member centre: Course browse + detail pages built
-- [ ] Member centre: Lesson viewer built
+- [x] Schema tables added + migration run (migration 0005 — courses, lessons, courseEnrollments, lessonCompletions + enums)
+- [x] Permissions updated (learning:manage already present in permissions.ts)
+- [x] Server actions created (src/app/actions/learning.ts — all 9 actions)
+- [x] Dashboard: sidebar nav item added (Learning + Newsletter group in sidebar.tsx)
+- [x] Dashboard: Course list, new, edit pages built
+- [x] Dashboard: Lesson list, new, edit pages built
+- [x] Member centre: sidebar nav item added (Learning link added to member-centre/page.tsx and profile/page.tsx sidebars)
+- [x] Member centre: Course browse + detail pages built (learning/page.tsx, learning/[slug]/page.tsx)
+- [x] Member centre: Lesson viewer built (learning/[slug]/[lessonSlug]/page.tsx)
 
 ### Feature B — Newsletter
-- [ ] Schema tables added (newsletters, emailPreferences) — may be same migration as above
-- [ ] Email functions added to src/lib/email.ts
-- [ ] Server actions created (newsletter.ts, email-preferences.ts)
-- [ ] Dashboard: sidebar nav item added
-- [ ] Dashboard: Newsletter compose, list, view pages built
-- [ ] Member profile: Email preferences section added
+- [x] Schema tables added (newsletters, emailPreferences) — same migration 0005 as above
+- [x] Email functions added to src/lib/email.ts (sendNewsletterEmail, sendEventAlertEmail)
+- [x] Server actions created (newsletter.ts — createNewsletter, updateNewsletter, deleteNewsletter, sendNewsletter; email-preferences.ts — updateEmailPreferences)
+- [x] Dashboard: sidebar nav item added (Newsletter in Learning group in sidebar.tsx)
+- [x] Dashboard: Newsletter compose, list, view, edit pages built
+- [x] Member profile: Email preferences section added (EmailPreferencesForm client component with Switch toggles)
 
 ### Agent Notes
-(Add any deviations, issues, or implementation notes here when done)
+**Implementation completed 2026-04-04**
+
+Key decisions and notes:
+- Schema was already complete (previous agent had added all tables and ran migration 0004 for lat/lng; migration 0005 for learning+newsletter was generated but needed running — ran successfully)
+- All dashboard pages, server actions, components (CourseForm, LessonForm, NewsletterForm, delete buttons, send button) were already scaffolded by a prior partial run — verified and corrected import paths
+- Several dashboard files used wrong relative import paths (e.g. `../../../../../../drizzle/schema` which resolves to `src/` not project root) — fixed to use `@/lib/db` alias which re-exports all schema tables
+- Member centre learning pages were missing: created course browse grid, course detail (with enroll button + progress bar + lesson list), and lesson viewer (with mark-complete + prev/next navigation)
+- Email preferences form is a client component (`EmailPreferencesForm`) using `useMutation` + `Switch` toggles; profile page (server) fetches the preferences row and passes initial values
+- Member centre sidebar (inline in each page) updated to include Learning nav item in main page and profile page; publications/directory pages not updated (out of scope for this task's sidebar requirement)
+- Event alert integration (optional bonus) not implemented — can be added later in events.ts
+- Build verified: `bun run build` passes with 0 errors, all new routes appear in the build output

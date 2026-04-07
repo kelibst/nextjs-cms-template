@@ -1,3 +1,4 @@
+import { sanitizeHtml } from "@/lib/utils";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -134,7 +135,7 @@ export default async function ArticlePage({
           {/* Article body */}
           <div
             className="prose prose-green max-w-none"
-            dangerouslySetInnerHTML={{ __html: post.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
           />
         </div>
 

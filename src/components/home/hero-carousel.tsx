@@ -14,6 +14,9 @@ import {
 
 interface Props {
   posts?: Post[]
+  isLoggedIn?: boolean
+  heroTitle?: string
+  heroSubtitle?: string
 }
 
 const CATEGORY_CONFIG: Record<string, { label: string; badge: string }> = {
@@ -39,7 +42,7 @@ function cleanExcerpt(raw: string, max = 180): string {
   return text.length > max ? text.slice(0, max) + '…' : text
 }
 
-export function HeroCarousel(_props: Props) {
+export function HeroCarousel({ isLoggedIn, heroTitle, heroSubtitle }: Props) {
   const posts = getAllPosts()
   const events = getEvents()
 
@@ -108,9 +111,13 @@ export function HeroCarousel(_props: Props) {
               transition={{ duration: 0.55, ease: 'easeOut', delay: 0.1 }}
               className="text-5xl lg:text-6xl font-bold text-foreground leading-[1.08] tracking-tight"
             >
-              We are the{' '}
-              <span className="text-primary">backbone</span>
-              {' '}of Public Health in Ghana
+              {heroTitle || (
+                <>
+                  We are the{' '}
+                  <span className="text-primary">backbone</span>
+                  {' '}of Public Health in Ghana
+                </>
+              )}
             </motion.h1>
 
             <motion.p
@@ -119,8 +126,7 @@ export function HeroCarousel(_props: Props) {
               transition={{ duration: 0.55, ease: 'easeOut', delay: 0.2 }}
               className="text-lg text-muted-foreground max-w-md leading-relaxed"
             >
-              Uniting Disease Control, Health Information, and Nutrition professionals
-              to build a healthier Ghana.
+              {heroSubtitle || 'Uniting Disease Control, Health Information, and Nutrition professionals to build a healthier Ghana.'}
             </motion.p>
 
             <motion.div
@@ -136,10 +142,10 @@ export function HeroCarousel(_props: Props) {
                 Explore Our Work
               </Link>
               <Link
-                href="/contact"
+                href={isLoggedIn ? '/member-centre' : '/login'}
                 className="inline-flex items-center justify-center gap-2 border-2 border-primary text-primary hover:bg-primary-subtle font-semibold px-7 py-3.5 rounded-xl transition-colors duration-200"
               >
-                Join GAPHTO
+                {isLoggedIn ? 'Member Portal' : 'Member Login'}
               </Link>
             </motion.div>
 

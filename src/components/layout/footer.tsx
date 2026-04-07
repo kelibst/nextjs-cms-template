@@ -18,7 +18,7 @@ export function Footer() {
 
   return (
     <footer className="bg-primary-deep text-white/90">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+      <div className="px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Column 1: Logo + About */}
           <div>
@@ -118,7 +118,7 @@ export function Footer() {
 
       {/* Bottom Bar */}
       <div className="border-t border-primary/30">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <p className="text-xs text-white/60">
             &copy; {currentYear} GAPHTO. All rights reserved.
           </p>

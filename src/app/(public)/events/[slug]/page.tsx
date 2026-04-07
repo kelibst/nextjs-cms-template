@@ -1,3 +1,4 @@
+import { sanitizeHtml } from '@/lib/utils'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -156,7 +157,7 @@ export default async function EventDetailPage({ params }: Props) {
                 <h2 className="text-xl font-semibold text-foreground mb-4">About This Event</h2>
                 <div
                   className="prose prose-green max-w-none text-foreground/80 leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: event.description }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(event.description ?? '') }}
                 />
               </section>
             )}

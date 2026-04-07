@@ -12,6 +12,8 @@ const matrix: Record<string, Role[]> = {
   'publications:manage': ['super_admin', 'admin'],
   'contact:view': ['super_admin', 'admin'],
   'settings:manage': ['super_admin'],
+  'learning:manage': ['super_admin', 'admin', 'editor'],
+  'newsletter:manage': ['super_admin', 'admin'],
 }
 
 export const can = (role: Role, action: string): boolean => {

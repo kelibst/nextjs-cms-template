@@ -6,9 +6,15 @@ import { Button } from '@/components/ui/button'
 
 interface Props {
   pdfUrl?: string | null
+  heading?: string
+  subtitle?: string
 }
 
-export function FundCta({ pdfUrl }: Props) {
+export function FundCta({
+  pdfUrl,
+  heading = 'GAPHTO Welfare Fund',
+  subtitle = 'Supporting our members through financial assistance, welfare loans, and mutual aid. The GAPHTO Welfare Fund exists to strengthen the well-being of every member.',
+}: Props) {
   return (
     <section className="relative py-16 overflow-hidden bg-primary">
       {/* Subtle animated background pattern */}
@@ -29,11 +35,10 @@ export function FundCta({ pdfUrl }: Props) {
         >
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-white">
-              GAPHTO Welfare Fund
+              {heading}
             </h2>
             <p className="text-primary-foreground/80 mt-3 text-lg max-w-2xl mx-auto leading-relaxed">
-              Supporting our members through financial assistance, welfare loans, and mutual aid.
-              The GAPHTO Welfare Fund exists to strengthen the well-being of every member.
+              {subtitle}
             </p>
           </div>
 
