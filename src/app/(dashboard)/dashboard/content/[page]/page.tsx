@@ -5,7 +5,10 @@ import { PageBuilderClient } from '@/components/dashboard/page-builder-client'
 
 export const dynamic = 'force-dynamic'
 
-const VALID_PAGES = ['homepage', 'about', 'fund', 'practice-areas'] as const
+const VALID_PAGES = [
+  'homepage', 'about', 'fund', 'practice-areas',
+  'news', 'blog', 'events', 'gallery', 'leadership', 'contact', 'publications',
+] as const
 type ValidPage = (typeof VALID_PAGES)[number]
 
 function isValidPage(page: string): page is ValidPage {

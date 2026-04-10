@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getContact } from "@/lib/data";
-import { PageHeader } from "@/components/shared/page-header";
+import { getContact, getBlocksForPage } from "@/lib/data";
+import { getHeroContent } from "@/lib/blocks";
+import { InnerPageHero } from "@/components/shared/inner-page-hero";
 import { ContactForm } from "./contact-form";
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: "Contact Us",
@@ -10,14 +13,26 @@ export const metadata: Metadata = {
     "Get in touch with GAPHTO — Ghana Association of Public Health Technical Officers.",
 };
 
-export default function ContactPage() {
-  const contact = getContact();
+export default async function ContactPage() {
+  const [contact, blocks] = await Promise.all([
+    Promise.resolve(getContact()),
+    getBlocksForPage('contact'),
+  ])
+
+  const hero = getHeroContent(blocks, {
+    title: 'Contact Us',
+    label: 'Get in Touch',
+    subtitle: "We'd love to hear from you. Reach out to GAPHTO.",
+  })
 
   return (
     <>
-      <PageHeader
-        title="Contact Us"
-        subtitle="We'd love to hear from you. Reach out to GAPHTO."
+      <InnerPageHero
+        title={hero.title}
+        label={hero.label}
+        subtitle={hero.subtitle}
+        heroImage={hero.heroImage}
+        centered={hero.centered !== false}
         breadcrumb={[{ label: "Home", href: "/" }, { label: "Contact" }]}
       />
 

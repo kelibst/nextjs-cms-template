@@ -4,7 +4,26 @@
 
 ---
 
-## ACTIVE TASKS — Page Builder Phases A/B/C/D/E ✅ ALL COMPLETE
+## COMPLETED TASKS — Phase 5: Publish Button + Blog CMS ✅
+
+| File | Agent | Feature |
+|------|-------|---------|
+| `plans/TASK_PUBLISH_BUTTON.md` | Agent 1 ✅ | Publish Page button in page builder |
+| `plans/TASK_BLOG_CMS.md` | Agent 2 ✅ | Wire /news public pages to DB posts |
+
+**Phase 5 Key Facts:**
+- All public pages have `export const dynamic = 'force-dynamic'` (/, /about, /fund, /practice-areas, /news, /news/[slug])
+- `republishPage(page)` — in `src/app/actions/blocks.ts`, revalidates the specific page + /news + /dashboard/content
+- `src/lib/server-data.ts` — NEW FILE with `getPublicPosts()` and `getPublicPostBySlug()` (DB-first, JSON fallback, try/catch for DB unavailable)
+- `src/lib/data.ts` — `getAllPosts()` still reads JSON (unchanged); server-data.ts wraps it
+- `src/app/actions/posts.ts` — all 3 actions now call `revalidatePath('/news', 'layout')`
+- Post route: `/news/[slug]` — uses `getPublicPostBySlug()` from server-data.ts; `generateStaticParams` removed
+- DB posts: only `published` status appears on /news; drafts/archived are hidden
+- Dashboard post management: fully wired — create/edit/delete instantly shows on /news
+
+---
+
+## COMPLETED TASKS — Page Builder Phases A/B/C/D/E ✅ ALL COMPLETE
 
 | File | Agent | Feature |
 |------|-------|---------|

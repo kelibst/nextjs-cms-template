@@ -33,7 +33,6 @@ export function StatsBarBlockEditor({ blockId: _blockId, initialContent, onSave 
     startTransition(async () => {
       try {
         await onSave({ items })
-        toast.success('Block saved')
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Failed to save block')
       }

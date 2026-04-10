@@ -27,17 +27,24 @@ interface PostCardProps {
   post: Post;
 }
 
+function resolveImageSrc(post: Post): string | null {
+  if (post.localImage) return postImagePath(post.localImage)
+  const img = post.featuredImage
+  if (!img) return null
+  if (img.startsWith("http") || img.startsWith("/")) return img
+  // relative path stored in DB — prepend /images/
+  return `/images/${img}`
+}
+
 export function PostCard({ post }: PostCardProps) {
-  const imageSrc = post.localImage
-    ? postImagePath(post.localImage)
-    : post.featuredImage || "/images/placeholder.jpg";
+  const imageSrc = resolveImageSrc(post);
 
   return (
     <Link href={`/news/${post.slug}`} className="group block">
       <article className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-md h-full flex flex-col">
         {/* Featured image */}
         <div className="relative aspect-video overflow-hidden bg-primary-subtle">
-          {imageSrc && imageSrc !== "/images/" ? (
+          {imageSrc ? (
             <Image
               src={imageSrc}
               alt={decodeEntities(post.title)}

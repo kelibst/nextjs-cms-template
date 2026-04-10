@@ -38,7 +38,6 @@ export function RichTextBlockEditor({ blockId: _blockId, initialContent, onSave 
     startTransition(async () => {
       try {
         await onSave({ heading: heading || undefined, body: editor.getHTML() })
-        toast.success('Block saved')
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Failed to save block')
       }

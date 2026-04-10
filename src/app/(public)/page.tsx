@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getAllPosts, getLeadership, getGalleryAlbums, getEvents, getAbout, getPracticeAreas, getFund, getBlocksForPage } from "@/lib/data";
 import { parseBlockContent, type HeroContent, type StatsBarContent, type NewsPreviewContent, type EventsPreviewContent, type PracticeAreasContent, type LeadershipPreviewContent, type GalleryTeaserContent, type RichTextContent, type FundCtaContent, type ImageBannerContent } from "@/lib/blocks";
 import { HeroCarousel } from "@/components/home/hero-carousel";

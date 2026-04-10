@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { upsertBlock, deleteBlock, toggleBlockVisibility } from '@/app/actions/blocks'
@@ -27,6 +28,7 @@ import { TimelineBlockEditor } from './timeline-block-editor'
 import { PracticeAreasBlockEditor } from './practice-areas-block-editor'
 import { SimpleSectionBlockEditor } from './simple-section-block-editor'
 import { FundCtaBlockEditor } from './fund-cta-block-editor'
+import { ImageBannerBlockEditor } from './image-banner-block-editor'
 
 type BlockRow = {
   id: string
@@ -40,6 +42,7 @@ type BlockRow = {
 
 interface BlockEditorShellProps {
   block: BlockRow
+  onDelete?: () => void
 }
 
 const BLOCK_TYPE_LABELS: Record<string, string> = {
@@ -145,6 +148,14 @@ function renderEditor(block: BlockRow, onSave: (content: object) => Promise<void
           onSave={onSave as (c: FundCtaContent) => Promise<void>}
         />
       )
+    case 'image_banner':
+      return (
+        <ImageBannerBlockEditor
+          blockId={block.id}
+          initialContent={parseBlockContent(block.content, { imageUrl: '', alt: '', caption: '' })}
+          onSave={onSave as (c: { imageUrl: string; alt: string; caption: string }) => Promise<void>}
+        />
+      )
     default:
       return (
         <p className="p-4 text-sm text-muted-foreground">
@@ -154,7 +165,8 @@ function renderEditor(block: BlockRow, onSave: (content: object) => Promise<void
   }
 }
 
-export function BlockEditorShell({ block }: BlockEditorShellProps) {
+export function BlockEditorShell({ block, onDelete }: BlockEditorShellProps) {
+  const router = useRouter()
   const [expanded, setExpanded] = useState(false)
   const [visible, setVisible] = useState(block.isVisible)
   const [visibilityPending, startVisibilityTransition] = useTransition()
@@ -195,6 +207,7 @@ export function BlockEditorShell({ block }: BlockEditorShellProps) {
       try {
         await deleteBlock(block.id)
         toast.success('Block deleted')
+        onDelete?.()
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Failed to delete block')
       }
@@ -210,6 +223,7 @@ export function BlockEditorShell({ block }: BlockEditorShellProps) {
       sortOrder: block.sortOrder,
     })
     toast.success('Block saved')
+    router.refresh()
   }
 
   return (

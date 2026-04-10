@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
@@ -21,6 +21,7 @@ const navLinks = [
   { label: 'Home', href: '/' },
   { label: 'About', href: '/about' },
   { label: 'News', href: '/news' },
+  { label: 'Blog', href: '/blog' },
   { label: 'Leadership', href: '/leadership' },
   { label: 'Gallery', href: '/gallery' },
   { label: 'Events', href: '/events' },
@@ -59,6 +60,10 @@ export function Header() {
     await signOut({ callbackUrl: '/' })
   }
 
+  const pathname = usePathname()
+  const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
+
   const isAdmin = session?.user?.role && ['super_admin', 'admin', 'editor'].includes(session.user.role)
 
   return (
@@ -86,7 +91,12 @@ export function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="px-3 py-2 text-sm font-medium text-foreground/80 hover:text-primary hover:bg-primary-subtle rounded-md transition-colors"
+                className={cn(
+                  'px-3 py-2 text-sm font-medium rounded-md transition-colors',
+                  isActive(link.href)
+                    ? 'text-primary bg-primary/10 font-semibold'
+                    : 'text-foreground/80 hover:text-primary hover:bg-primary/5'
+                )}
               >
                 {link.label}
               </Link>
@@ -175,7 +185,12 @@ export function Header() {
               key={link.href}
               href={link.href}
               onClick={() => setMobileOpen(false)}
-              className="px-3 py-2 text-sm font-medium text-foreground/80 hover:text-primary hover:bg-primary-subtle rounded-md transition-colors"
+              className={cn(
+                'px-3 py-2 text-sm font-medium rounded-md transition-colors',
+                isActive(link.href)
+                  ? 'text-primary bg-primary/10 font-semibold'
+                  : 'text-foreground/80 hover:text-primary hover:bg-primary/5'
+              )}
             >
               {link.label}
             </Link>

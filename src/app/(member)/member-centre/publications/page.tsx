@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PageHeader } from "@/components/shared/page-header";
+import { InnerPageHero } from "@/components/shared/inner-page-hero";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FileText, Download, BookOpen } from "lucide-react";
@@ -27,8 +27,9 @@ const TYPE_COLORS: Record<string, string> = {
 export default function MemberPublicationsPage() {
   return (
     <main className="flex-1">
-      <PageHeader
+      <InnerPageHero
         title="Publications"
+        label="Knowledge Base"
         subtitle="GAPHTO member-exclusive publications and resources."
         breadcrumb={[
           { label: "Member Centre", href: "/member-centre" },

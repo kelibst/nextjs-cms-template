@@ -45,6 +45,7 @@ export async function createPost(data: {
   }).returning()
 
   revalidatePath('/dashboard/posts')
+  revalidatePath('/news', 'layout')
   return created
 }
 
@@ -82,6 +83,7 @@ export async function updatePost(id: string, data: Partial<{
 
   const [updated] = await db.update(posts).set(updates).where(eq(posts.id, id)).returning()
   revalidatePath('/dashboard/posts')
+  revalidatePath('/news', 'layout')
   return updated
 }
 
@@ -92,4 +94,5 @@ export async function deletePost(id: string) {
 
   await db.delete(posts).where(eq(posts.id, id))
   revalidatePath('/dashboard/posts')
+  revalidatePath('/news', 'layout')
 }

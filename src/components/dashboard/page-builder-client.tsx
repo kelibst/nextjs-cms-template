@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   DndContext,
@@ -17,7 +17,7 @@ import {
   verticalListSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable'
-import { reorderBlocks, upsertBlock } from '@/app/actions/blocks'
+import { reorderBlocks, upsertBlock, republishPage } from '@/app/actions/blocks'
 import { BlockEditorShell } from '@/components/dashboard/block-editor'
 import { Button } from '@/components/ui/button'
 import {
@@ -27,8 +27,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Plus, ChevronRight } from 'lucide-react'
+import { Plus, ChevronRight, Upload } from 'lucide-react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 
 type BlockRow = {
   id: string
@@ -50,6 +51,15 @@ interface PageBuilderClientProps {
 const PAGE_LABELS: Record<string, string> = {
   homepage: 'Homepage',
   about: 'About Page',
+  fund: 'GAPHTO Fund',
+  'practice-areas': 'Practice Areas',
+  news: 'News & Updates',
+  blog: 'Blog',
+  events: 'Events & CPD',
+  gallery: 'Photo Gallery',
+  leadership: 'Our Leadership',
+  contact: 'Contact Us',
+  publications: 'Publications',
 }
 
 // ─── Block type catalogue ──────────────────────────────────────────────────────
@@ -91,8 +101,15 @@ const DEFAULT_CONTENT: Record<string, object> = {
 export function PageBuilderClient({ blocks: initialBlocks, page }: PageBuilderClientProps) {
   const router = useRouter()
   const [blockList, setBlockList] = useState<BlockRow[]>(initialBlocks)
+
+  // Sync local state when server sends fresh blocks after router.refresh()
+  useEffect(() => {
+    setBlockList(initialBlocks)
+  }, [initialBlocks])
+
   const [, startReorder] = useTransition()
   const [isPendingAdd, startAdd] = useTransition()
+  const [isPublishing, setIsPublishing] = useState(false)
   const [addDialogOpen, setAddDialogOpen] = useState(false)
 
   const pageLabel = PAGE_LABELS[page] ?? page
@@ -122,8 +139,13 @@ export function PageBuilderClient({ blocks: initialBlocks, page }: PageBuilderCl
     setBlockList(reordered)
 
     startReorder(async () => {
-      await reorderBlocks(reordered.map(b => ({ id: b.id, sortOrder: b.sortOrder })))
-      router.refresh()
+      try {
+        await reorderBlocks(reordered.map(b => ({ id: b.id, sortOrder: b.sortOrder })))
+        router.refresh()
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Failed to reorder blocks')
+        setBlockList(blockList) // revert optimistic reorder
+      }
     })
   }
 
@@ -134,16 +156,32 @@ export function PageBuilderClient({ blocks: initialBlocks, page }: PageBuilderCl
     const nextSortOrder = blockList.length
 
     startAdd(async () => {
-      await upsertBlock({
-        id: null,
-        page,
-        type,
-        content: defaultContent,
-        sortOrder: nextSortOrder,
-      })
-      setAddDialogOpen(false)
-      router.refresh()
+      try {
+        await upsertBlock({
+          id: null,
+          page,
+          type,
+          content: defaultContent,
+          sortOrder: nextSortOrder,
+        })
+        setAddDialogOpen(false)
+        router.refresh()
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Failed to add block')
+      }
     })
+  }
+
+  async function handlePublish() {
+    setIsPublishing(true)
+    try {
+      await republishPage(page)
+      toast.success('Page published successfully')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to publish page')
+    } finally {
+      setIsPublishing(false)
+    }
   }
 
   // ── Render ───────────────────────────────────────────────────────────────────
@@ -167,6 +205,17 @@ export function PageBuilderClient({ blocks: initialBlocks, page }: PageBuilderCl
         <p className="text-sm text-muted-foreground">
           {blockList.length} block{blockList.length !== 1 ? 's' : ''} — drag to reorder, expand to edit.
         </p>
+        <div className="mt-3">
+          <Button
+            size="sm"
+            onClick={handlePublish}
+            disabled={isPublishing}
+            className="gap-1.5"
+          >
+            <Upload className="w-3.5 h-3.5" />
+            {isPublishing ? 'Publishing...' : 'Publish Page'}
+          </Button>
+        </div>
       </div>
 
       {/* Block list */}
@@ -177,6 +226,7 @@ export function PageBuilderClient({ blocks: initialBlocks, page }: PageBuilderCl
           </div>
         ) : (
           <DndContext
+            id="page-builder-dnd"
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
@@ -189,6 +239,10 @@ export function PageBuilderClient({ blocks: initialBlocks, page }: PageBuilderCl
                 <BlockEditorShell
                   key={block.id}
                   block={block}
+                  onDelete={() => {
+                    setBlockList(prev => prev.filter(b => b.id !== block.id))
+                    router.refresh()
+                  }}
                 />
               ))}
             </SortableContext>

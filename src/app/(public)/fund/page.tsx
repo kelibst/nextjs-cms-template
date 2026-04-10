@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import Link from 'next/link'
 import { CheckCircle, DollarSign, Clock, AlertCircle } from 'lucide-react'
 import { LoanCalculator } from '@/components/fund/loan-calculator'

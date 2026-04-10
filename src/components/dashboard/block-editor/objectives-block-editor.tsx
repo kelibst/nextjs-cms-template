@@ -34,7 +34,6 @@ export function ObjectivesBlockEditor({ blockId: _blockId, initialContent, onSav
     startTransition(async () => {
       try {
         await onSave({ heading, items })
-        toast.success('Block saved')
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Failed to save block')
       }

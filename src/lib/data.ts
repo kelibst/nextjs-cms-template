@@ -8,6 +8,7 @@ import aboutData from "@/data/about.json";
 import contactData from "@/data/contact.json";
 import practiceAreasData from "@/data/practice-areas.json";
 import fundData from "@/data/fund.json";
+import publicationsData from "@/data/publications.json";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -17,7 +18,7 @@ export interface Post {
   content: string;
   excerpt: string;
   date: string;
-  category: "gaphto-news" | "health-news" | "blog";
+  category: "gaphto-news" | "health-news" | "blog" | "announcement";
   author: string;
   featuredImage: string;
   localImage: string;
@@ -91,6 +92,18 @@ export interface Fund {
   description: string;
   pdfUrl: string | null;
   localPdf: string | null;
+}
+
+export interface Publication {
+  id: number;
+  slug: string;
+  title: string;
+  year: string;
+  type: "Journal" | "Report" | "Guideline" | "Manual" | "Policy";
+  description: string;
+  coverImage: string | null;
+  fileUrl: string | null;
+  isPublic: boolean;
 }
 
 // ─── Loaders ──────────────────────────────────────────────────────────────────
@@ -172,6 +185,16 @@ export function getFund(): Fund {
   return fundData as Fund;
 }
 
+export function getAllPublications(): Publication[] {
+  return (publicationsData as Publication[]).sort(
+    (a, b) => parseInt(b.year) - parseInt(a.year)
+  );
+}
+
+export function getPublicationBySlug(slug: string): Publication | undefined {
+  return getAllPublications().find((p) => p.slug === slug);
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /** Decode common HTML entities in a string */
@@ -188,14 +211,11 @@ export function decodeEntities(str: string): string {
 
 /** Return a public image path for a local scraped image */
 export function localImagePath(localPath: string, prefix: "leadership" | "gallery" | "posts"): string {
-  // localPath is like "leadership/filename.jpg" or "gallery/album-slug/filename.jpg"
-  // public images are at /images/{localPath}
   const stripped = localPath.startsWith(`${prefix}/`) ? localPath : `${prefix}/${localPath}`;
   return `/images/${stripped}`;
 }
 
 export function leadershipImagePath(localImage: string): string {
-  // localImage is "leadership/filename.jpg"
   return `/images/${localImage}`;
 }
 

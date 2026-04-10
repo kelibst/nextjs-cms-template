@@ -3,7 +3,19 @@
 export type HeroContent = {
   title: string
   subtitle: string
-  imageUrl?: string
+  label?: string       // Badge text above title (e.g. "Our Story", "Stay Informed")
+  heroImage?: string   // Optional full-bleed background image URL
+  centered?: boolean   // Center-align layout (default true)
+}
+
+/** Extract and parse the hero block from a block list, returning defaults if not found */
+export function getHeroContent(
+  blocks: Array<{ type: string; content: string; isVisible: boolean }>,
+  defaults: HeroContent
+): HeroContent {
+  const block = blocks.find((b) => b.type === 'hero' && b.isVisible)
+  if (!block) return defaults
+  return parseBlockContent<HeroContent>(block.content, defaults)
 }
 
 export type StatsBarContent = {

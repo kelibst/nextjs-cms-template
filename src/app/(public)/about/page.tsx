@@ -1,9 +1,11 @@
+export const dynamic = 'force-dynamic'
+
 import { sanitizeHtml } from "@/lib/utils";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getAbout, getBlocksForPage } from "@/lib/data";
-import { parseBlockContent, type RichTextContent, type ObjectivesContent, type PracticeAreasContent, type TimelineContent } from "@/lib/blocks";
-import { PageHeader } from "@/components/shared/page-header";
+import { parseBlockContent, getHeroContent, type RichTextContent, type ObjectivesContent, type PracticeAreasContent, type TimelineContent } from "@/lib/blocks";
+import { InnerPageHero } from "@/components/shared/inner-page-hero";
 
 export const metadata: Metadata = {
   title: "About GAPHTO",
@@ -128,11 +130,20 @@ export default async function AboutPage() {
     ? timelineContent.items
     : TIMELINE_DEFAULTS;
 
+  const heroContent = getHeroContent(aboutBlocks, {
+    title: 'About GAPHTO',
+    label: 'Our Story',
+    subtitle: 'Ghana Association of Public Health Technical Officers',
+  })
+
   return (
     <>
-      <PageHeader
-        title="About GAPHTO"
-        subtitle="Ghana Association of Public Health Technical Officers"
+      <InnerPageHero
+        title={heroContent.title}
+        label={heroContent.label}
+        subtitle={heroContent.subtitle}
+        heroImage={heroContent.heroImage}
+        centered={heroContent.centered !== false}
         breadcrumb={[{ label: "Home", href: "/" }, { label: "About" }]}
       />
 

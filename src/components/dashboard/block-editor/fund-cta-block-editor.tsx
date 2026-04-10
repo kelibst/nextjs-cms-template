@@ -23,7 +23,6 @@ export function FundCtaBlockEditor({ blockId: _blockId, initialContent, onSave }
     startTransition(async () => {
       try {
         await onSave({ heading, subtitle, buttonText })
-        toast.success('Block saved')
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Failed to save block')
       }

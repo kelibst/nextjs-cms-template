@@ -33,7 +33,6 @@ export function SimpleSectionBlockEditor({
         const content: SimpleSectionContent = { heading }
         if (showCount) content.count = count
         await onSave(content)
-        toast.success('Block saved')
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Failed to save block')
       }

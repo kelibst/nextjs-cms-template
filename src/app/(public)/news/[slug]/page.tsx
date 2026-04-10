@@ -1,16 +1,17 @@
+export const dynamic = 'force-dynamic'
+
 import { sanitizeHtml } from "@/lib/utils";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getPublicPostBySlug } from "@/lib/server-data";
 import {
-  getAllPosts,
-  getPostBySlug,
   getRelatedPosts,
   decodeEntities,
   postImagePath,
 } from "@/lib/data";
 import { PostCard } from "@/components/shared/post-card";
+import { ArticleHero } from "@/components/shared/article-hero";
 
 const categoryLabels: Record<string, string> = {
   "gaphto-news": "GAPHTO News",
@@ -24,35 +25,24 @@ const categoryColors: Record<string, string> = {
   blog: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
 };
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
-
-export async function generateStaticParams() {
-  const posts = getAllPosts();
-  return posts.map((p) => ({ slug: p.slug }));
-}
-
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await getPublicPostBySlug(slug);
   if (!post) return {};
-  const imageSrc = post.localImage ? postImagePath(post.localImage) : post.featuredImage;
+  const rawMeta = post.localImage ? postImagePath(post.localImage) : post.featuredImage
+  // OG images must be absolute URLs — skip relative paths to avoid URL construction errors
+  const ogImage = rawMeta && rawMeta.startsWith('http') ? rawMeta : undefined
   return {
     title: decodeEntities(post.title),
     description: post.excerpt.slice(0, 160),
     openGraph: {
       title: decodeEntities(post.title),
       description: post.excerpt.slice(0, 160) || undefined,
-      images: imageSrc ? [imageSrc] : [],
+      images: ogImage ? [ogImage] : [],
       type: "article",
       publishedTime: post.date ? new Date(post.date).toISOString() : undefined,
     },
@@ -65,74 +55,38 @@ export default async function ArticlePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await getPublicPostBySlug(slug);
   if (!post) notFound();
 
   const relatedPosts = getRelatedPosts(post, 3);
-  const imageSrc = post.localImage
-    ? postImagePath(post.localImage)
-    : post.featuredImage;
+
+  // Resolve image: local path gets /images/ prefix; featuredImage must be absolute or /‑relative
+  const rawImage = post.localImage ? postImagePath(post.localImage) : post.featuredImage
+  const imageSrc = rawImage && (rawImage.startsWith('/') || rawImage.startsWith('http'))
+    ? rawImage
+    : null
+
+  const backHref = post.category === "blog" ? "/blog" : "/news";
+  const backLabel = post.category === "blog" ? "Back to Blog" : "Back to News";
 
   return (
     <>
       <div className="pb-16">
-        {/* Featured image */}
-        {imageSrc && (
-          <div className="relative h-64 w-full overflow-hidden bg-primary-deep sm:h-80 md:h-96">
-            <Image
-              src={imageSrc}
-              alt={decodeEntities(post.title)}
-              fill
-              className="object-cover opacity-80"
-              priority
-              sizes="100vw"
-            />
-            <div className="absolute inset-0 bg-linear-to-b from-transparent to-black/60" />
-          </div>
-        )}
+        {/* Full-bleed image hero with overlaid title */}
+        <ArticleHero
+          title={decodeEntities(post.title)}
+          imageSrc={imageSrc}
+          category={post.category}
+          categoryLabel={categoryLabels[post.category] ?? post.category}
+          categoryColor={categoryColors[post.category] ?? "bg-muted text-muted-foreground"}
+          date={post.date}
+          author={post.author}
+          backHref={backHref}
+          backLabel={backLabel}
+        />
 
-        {/* Article */}
+        {/* Article body */}
         <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-          {/* Back link */}
-          <Link
-            href="/news"
-            className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path
-                fillRule="evenodd"
-                d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Back to News
-          </Link>
-
-          {/* Category + date */}
-          <div className="mb-4 flex flex-wrap items-center gap-3">
-            <span
-              className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
-                categoryColors[post.category] ?? "bg-muted text-muted-foreground"
-              }`}
-            >
-              {categoryLabels[post.category] ?? post.category}
-            </span>
-            <time dateTime={post.date} className="text-sm text-muted-foreground">
-              {formatDate(post.date)}
-            </time>
-            {post.author && (
-              <span className="text-sm text-muted-foreground">
-                By {post.author}
-              </span>
-            )}
-          </div>
-
-          {/* Title */}
-          <h1 className="mb-8 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            {decodeEntities(post.title)}
-          </h1>
-
-          {/* Article body */}
           <div
             className="prose prose-green max-w-none"
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}

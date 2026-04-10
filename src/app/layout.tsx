@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Providers } from "@/components/providers";
+import { ThemeProvider } from 'next-themes'
 import { auth } from "@/auth";
 import { Toaster } from 'sonner'
 import { GoogleAnalytics } from '@next/third-parties/google'
@@ -51,9 +52,11 @@ export default async function RootLayout({
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
     >
       <body className="min-h-full flex flex-col">
-        <Providers session={session}>
-          {children}
-        </Providers>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <Providers session={session}>
+            {children}
+          </Providers>
+        </ThemeProvider>
         <Toaster position="bottom-right" richColors />
         {process.env.NEXT_PUBLIC_GA_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />

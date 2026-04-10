@@ -51,6 +51,8 @@ export async function upsertBlock(params: {
 
   revalidatePath('/', 'layout')
   revalidatePath('/about')
+  revalidatePath('/fund')
+  revalidatePath('/practice-areas')
 }
 
 export async function deleteBlock(id: string) {
@@ -61,6 +63,8 @@ export async function deleteBlock(id: string) {
   await db.delete(pageBlocks).where(eq(pageBlocks.id, id))
   revalidatePath('/', 'layout')
   revalidatePath('/about')
+  revalidatePath('/fund')
+  revalidatePath('/practice-areas')
 }
 
 export async function reorderBlocks(blocks: { id: string; sortOrder: number }[]) {
@@ -76,6 +80,8 @@ export async function reorderBlocks(blocks: { id: string; sortOrder: number }[])
 
   revalidatePath('/', 'layout')
   revalidatePath('/about')
+  revalidatePath('/fund')
+  revalidatePath('/practice-areas')
 }
 
 export async function toggleBlockVisibility(id: string) {
@@ -93,4 +99,26 @@ export async function toggleBlockVisibility(id: string) {
 
   revalidatePath('/', 'layout')
   revalidatePath('/about')
+  revalidatePath('/fund')
+  revalidatePath('/practice-areas')
+}
+
+export async function republishPage(page: string) {
+  const session = await auth()
+  if (!session) throw new Error('Unauthorized')
+  requireAdmin(session.user.role)
+
+  const pathMap: Record<string, string> = {
+    homepage: '/',
+    about: '/about',
+    fund: '/fund',
+    'practice-areas': '/practice-areas',
+  }
+
+  const publicPath = pathMap[page]
+  if (publicPath) {
+    revalidatePath(publicPath, 'layout')
+  }
+  revalidatePath('/news', 'layout')
+  revalidatePath('/dashboard/content')
 }
