@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
+import { cn } from '@/lib/utils'
 import type { HeroContent } from '@/lib/blocks'
 
 interface HeroBlockEditorProps {
@@ -14,7 +15,17 @@ interface HeroBlockEditorProps {
   onSave: (content: HeroContent) => Promise<void>
 }
 
+const TEMPLATES = [
+  { value: 'carousel', icon: '📰', name: 'News Carousel', desc: 'Gradient background with live news panel on the right' },
+  { value: 'centered', icon: '⬛', name: 'Centered', desc: 'Full-screen gradient with centered animated headline' },
+  { value: 'split', icon: '◧', name: 'Split', desc: 'Text on left, image or visual panel on right' },
+  { value: 'bold', icon: '𝐁', name: 'Bold Statement', desc: 'Dark background with oversized display typography' },
+] as const
+
+type TemplateValue = typeof TEMPLATES[number]['value']
+
 export function HeroBlockEditor({ blockId: _blockId, initialContent, onSave }: HeroBlockEditorProps) {
+  const [template, setTemplate] = useState<TemplateValue>(initialContent.template ?? 'carousel')
   const [title, setTitle] = useState(initialContent.title ?? '')
   const [subtitle, setSubtitle] = useState(initialContent.subtitle ?? '')
   const [label, setLabel] = useState(initialContent.label ?? '')
@@ -25,7 +36,7 @@ export function HeroBlockEditor({ blockId: _blockId, initialContent, onSave }: H
   function handleSave() {
     startTransition(async () => {
       try {
-        await onSave({ title, subtitle, label, heroImage: heroImage || undefined, centered })
+        await onSave({ title, subtitle, label, heroImage: heroImage || undefined, centered, template })
         toast.success('Hero saved')
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Failed to save block')
@@ -35,6 +46,30 @@ export function HeroBlockEditor({ blockId: _blockId, initialContent, onSave }: H
 
   return (
     <div className="p-4 space-y-4">
+      {/* Template picker */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-foreground">Template</label>
+        <div className="grid grid-cols-2 gap-2">
+          {TEMPLATES.map(({ value, icon, name, desc }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setTemplate(value)}
+              className={cn(
+                'p-4 rounded-xl border-2 text-left transition-all',
+                template === value
+                  ? 'border-primary bg-primary-subtle'
+                  : 'border-border hover:border-primary/40'
+              )}
+            >
+              <span className="text-2xl leading-none block">{icon}</span>
+              <span className="font-semibold text-sm text-foreground block mt-1">{name}</span>
+              <span className="text-xs text-muted-foreground mt-1 block">{desc}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Title */}
       <div className="space-y-1">
         <label className="text-sm font-medium text-foreground">Page Title</label>

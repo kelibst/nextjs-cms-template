@@ -8,12 +8,18 @@ interface Props {
   pdfUrl?: string | null
   heading?: string
   subtitle?: string
+  buttonText?: string
+  buttonHref?: string
+  showCalculator?: boolean
 }
 
 export function FundCta({
   pdfUrl,
   heading = 'GAPHTO Welfare Fund',
   subtitle = 'Supporting our members through financial assistance, welfare loans, and mutual aid. The GAPHTO Welfare Fund exists to strengthen the well-being of every member.',
+  buttonText,
+  buttonHref,
+  showCalculator,
 }: Props) {
   return (
     <section className="relative py-16 overflow-hidden bg-primary">
@@ -48,7 +54,7 @@ export function FundCta({
               size="lg"
               className="bg-white text-primary-deep hover:bg-primary-subtle border-0 h-11 px-6 font-semibold"
             >
-              <Link href="/fund">Learn More</Link>
+              <Link href={buttonHref ?? '/fund'}>{buttonText ?? 'Learn More'}</Link>
             </Button>
             {pdfUrl && (
               <Button
@@ -62,14 +68,16 @@ export function FundCta({
                 </a>
               </Button>
             )}
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="border-white text-white hover:bg-white/10 h-11 px-6 font-semibold"
-            >
-              <Link href="/fund/calculator">Loan Calculator</Link>
-            </Button>
+            {showCalculator !== false && (
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="border-white text-white hover:bg-white/10 h-11 px-6 font-semibold"
+              >
+                <Link href="/fund/calculator">Loan Calculator</Link>
+              </Button>
+            )}
           </div>
         </motion.div>
       </div>

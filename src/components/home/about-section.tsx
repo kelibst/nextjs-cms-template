@@ -7,12 +7,25 @@ import { type About } from '@/lib/data'
 
 interface Props {
   about: About
-  galleryImageSrc?: string
+  galleryImageSrc?: string  // fallback if imageUrl not set
   heading?: string
+  imageUrl?: string         // block-supplied image (takes priority over galleryImageSrc)
+  imageAlt?: string
+  linkText?: string         // CTA label (default: "Learn More About Us")
+  linkHref?: string         // CTA destination (default: "/about")
 }
 
-export function AboutSection({ about, galleryImageSrc, heading = 'Building a Healthier Ghana Together' }: Props) {
-  const imgSrc = galleryImageSrc || '/images/placeholder.jpg'
+export function AboutSection({
+  about,
+  galleryImageSrc,
+  heading = 'Building a Healthier Ghana Together',
+  imageUrl,
+  imageAlt,
+  linkText = 'Learn More About Us',
+  linkHref = '/about',
+}: Props) {
+  const imgSrc = imageUrl || galleryImageSrc || '/images/placeholder.jpg'
+  const imgAlt = imageAlt || 'GAPHTO events and activities'
 
   return (
     <section className="py-16 bg-background overflow-hidden">
@@ -64,10 +77,10 @@ export function AboutSection({ about, galleryImageSrc, heading = 'Building a Hea
             </div>
 
             <Link
-              href="/about"
+              href={linkHref}
               className="inline-flex items-center gap-1 text-primary font-medium hover:text-primary/80 transition-colors"
             >
-              Learn More About Us <span aria-hidden="true">&rarr;</span>
+              {linkText} <span aria-hidden="true">&rarr;</span>
             </Link>
           </motion.div>
 
@@ -84,7 +97,7 @@ export function AboutSection({ about, galleryImageSrc, heading = 'Building a Hea
             <div className="relative z-10 rounded-xl overflow-hidden aspect-4/3">
               <Image
                 src={imgSrc}
-                alt="GAPHTO events and activities"
+                alt={imgAlt}
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"

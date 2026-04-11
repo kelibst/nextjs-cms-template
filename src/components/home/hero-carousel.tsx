@@ -70,11 +70,7 @@ export function HeroCarousel({ isLoggedIn, heroTitle, heroSubtitle }: Props) {
 
   return (
     <section
-      className="relative min-h-screen w-full overflow-hidden flex items-center"
-      style={{
-        background:
-          'radial-gradient(ellipse at 70% 50%, var(--primary-subtle) 0%, var(--background) 40%, var(--background) 75%)',
-      }}
+      className="relative min-h-screen w-full overflow-hidden flex items-center bg-linear-to-br from-primary-deep via-primary/90 to-primary/60 dark:from-primary-deep dark:via-primary-deep/80 dark:to-black/60"
     >
       {/* Dot-grid overlay */}
       <div
@@ -99,7 +95,7 @@ export function HeroCarousel({ isLoggedIn, heroTitle, heroSubtitle }: Props) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: 'easeOut' }}
             >
-              <span className="inline-flex items-center gap-2 bg-primary-muted text-primary/90 text-sm font-medium px-4 py-1.5 rounded-full border border-primary-muted">
+              <span className="inline-flex items-center gap-2 bg-white/20 text-white text-sm font-medium px-4 py-1.5 rounded-full border border-white/30">
                 <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                 Ghana&apos;s Public Health Association
               </span>
@@ -109,12 +105,12 @@ export function HeroCarousel({ isLoggedIn, heroTitle, heroSubtitle }: Props) {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, ease: 'easeOut', delay: 0.1 }}
-              className="text-5xl lg:text-6xl font-bold text-foreground leading-[1.08] tracking-tight"
+              className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.08] tracking-tight [text-shadow:0_2px_20px_rgba(0,0,0,0.35)]"
             >
               {heroTitle || (
                 <>
                   We are the{' '}
-                  <span className="text-primary">backbone</span>
+                  <span className="text-primary-muted">backbone</span>
                   {' '}of Public Health in Ghana
                 </>
               )}
@@ -124,7 +120,7 @@ export function HeroCarousel({ isLoggedIn, heroTitle, heroSubtitle }: Props) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, ease: 'easeOut', delay: 0.2 }}
-              className="text-lg text-muted-foreground max-w-md leading-relaxed"
+              className="text-lg text-white/80 max-w-md leading-relaxed"
             >
               {heroSubtitle || 'Uniting Disease Control, Health Information, and Nutrition professionals to build a healthier Ghana.'}
             </motion.p>
@@ -137,13 +133,13 @@ export function HeroCarousel({ isLoggedIn, heroTitle, heroSubtitle }: Props) {
             >
               <Link
                 href="/about"
-                className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-primary-foreground font-semibold px-7 py-3.5 rounded-xl transition-colors duration-200 shadow-md shadow-primary/20"
+                className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-primary-foreground font-semibold px-7 py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-primary/40 hover:shadow-primary/60"
               >
                 Explore Our Work
               </Link>
               <Link
                 href={isLoggedIn ? '/member-centre' : '/login'}
-                className="inline-flex items-center justify-center gap-2 border-2 border-primary text-primary hover:bg-primary-subtle font-semibold px-7 py-3.5 rounded-xl transition-colors duration-200"
+                className="inline-flex items-center justify-center gap-2 border-2 border-white/50 text-white hover:bg-white/15 font-semibold px-7 py-3.5 rounded-xl transition-colors duration-200"
               >
                 {isLoggedIn ? 'Member Portal' : 'Member Login'}
               </Link>
@@ -153,21 +149,21 @@ export function HeroCarousel({ isLoggedIn, heroTitle, heroSubtitle }: Props) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.45 }}
-              className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground"
+              className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/65"
             >
               <span className="flex items-center gap-1.5">
                 <Users className="w-4 h-4 text-primary" />
-                <strong className="text-foreground/80">500+</strong> Members
+                <strong className="text-white/90">500+</strong> Members
               </span>
               <span className="text-muted-foreground/40">·</span>
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-4 h-4 text-primary" />
-                <strong className="text-foreground/80">40+</strong> Years Active
+                <strong className="text-white/90">40+</strong> Years Active
               </span>
               <span className="text-muted-foreground/40">·</span>
               <span className="flex items-center gap-1.5">
                 <MapPin className="w-4 h-4 text-primary" />
-                <strong className="text-foreground/80">16</strong> Regions
+                <strong className="text-white/90">16</strong> Regions
               </span>
             </motion.div>
           </div>
@@ -181,7 +177,7 @@ export function HeroCarousel({ isLoggedIn, heroTitle, heroSubtitle }: Props) {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
-            <div className="bg-card rounded-2xl border border-border shadow-xl overflow-hidden">
+            <div className="bg-white dark:bg-white/10 dark:backdrop-blur-sm rounded-2xl border border-black/8 dark:border-white/20 shadow-xl overflow-hidden">
 
               {/* Panel header */}
               <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-border/50">

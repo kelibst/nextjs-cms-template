@@ -3,7 +3,7 @@
 import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { galleryAlbums, galleryImages } from '../../../drizzle/schema'
-import { eq } from 'drizzle-orm'
+import { eq, asc } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { can, type Role } from '@/lib/permissions'
@@ -115,4 +115,14 @@ export async function deleteGalleryImage(albumId: string, imageId: string) {
 
   await db.delete(galleryImages).where(eq(galleryImages.id, imageId))
   revalidatePath(`/dashboard/gallery/${albumId}`)
+}
+
+// ── Public helpers ────────────────────────────────────────────────────────────
+
+/** Returns minimal album info for use in block editors (no auth required). */
+export async function getGalleryAlbumsSummary() {
+  return db
+    .select({ id: galleryAlbums.id, title: galleryAlbums.title, slug: galleryAlbums.slug })
+    .from(galleryAlbums)
+    .orderBy(asc(galleryAlbums.createdAt))
 }

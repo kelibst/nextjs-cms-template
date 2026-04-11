@@ -1,14 +1,23 @@
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
+import { getNavLinks } from '@/app/actions/navigation'
 
-export default function PublicLayout({ children }: { children: React.ReactNode }) {
+export default async function PublicLayout({ children }: { children: React.ReactNode }) {
+  let navLinks: { label: string; href: string; openInNewTab?: boolean }[] | undefined
+  try {
+    const fetched = await getNavLinks()
+    if (fetched.length > 0) navLinks = fetched
+  } catch {
+    // navLinks stays undefined → header/footer use their own fallbacks
+  }
+
   return (
     <>
-      <Header />
+      <Header navLinks={navLinks} />
       <main className="flex-1 pt-16">
         {children}
       </main>
-      <Footer />
+      <Footer navLinks={navLinks} />
     </>
   )
 }

@@ -95,11 +95,14 @@ async function seedHomepage() {
     },
     {
       page: 'homepage',
-      type: 'rich_text' as const,
+      type: 'about_preview' as const,
       sortOrder: 7,
       content: JSON.stringify({
-        heading: 'About GAPHTO',
-        body: aboutData.background,
+        heading: 'Building a Healthier Ghana Together',
+        imageUrl: '',
+        imageAlt: 'GAPHTO events and activities',
+        linkText: 'Learn More About Us',
+        linkHref: '/about',
       }),
     },
     {

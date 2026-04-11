@@ -14,6 +14,8 @@ import type {
   TimelineContent,
   PracticeAreasContent,
   FundCtaContent,
+  GalleryTeaserContent,
+  AboutPreviewContent,
 } from '@/lib/blocks'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
@@ -28,7 +30,9 @@ import { TimelineBlockEditor } from './timeline-block-editor'
 import { PracticeAreasBlockEditor } from './practice-areas-block-editor'
 import { SimpleSectionBlockEditor } from './simple-section-block-editor'
 import { FundCtaBlockEditor } from './fund-cta-block-editor'
+import { GalleryTeaserBlockEditor } from './gallery-teaser-block-editor'
 import { ImageBannerBlockEditor } from './image-banner-block-editor'
+import { AboutPreviewBlockEditor } from './about-preview-block-editor'
 
 type BlockRow = {
   id: string
@@ -58,6 +62,7 @@ const BLOCK_TYPE_LABELS: Record<string, string> = {
   gallery_teaser: 'Gallery',
   fund_cta: 'Fund CTA',
   image_banner: 'Image Banner',
+  about_preview: 'About Preview',
 }
 
 // Default fallbacks for each block type
@@ -69,7 +74,9 @@ const defaultTimeline: TimelineContent = { heading: '', items: [] }
 const defaultPracticeAreas: PracticeAreasContent = { heading: '', items: [] }
 const defaultSimpleSection = { heading: '' }
 const defaultSimpleSectionWithCount = { heading: '', count: 3 }
+const defaultGalleryTeaser: GalleryTeaserContent = { heading: '', count: 6, selectedAlbumSlugs: [] }
 const defaultFundCta: FundCtaContent = { heading: '', subtitle: '', buttonText: '' }
+const defaultAboutPreview: AboutPreviewContent = { heading: '', imageUrl: '', imageAlt: '', linkText: 'Learn More About Us', linkHref: '/about' }
 
 function renderEditor(block: BlockRow, onSave: (content: object) => Promise<void>) {
   switch (block.type) {
@@ -134,10 +141,10 @@ function renderEditor(block: BlockRow, onSave: (content: object) => Promise<void
       )
     case 'gallery_teaser':
       return (
-        <SimpleSectionBlockEditor
+        <GalleryTeaserBlockEditor
           blockId={block.id}
-          initialContent={parseBlockContent(block.content, defaultSimpleSection)}
-          onSave={onSave as (c: { heading: string; count?: number }) => Promise<void>}
+          initialContent={parseBlockContent<GalleryTeaserContent>(block.content, defaultGalleryTeaser)}
+          onSave={onSave as (c: GalleryTeaserContent) => Promise<void>}
         />
       )
     case 'fund_cta':
@@ -154,6 +161,14 @@ function renderEditor(block: BlockRow, onSave: (content: object) => Promise<void
           blockId={block.id}
           initialContent={parseBlockContent(block.content, { imageUrl: '', alt: '', caption: '' })}
           onSave={onSave as (c: { imageUrl: string; alt: string; caption: string }) => Promise<void>}
+        />
+      )
+    case 'about_preview':
+      return (
+        <AboutPreviewBlockEditor
+          blockId={block.id}
+          initialContent={parseBlockContent<AboutPreviewContent>(block.content, defaultAboutPreview)}
+          onSave={onSave as (c: AboutPreviewContent) => Promise<void>}
         />
       )
     default:

@@ -5,8 +5,11 @@ import { motion } from 'framer-motion'
 import { Shield, BarChart3, Apple } from 'lucide-react'
 import { type PracticeArea } from '@/lib/data'
 
+// Block items come in as { title, description } — DB records as { slug, title, content }
+type AreaItem = PracticeArea | { title: string; description: string; slug?: string; content?: string }
+
 interface Props {
-  areas: PracticeArea[]
+  areas: AreaItem[]
   heading?: string
 }
 
@@ -16,7 +19,8 @@ const icons: Record<string, React.ElementType> = {
   'nutrition': Apple,
 }
 
-function stripHtml(html: string, maxLen = 160) {
+function stripHtml(html: string | undefined | null, maxLen = 160) {
+  if (!html) return ''
   return html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().slice(0, maxLen)
 }
 
@@ -39,10 +43,12 @@ export function PracticeAreas({ areas, heading = 'Our Areas of Practice' }: Prop
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {areas.map((area, i) => {
-            const Icon = icons[area.slug] ?? Shield
+            const slug = 'slug' in area ? area.slug : undefined
+            const text = stripHtml(('content' in area ? area.content : undefined) ?? ('description' in area ? (area as { description?: string }).description : undefined))
+            const Icon = (slug && icons[slug]) ? icons[slug] : Shield
             return (
               <motion.div
-                key={area.slug}
+                key={slug ?? i}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -61,16 +67,18 @@ export function PracticeAreas({ areas, heading = 'Our Areas of Practice' }: Prop
                       {area.title.replace(/&#038;/g, '&').replace(/&amp;/g, '&')}
                     </h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      {stripHtml(area.content)}...
+                      {text}{text ? '…' : ''}
                     </p>
                   </div>
 
-                  <Link
-                    href={`/practice-areas/${area.slug}`}
-                    className="text-sm font-medium text-primary hover:text-primary/80 flex items-center gap-1 mt-auto"
-                  >
-                    Learn More <span aria-hidden="true">&rarr;</span>
-                  </Link>
+                  {slug && (
+                    <Link
+                      href={`/practice-areas/${slug}`}
+                      className="text-sm font-medium text-primary hover:text-primary/80 flex items-center gap-1 mt-auto"
+                    >
+                      Learn More <span aria-hidden="true">&rarr;</span>
+                    </Link>
+                  )}
                 </div>
               </motion.div>
             )

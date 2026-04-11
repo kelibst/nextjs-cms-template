@@ -12,11 +12,15 @@ import {
   type ImageBannerContent,
   type ObjectivesContent,
   type TimelineContent,
+  type AboutPreviewContent,
 } from "@/lib/blocks"
 import { sanitizeHtml } from "@/lib/utils"
 
 // Homepage components
 import { HeroCarousel } from "@/components/home/hero-carousel"
+import { HeroCentered } from "@/components/home/hero-centered"
+import { HeroSplit } from "@/components/home/hero-split"
+import { HeroBold } from "@/components/home/hero-bold"
 import { StatsBar } from "@/components/home/stats-bar"
 import { NewsPreview } from "@/components/home/news-preview"
 import { EventsPreview } from "@/components/home/events-preview"
@@ -75,6 +79,39 @@ function renderHomepageBlock(block: BlockRow, dataSources: BlockDataSources) {
         title: "",
         subtitle: "",
       })
+      const template = content.template ?? 'carousel'
+      if (template === 'centered') {
+        return (
+          <HeroCentered
+            heroTitle={content.title || undefined}
+            heroSubtitle={content.subtitle || undefined}
+            heroLabel={content.label}
+            isLoggedIn={dataSources.isLoggedIn}
+          />
+        )
+      }
+      if (template === 'split') {
+        return (
+          <HeroSplit
+            heroTitle={content.title || undefined}
+            heroSubtitle={content.subtitle || undefined}
+            heroLabel={content.label}
+            heroImage={content.heroImage}
+            isLoggedIn={dataSources.isLoggedIn}
+          />
+        )
+      }
+      if (template === 'bold') {
+        return (
+          <HeroBold
+            heroTitle={content.title || undefined}
+            heroSubtitle={content.subtitle || undefined}
+            heroLabel={content.label}
+            isLoggedIn={dataSources.isLoggedIn}
+          />
+        )
+      }
+      // default: carousel
       return (
         <HeroCarousel
           posts={dataSources.posts}
@@ -89,18 +126,7 @@ function renderHomepageBlock(block: BlockRow, dataSources: BlockDataSources) {
       const content = parseBlockContent<StatsBarContent>(block.content, {
         items: [],
       })
-      return (
-        <StatsBar
-          membersCount={content.items?.[0]?.count}
-          membersLabel={content.items?.[0]?.label}
-          journalsCount={content.items?.[1]?.count}
-          journalsLabel={content.items?.[1]?.label}
-          eventsCount={content.items?.[2]?.count}
-          eventsLabel={content.items?.[2]?.label}
-          yearsCount={content.items?.[3]?.count}
-          yearsLabel={content.items?.[3]?.label}
-        />
-      )
+      return <StatsBar items={content.items} />
     }
 
     case "news_preview": {
@@ -109,7 +135,7 @@ function renderHomepageBlock(block: BlockRow, dataSources: BlockDataSources) {
         count: 3,
       })
       return (
-        <NewsPreview posts={dataSources.posts ?? []} heading={content.heading} />
+        <NewsPreview posts={dataSources.posts ?? []} heading={content.heading} count={content.count} />
       )
     }
 
@@ -122,6 +148,7 @@ function renderHomepageBlock(block: BlockRow, dataSources: BlockDataSources) {
         <EventsPreview
           events={dataSources.events ?? []}
           heading={content.heading}
+          count={content.count}
         />
       )
     }
@@ -131,9 +158,12 @@ function renderHomepageBlock(block: BlockRow, dataSources: BlockDataSources) {
         heading: "Our Areas of Practice",
         items: [],
       })
+      const areas = (content.items && content.items.length > 0)
+        ? (content.items as any[])
+        : (dataSources.practiceAreas ?? [])
       return (
         <PracticeAreas
-          areas={dataSources.practiceAreas ?? []}
+          areas={areas}
           heading={content.heading}
         />
       )
@@ -148,6 +178,7 @@ function renderHomepageBlock(block: BlockRow, dataSources: BlockDataSources) {
         <LeadershipPreview
           leaders={dataSources.leaders ?? []}
           heading={content.heading}
+          count={content.count}
         />
       )
     }
@@ -155,39 +186,65 @@ function renderHomepageBlock(block: BlockRow, dataSources: BlockDataSources) {
     case "gallery_teaser": {
       const content = parseBlockContent<GalleryTeaserContent>(block.content, {
         heading: "Gallery",
+        count: 6,
       })
       return (
         <GalleryTeaser
           albums={dataSources.albums ?? []}
           heading={content.heading}
+          count={content.count}
+          selectedAlbumSlugs={content.selectedAlbumSlugs}
         />
       )
     }
 
     case "rich_text": {
-      const content = parseBlockContent<RichTextContent>(block.content, {
-        body: "",
-      })
+      const content = parseBlockContent<RichTextContent>(block.content, { body: "" })
+      return (
+        <section className="py-12">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            {content.heading && (
+              <h2 className="mb-4 text-2xl font-bold text-primary">{content.heading}</h2>
+            )}
+            <div
+              className="prose prose-green max-w-none"
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.body) }}
+            />
+          </div>
+        </section>
+      )
+    }
+
+    case "about_preview": {
+      const content = parseBlockContent<AboutPreviewContent>(block.content, {})
       return (
         <AboutSection
           about={dataSources.about}
           galleryImageSrc={dataSources.galleryImageSrc}
-          heading={content.heading || undefined}
+          heading={content.heading}
+          imageUrl={content.imageUrl}
+          imageAlt={content.imageAlt}
+          linkText={content.linkText}
+          linkHref={content.linkHref}
         />
       )
     }
 
     case "fund_cta": {
-      const content = parseBlockContent<FundCtaContent>(block.content, {
+      const c = parseBlockContent<FundCtaContent>(block.content, {
         heading: "GAPHTO Welfare Fund",
         subtitle: "",
         buttonText: "Learn More",
+        showCalculator: true,
       })
       return (
         <FundCta
-          pdfUrl={dataSources.fund?.pdfUrl}
-          heading={content.heading}
-          subtitle={content.subtitle}
+          heading={c.heading}
+          subtitle={c.subtitle}
+          buttonText={c.buttonText}
+          buttonHref={c.buttonHref}
+          pdfUrl={c.pdfUrl ?? dataSources.fund?.pdfUrl}
+          showCalculator={c.showCalculator}
         />
       )
     }
@@ -222,8 +279,19 @@ function renderAboutBlock(block: BlockRow, dataSources: BlockDataSources) {
     case "rich_text": {
       const content = parseBlockContent<RichTextContent>(block.content, {
         body: "",
+        variant: "generic",
       })
 
+      // Variant-first dispatch
+      if (content.variant === "background") {
+        return <AboutBackground body={content.body} />
+      }
+
+      if (content.variant === "vision_mission") {
+        return <AboutVisionMission vision={content.vision} mission={content.mission} body={content.body} />
+      }
+
+      // Legacy heading-based dispatch (backward compat)
       if (content.heading === "Background") {
         return <AboutBackground body={content.body} />
       }
@@ -284,18 +352,7 @@ function renderAboutBlock(block: BlockRow, dataSources: BlockDataSources) {
       const content = parseBlockContent<StatsBarContent>(block.content, {
         items: [],
       })
-      return (
-        <StatsBar
-          membersCount={content.items?.[0]?.count}
-          membersLabel={content.items?.[0]?.label}
-          journalsCount={content.items?.[1]?.count}
-          journalsLabel={content.items?.[1]?.label}
-          eventsCount={content.items?.[2]?.count}
-          eventsLabel={content.items?.[2]?.label}
-          yearsCount={content.items?.[3]?.count}
-          yearsLabel={content.items?.[3]?.label}
-        />
-      )
+      return <StatsBar items={content.items} />
     }
 
     // Fall through: render using homepage dispatch for any other types

@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Phone, Mail, MapPin } from 'lucide-react'
+import Logo from './Logo'
 
-const quickLinks = [
+const fallbackQuickLinks = [
   { label: 'Home', href: '/' },
   { label: 'About Us', href: '/about' },
   { label: 'GAPHTO News', href: '/news' },
@@ -14,7 +15,11 @@ const quickLinks = [
   { label: 'GAPHTO Fund', href: '/fund' },
 ]
 
-export function Footer() {
+interface FooterProps {
+  navLinks?: { label: string; href: string; openInNewTab?: boolean }[]
+}
+
+export function Footer({ navLinks = fallbackQuickLinks }: FooterProps) {
   const currentYear = new Date().getFullYear()
 
   return (
@@ -23,15 +28,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Column 1: Logo + About */}
           <div>
-            <Link href="/" className="inline-block mb-4">
-              <Image
-                src="/images/logo/logo.png"
-                alt="GAPHTO"
-                width={100}
-                height={30}
-                className="object-contain brightness-0 invert"
-              />
-            </Link>
+            <Logo />
             <p className="text-sm text-white/70 leading-relaxed mb-4">
               Ghana Association of Public Health Technical Officers — uniting Disease Control Officers,
               Health Information Officers, Nutrition Officers, and Field Technicians nationwide.
@@ -82,10 +79,12 @@ export function Footer() {
               Quick Links
             </h3>
             <ul className="space-y-2">
-              {quickLinks.map((link) => (
+              {navLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
+                    target={link.openInNewTab ? '_blank' : undefined}
+                    rel={link.openInNewTab ? 'noopener noreferrer' : undefined}
                     className="text-sm text-white/70 hover:text-white transition-colors"
                   >
                     {link.label}

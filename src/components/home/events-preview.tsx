@@ -9,6 +9,7 @@ import { type Event } from '@/lib/data'
 interface Props {
   events: Event[]
   heading?: string
+  count?: number
 }
 
 function formatEventDate(dateStr: string | null) {
@@ -29,7 +30,7 @@ function stripHtml(html: string) {
   return html.replace(/<[^>]*>/g, '').replace(/&#[0-9]+;/g, '').replace(/&amp;/g, '&').replace(/&[a-z]+;/g, '').trim()
 }
 
-export function EventsPreview({ events, heading = 'Events & Programs' }: Props) {
+export function EventsPreview({ events, heading = 'Events & Programs', count }: Props) {
   return (
     <section className="py-16 bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -59,7 +60,7 @@ export function EventsPreview({ events, heading = 'Events & Programs' }: Props) 
           </div>
         ) : (
           <div className="flex gap-4 overflow-x-auto md:grid md:grid-cols-2 lg:grid-cols-4 pb-4 md:pb-0 snap-x snap-mandatory md:snap-none">
-            {events.map((event, i) => {
+            {events.slice(0, count ?? 4).map((event, i) => {
               const date = formatEventDate(event.startDate)
               return (
                 <motion.div

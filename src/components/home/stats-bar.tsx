@@ -10,6 +10,7 @@ interface Stat {
 }
 
 interface Props {
+  items?: { count: string; suffix: string; label: string }[]
   membersCount?: string
   membersLabel?: string
   journalsCount?: string
@@ -50,6 +51,7 @@ function parseStatValue(raw: string): { value: number; suffix: string } {
 }
 
 export function StatsBar({
+  items,
   membersCount = '500+',
   membersLabel = 'Members Nationwide',
   journalsCount = '42+',
@@ -59,12 +61,17 @@ export function StatsBar({
   yearsCount = '16',
   yearsLabel = 'Regions Covered',
 }: Props) {
-  const stats: Stat[] = [
-    { ...parseStatValue(membersCount), label: membersLabel },
-    { ...parseStatValue(journalsCount), label: journalsLabel },
-    { ...parseStatValue(eventsCount), label: eventsLabel },
-    { ...parseStatValue(yearsCount), label: yearsLabel },
-  ]
+  const stats: Stat[] = (items && items.length > 0)
+    ? items.map(item => {
+        const { value } = parseStatValue(item.count)
+        return { value, suffix: item.suffix, label: item.label }
+      })
+    : [
+        { ...parseStatValue(membersCount), label: membersLabel },
+        { ...parseStatValue(journalsCount), label: journalsLabel },
+        { ...parseStatValue(eventsCount), label: eventsLabel },
+        { ...parseStatValue(yearsCount), label: yearsLabel },
+      ]
 
   return (
     <section className="bg-primary-hover text-primary-foreground py-10">

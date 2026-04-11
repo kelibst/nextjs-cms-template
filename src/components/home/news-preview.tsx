@@ -9,6 +9,7 @@ import { type Post } from '@/lib/data'
 interface Props {
   posts: Post[]
   heading?: string
+  count?: number
 }
 
 const categoryLabel: Record<string, string> = {
@@ -37,7 +38,7 @@ function stripHtml(html: string) {
   return html.replace(/<[^>]*>/g, '').replace(/&#[0-9]+;/g, '').replace(/&amp;/g, '&').replace(/&[a-z]+;/g, '')
 }
 
-export function NewsPreview({ posts, heading = 'Latest News' }: Props) {
+export function NewsPreview({ posts, heading = 'Latest News', count }: Props) {
   return (
     <section className="py-16 bg-muted/50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -63,7 +64,7 @@ export function NewsPreview({ posts, heading = 'Latest News' }: Props) {
 
         {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {posts.slice(0, 3).map((post, i) => (
+          {posts.slice(0, count ?? 3).map((post, i) => (
             <motion.div
               key={post.slug}
               initial={{ opacity: 0, y: 30 }}

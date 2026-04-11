@@ -8,6 +8,8 @@ import { type GalleryAlbum } from '@/lib/data'
 interface Props {
   albums: GalleryAlbum[]
   heading?: string
+  count?: number
+  selectedAlbumSlugs?: string[]
 }
 
 interface GalleryItem {
@@ -17,11 +19,14 @@ interface GalleryItem {
   albumSlug: string
 }
 
-function getFirstSixImages(albums: GalleryAlbum[]): GalleryItem[] {
+function collectImages(albums: GalleryAlbum[], maxCount: number, selectedAlbumSlugs?: string[]): GalleryItem[] {
+  const filteredAlbums = (selectedAlbumSlugs && selectedAlbumSlugs.length > 0)
+    ? albums.filter(a => selectedAlbumSlugs.includes(a.albumSlug))
+    : albums
   const items: GalleryItem[] = []
-  for (const album of albums) {
+  for (const album of filteredAlbums) {
     for (const img of album.images) {
-      if (items.length >= 6) break
+      if (items.length >= maxCount) break
       items.push({
         src: img.localPath ? `/images/${img.localPath}` : '/images/placeholder.jpg',
         caption: img.caption,
@@ -29,13 +34,13 @@ function getFirstSixImages(albums: GalleryAlbum[]): GalleryItem[] {
         albumSlug: album.albumSlug,
       })
     }
-    if (items.length >= 6) break
+    if (items.length >= maxCount) break
   }
   return items
 }
 
-export function GalleryTeaser({ albums, heading = 'Gallery' }: Props) {
-  const images = getFirstSixImages(albums)
+export function GalleryTeaser({ albums, heading = 'Gallery', count, selectedAlbumSlugs }: Props) {
+  const images = collectImages(albums, count ?? 6, selectedAlbumSlugs)
 
   return (
     <section className="py-16 bg-muted/50">

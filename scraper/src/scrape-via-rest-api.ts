@@ -34,11 +34,19 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function apiGet<T>(url: string, params: Record<string, string | number> = {}): Promise<T> {
   await sleep(300);
+  const authHeader = process.env.WP_USERNAME && process.env.WP_APP_PASSWORD
+    ? {
+        Authorization: `Basic ${Buffer.from(
+          `${process.env.WP_USERNAME}:${process.env.WP_APP_PASSWORD}`
+        ).toString('base64')}`,
+      }
+    : {};
   const response = await axios.get<T>(url, {
     params,
     timeout: 30000,
     headers: {
       'User-Agent': 'Mozilla/5.0 (compatible; GAPHTOScraper/1.0)',
+      ...authHeader,
     },
   });
   return response.data;

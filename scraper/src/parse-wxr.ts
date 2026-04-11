@@ -52,6 +52,11 @@ function plain(block: string, tag: string): string {
   return m ? m[1].trim() : '';
 }
 
+/** Strip CDATA wrappers from a string if present (e.g. "<![CDATA[]]>" → "") */
+function stripCdata(s: string): string {
+  return s.replace(/^<!\[CDATA\[([\s\S]*?)\]\]>$/, '$1').trim();
+}
+
 /** Try CDATA first, then fall back to plain text */
 function field(block: string, tag: string): string {
   return cdata(block, tag) || plain(block, tag);
@@ -113,7 +118,7 @@ function parseItems(xml: string): WxrItem[] {
     items.push({
       id:            field(b, 'wp:post_id'),
       title:         field(b, 'title'),
-      slug:          field(b, 'wp:post_name'),
+      slug:          stripCdata(field(b, 'wp:post_name')),
       content:       cdata(b, 'content:encoded'),
       excerpt:       cdata(b, 'excerpt:encoded'),
       date:          field(b, 'wp:post_date'),

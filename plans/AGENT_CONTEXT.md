@@ -4,6 +4,127 @@
 
 ---
 
+## ACTIVE SPRINT — UI/UX Polish + Navigation Management (2026-04-11)
+
+**PM Summary:** Two agents working in parallel. Agent 1 fixes logo display issues + enhances homepage hero. Agent 2 builds the navigation links management system (DB-driven nav).
+
+### Agent 1 — Logo Fix + Hero Enhancement
+Task file: `plans/TASK_PM6_AGENT1_UI.md`
+**Scope:**
+- `src/components/layout/header.tsx` — Fix logo sizing + dark mode (round container, dark mode filter)
+- `src/components/dashboard/topbar.tsx` — Same logo fix
+- `src/components/home/hero-carousel.tsx` — Visual improvements
+
+### Agent 2 — Navigation Management
+Task file: `plans/TASK_PM6_AGENT2_NAV.md`
+**Scope:**
+- `drizzle/schema.ts` — Add `navigationLinks` table
+- New Drizzle migration
+- `src/app/actions/navigation.ts` — Server actions (CRUD + reorder)
+- `src/app/(dashboard)/dashboard/navigation/` — Admin CRUD UI
+- `src/components/layout/header.tsx` — Replace hardcoded navLinks array with DB fetch
+- `src/components/layout/footer.tsx` — Replace hardcoded quickLinks with DB fetch
+- `src/components/dashboard/sidebar.tsx` — Add Navigation link in sidebar menu
+- `src/lib/permissions.ts` — Add `navigation:manage` permission
+- `drizzle/seed.ts` or new seed — Populate 8 default nav links
+
+### Key technical facts for both agents
+- Dark mode uses `next-themes` with `.dark` class on `<html>` — logo needs `dark:` Tailwind classes or `useTheme()` swap
+- Navigation is currently hardcoded arrays in header.tsx (lines 21-30) and footer.tsx (lines 5-14)
+- siteSettings table exists but navigation should use a dedicated `navigationLinks` table for order/visibility management
+- Migration command: `bunx drizzle-kit generate --config=drizzle/drizzle.config.ts && bunx tsx drizzle/migrate.ts`
+- NEVER create src/middleware.ts — use src/proxy.ts
+- Package manager: `bun` (not npm)
+
+---
+
+## COMPLETED SPRINT — Scraper Image Fix (2026-04-11) ✅
+
+**PM Summary:** Two agents working in parallel on the scraper. No UI changes. No DB schema changes. No migrations needed.
+
+### Agent A — Auth + Media Endpoint Fix
+Task file: `plans/TASK_SCRAPER_A_AUTH.md`
+**Scope:** `scraper/src/scrape-via-rest-api.ts` only. Add WordPress app password Basic auth to `fetchAllMedia()`. Read credentials from `WP_USERNAME` + `WP_APP_PASSWORD` env vars. Update `.env.example`.
+
+### Agent B — Image Recovery for 12 Posts
+Task file: `plans/TASK_SCRAPER_B_RECOVERY.md`
+**Scope:** `scraper/src/parse-wxr.ts` and `scraper/src/scrape-news.ts`. Use `media-all.json` (153 items, each has `post` = WordPress parent post ID) to backfill `featuredImage` + `localImage` for the 12 posts confirmed missing. Also investigate the blog post with slug `<![CDATA[]]>` (slug parsing bug in parse-wxr.ts).
+
+### Confirmed missing posts (12 total)
+| # | Category | Slug |
+|---|----------|------|
+| 1 | gaphto-news | `2021-annual-general-conference-elections` |
+| 2 | gaphto-news | `welcome-address-ag-national-president-2017-agc-kumasi` |
+| 3 | gaphto-news | `gaphto-demands-degree-salary-grade` |
+| 4 | gaphto-news | `public-health-technical-officers-meeting-in-koforidua` |
+| 5 | health-news | `5-5-million-ghanaian-adults-malnourished-during-infancy-report` |
+| 6 | health-news | `nmimr-holds-symposium-on-non-communicable-diseases-in-west-africa` |
+| 7 | health-news | `health-coalition-calls-on-government-to-address-equity-gabs-on-immunization` |
+| 8 | health-news | `ghana-health-service-discredits-ebola-outbreak-rumours` |
+| 9 | health-news | `ghs-moves-to-improve-emergency-medical-services` |
+| 10 | health-news | `district-malaria-advocacy-groups-converge-in-upper-east-for-workshop` |
+| 11 | health-news | `430000-mosquito-nets-distributed-in-upper-west` |
+| 12 | blog | slug bug — title: `2018 Annual General Andy Scientific Conference Communique` |
+
+### Key technical facts for both agents
+- `scraper/src/utils.ts` → `toWpCdnUrl(url)` — rewrites gaphto.org upload URLs to `i0.wp.com` CDN (bypasses 403). `downloadImage(url, localPath)` calls this automatically.
+- `scraper/output/media-all.json` — 153 items with fields: `id, slug, title, alt_text, caption, source_url, width, height, post, date`. The `post` field is the WordPress parent post ID.
+- `scrape-news.ts` already uses `_embed=true` on posts — NO 401 issue there. The 401 is only in `scrape-via-rest-api.ts` → `fetchAllMedia()`.
+- WXR parser (`parse-wxr.ts`) resolves featured images via `_thumbnail_id` postmeta → media index.
+- Scraper outputs are in `scraper/output/` — JSON files, overwrite-safe to re-generate.
+- After agents finish, run: `bun run db:sync-data && bun run db:seed` to re-populate the DB.
+
+---
+
+## Agent Work Log
+
+### Agent 1 — Logo + Hero UI — 2026-04-11 — DONE
+- header.tsx: replaced flat `<Image width={120}>` with round 40×40 container (`rounded-full overflow-hidden shrink-0 border bg-white dark:bg-white/10`) + `dark:brightness-0 dark:invert` on Image for dark mode visibility
+- topbar.tsx: confirmed no logo Image present (uses Avatar initials) — no change needed
+- hero-carousel.tsx: replaced inline radial-gradient style with `bg-linear-to-br from-primary-deep via-primary/90 to-primary/60` Tailwind gradient; upgraded headline to `text-4xl md:text-5xl lg:text-6xl font-extrabold` with text-shadow; boosted primary CTA to `shadow-lg shadow-primary/40 hover:shadow-primary/60`; applied frosted glass to news panel (`bg-white/10 backdrop-blur-sm border border-white/20`)
+
+### Agent A — Auth fix (scrape-via-rest-api.ts) — 2026-04-11 — DONE
+- Added auth header to apiGet() in scraper/src/scrape-via-rest-api.ts
+- Updated .env.example with WP_USERNAME + WP_APP_PASSWORD
+- Updated readme/SCRAPER.md with Authentication section
+- Auth is optional: scraper works without credentials, adds header only when both vars set
+
+### Agent B — CDATA slug fix (parse-wxr.ts) — 2026-04-11 — DONE
+- Added stripCdata() helper function in scraper/src/parse-wxr.ts (after field() helper)
+- Applied to slug: stripCdata(field(b, 'wp:post_name')) in parseItems()
+- Fixes blog post with slug "<![CDATA[]]>" → will use toSlug(title) fallback after re-running scrape:xml
+- B3 image recovery NOT implemented: 0 of 11 missing posts had matching media in media-all.json (no _thumbnail_id postmeta set in WordPress for those posts)
+
+### Agent 1 — Block Editors (gallery teaser + fund CTA) — 2026-04-11 — DONE
+- Created GalleryTeaserBlockEditor with album selection checkboxes and count control
+- Added getGalleryAlbumsSummary() server action to src/app/actions/gallery.ts
+- Enhanced FundCtaBlockEditor with buttonHref, pdfUrl, showCalculator fields
+- Created src/components/ui/checkbox.tsx (Radix UI-based)
+- Updated block-editor-shell.tsx: gallery_teaser now routes to GalleryTeaserBlockEditor
+- Updated DEFAULT_CONTENT in page-builder-client.tsx for gallery_teaser and fund_cta
+- TypeScript: bunx tsc --noEmit passes with zero errors
+
+### Agent 2 — Block Rendering fixes — 2026-04-11 — DONE
+- count prop threaded through news/events/leadership preview components
+- gallery-teaser filters by selectedAlbumSlugs, respects count
+- fund-cta uses buttonText/buttonHref/pdfUrl/showCalculator from block config
+- practice_areas_grid uses block content items when provided (homepage)
+- stats-bar supports generic items[] for dynamic stat display
+- All changes wired in block-renderer.tsx
+
+### Agent 2 — Navigation Management — 2026-04-11 — DONE
+- Added navigationLinks table to drizzle/schema.ts; migration 0008 generated and applied
+- Created src/lib/seed-navigation.ts; seeded 8 default nav links (Home→Contact)
+- Created src/app/actions/navigation.ts with 7 server actions: getNavLinks, getAllNavLinks, createNavLink, updateNavLink, deleteNavLink, toggleNavVisibility, reorderNavLinks
+- Added navigation:manage permission to src/lib/permissions.ts (super_admin, admin)
+- Built /dashboard/navigation admin page (server component + NavigationManager client component with full dnd-kit drag-to-reorder, add/edit/delete dialogs, visibility toggles)
+- Updated src/components/dashboard/sidebar.tsx: added Menu icon + Navigation link in Pages section (admin/super_admin only)
+- Wired src/app/(public)/layout.tsx to fetch nav links from DB; passes navLinks prop to Header and Footer with try/catch fallback
+- Updated header.tsx and footer.tsx to accept navLinks prop with hardcoded fallback arrays; supports openInNewTab attribute
+- Build passes cleanly (bun run build)
+
+---
+
 ## COMPLETED TASKS — Phase 5: Publish Button + Blog CMS ✅
 
 | File | Agent | Feature |
@@ -379,6 +500,7 @@ src/app/news/**, src/app/leadership/**, src/app/gallery/**, src/app/about/**, sr
 | PM2 Phase 5A Agent 2 | Public Events Page + Registration | DONE | src/app/events/page.tsx (Server Component, DB query for upcoming/past split, OG metadata), src/app/events/events-list-client.tsx (framer-motion card grid with upcoming + past sections), src/app/events/[slug]/page.tsx (detail page with hero image overlay, sidebar infobox, generateMetadata with OG, inline + sidebar registration form), src/components/events/event-registration-form.tsx ('use client', useMutation + sonner toast + registered success card), src/app/actions/event-registration.ts (server action: duplicate email check, capacity check, insert with paymentStatus). Header already had Events nav link — not touched. TSC: 0 errors. |
 | PM2 Phase 5B Agent 1 | Email Integration (Resend) | DONE | resend@6.10.0 installed. src/lib/email.ts (sendContactAcknowledgement, sendContactNotification, sendEventRegistrationConfirmation — typed helpers). src/app/api/contact/route.ts updated: inserts into contactSubmissions table then sends both emails in separate try/catch (email failures do NOT block 200 response). src/app/actions/event-registration.ts updated: sends confirmation email in try/catch after successful DB insert. TSC: 0 errors. Requires RESEND_API_KEY and ADMIN_EMAIL in .env.local. |
 | PM2 Phase 5B Agent 2 | Member Directory | DONE | src/app/(member)/member-centre/directory/page.tsx (Server Component: members JOIN users, filtered by q/specialty/region searchParams, graceful DB fallback), src/components/member/member-directory-client.tsx ('use client': search input with 300ms debounce, specialty + region Select filters — all update URL params so Server Component re-renders), src/components/member/member-card.tsx (Avatar initials, specialty badge, region/facility rows, membership status badge). Added Member Directory nav link + quick link to src/app/(member)/member-centre/page.tsx. TSC: 0 errors. |
+| Agent B | WXR Slug Fix (B2) | DONE | scraper/src/parse-wxr.ts: added `stripCdata()` helper (strips `<![CDATA[...]]>` wrappers from plain() fallback results); applied to `slug` extraction in `parseItems()` — `slug: stripCdata(field(b, 'wp:post_name'))`. Fixes post 661 (`2018 Annual General Andy Scientific Conference Communique`) whose `<wp:post_name>` was `<![CDATA[]]>` (empty CDATA), causing blog.json to store literal `"<![CDATA[]]>"` as slug. B3 (image recovery) confirmed NOT needed — 11 missing posts have no associated media in WordPress. Re-run `bun run scrape:xml` to regenerate clean JSON. |
 | Agent A | Phase 3b — Theme: foundation + public pages | DONE | globals.css (primary=green, 4 new tokens), providers.tsx (ThemeProvider), layout.tsx (suppressHydrationWarning), theme-toggle.tsx (new), header.tsx + footer.tsx, all home components, all public pages. Build: 0 errors. |
 | Agent B | Phase 3b — Theme: dashboard components + pages | DONE | sidebar, topbar, data-table, all dashboard form components (colors only), contact-inbox, settings-form, delete buttons (dark: variants), announcement-actions, all dashboard pages refactored. Build: 0 errors. |
 | PM2 Phase 5C Agent 1 | Paystack Payment Integration | DONE | drizzle/schema.ts (paymentReference column added to eventRegistrations), drizzle/migrations/0001_magenta_red_ghost.sql (generated + applied), src/lib/paystack.ts (initializePayment + verifyPayment fetch helpers), src/app/api/payments/initialize/route.ts (POST: lookup registration+event, call Paystack, return authorizationUrl), src/app/api/payments/verify/route.ts (GET: verify payment, update DB paymentStatus+paymentReference, redirect to event page), src/app/events/payment/[registrationId]/page.tsx (Server Component: shows event title/date, registrant details, amount), src/components/events/payment-button.tsx ('use client': POST to /api/payments/initialize then window.location.href). event-registration.ts already returns requiresPayment+registrationId — no change needed. event-registration-form.tsx already redirects to /events/payment/[registrationId] — no change needed. TSC: 0 errors. Requires PAYSTACK_SECRET_KEY, PAYSTACK_PUBLIC_KEY, NEXT_PUBLIC_APP_URL in .env.local. |
@@ -748,3 +870,16 @@ All props are optional with hardcoded fallbacks — no breaking changes.
 | `GalleryTeaser` | `heading?: string` |
 | `AboutSection` | `heading?: string` |
 | `FundCta` | `heading?: string`, `subtitle?: string` |
+
+### Agent 1 — About Block System — 2026-04-11 — DONE
+- RichTextBlockEditor: Section Type select (generic/background/vision_mission) with conditional fields
+- AboutVisionMission: now renders two-card Vision + Mission layout
+- block-renderer: variant-first dispatch for about rich_text blocks
+- seed-about-blocks.ts: 6 about blocks seeded from about.json
+
+### Agent 2 — Hero Template System — 2026-04-11 — DONE
+- Created HeroCentered (staggered word animation, floating orbs, centered layout)
+- Created HeroSplit (slide-in two-column, image panel, light bg)
+- Created HeroBold (oversized type, animated underline on last word, scroll indicator)
+- HeroBlockEditor: template picker 2×2 card grid
+- block-renderer: dispatches hero by content.template

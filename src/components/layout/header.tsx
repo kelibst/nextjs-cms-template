@@ -17,8 +17,9 @@ import {
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
+import Logo from './Logo'
 
-const navLinks = [
+const fallbackNavLinks = [
   { label: 'Home', href: '/' },
   { label: 'About', href: '/about' },
   { label: 'News', href: '/news' },
@@ -28,6 +29,10 @@ const navLinks = [
   { label: 'Events', href: '/events' },
   { label: 'Contact', href: '/contact' },
 ]
+
+interface HeaderProps {
+  navLinks?: { label: string; href: string; openInNewTab?: boolean }[]
+}
 
 function UserAvatar({ name }: { name: string }) {
   const initials = name
@@ -43,7 +48,7 @@ function UserAvatar({ name }: { name: string }) {
   )
 }
 
-export function Header() {
+export function Header({ navLinks = fallbackNavLinks }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const { data: session, status } = useSession()
@@ -77,19 +82,7 @@ export function Header() {
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <Image
-              src="/images/logo/logo.png"
-              alt="GAPHTO"
-              width={120}
-              height={36}
-              className="object-contain"
-              priority
-            />
-            <span className="hidden sm:block text-xs text-muted-foreground leading-tight max-w-35">
-              Ghana Association of Public Health Technical Officers
-            </span>
-          </Link>
+          <Logo />
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
@@ -97,6 +90,8 @@ export function Header() {
               <Link
                 key={link.href}
                 href={link.href}
+                target={link.openInNewTab ? '_blank' : undefined}
+                rel={link.openInNewTab ? 'noopener noreferrer' : undefined}
                 className={cn(
                   'px-3 py-2 text-sm font-medium rounded-md transition-colors',
                   isActive(link.href)
@@ -190,6 +185,8 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
+              target={link.openInNewTab ? '_blank' : undefined}
+              rel={link.openInNewTab ? 'noopener noreferrer' : undefined}
               onClick={() => setMobileOpen(false)}
               className={cn(
                 'px-3 py-2 text-sm font-medium rounded-md transition-colors',

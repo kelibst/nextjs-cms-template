@@ -10,8 +10,8 @@
     "db:up": "docker-compose -f infrastructure/docker-compose.yml up -d",
     "db:down": "docker-compose -f infrastructure/docker-compose.yml down",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "ts-node drizzle/migrate.ts",
-    "db:seed": "ts-node drizzle/seed.ts",
+    "db:migrate": "bun drizzle/migrate.ts",
+    "db:seed": "bun drizzle/seed.ts",
     "scrape": "cd scraper && bun src/index.ts",
     "scrape:xml": "cd scraper && bun src/parse-wxr.ts",
     "db:sync-data": "mkdir -p src/data public/images && cp scraper/output/*.json src/data/ && cp -r scraped-assets/. public/images/"

@@ -5,6 +5,8 @@ import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import type { FundCtaContent } from '@/lib/blocks'
 
 interface FundCtaBlockEditorProps {
@@ -17,12 +19,15 @@ export function FundCtaBlockEditor({ blockId: _blockId, initialContent, onSave }
   const [heading, setHeading] = useState(initialContent.heading ?? '')
   const [subtitle, setSubtitle] = useState(initialContent.subtitle ?? '')
   const [buttonText, setButtonText] = useState(initialContent.buttonText ?? '')
+  const [buttonHref, setButtonHref] = useState(initialContent.buttonHref ?? '')
+  const [pdfUrl, setPdfUrl] = useState(initialContent.pdfUrl ?? '')
+  const [showCalculator, setShowCalculator] = useState(initialContent.showCalculator !== false)
   const [isPending, startTransition] = useTransition()
 
   function handleSave() {
     startTransition(async () => {
       try {
-        await onSave({ heading, subtitle, buttonText })
+        await onSave({ heading, subtitle, buttonText, buttonHref, pdfUrl, showCalculator })
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Failed to save block')
       }
@@ -54,6 +59,35 @@ export function FundCtaBlockEditor({ blockId: _blockId, initialContent, onSave }
           value={buttonText}
           onChange={(e) => setButtonText(e.target.value)}
           placeholder="e.g. Donate Now"
+        />
+      </div>
+      <div className="space-y-1">
+        <Label>Primary Button URL</Label>
+        <Input
+          value={buttonHref}
+          onChange={(e) => setButtonHref(e.target.value)}
+          placeholder="/fund or https://..."
+        />
+      </div>
+      <div className="space-y-1">
+        <Label>Fund Document PDF URL (optional)</Label>
+        <Input
+          value={pdfUrl}
+          onChange={(e) => setPdfUrl(e.target.value)}
+          placeholder="https://... PDF link — leave empty to hide this button"
+        />
+        <p className="text-xs text-muted-foreground">
+          Leave empty to hide the &quot;View Document&quot; button.
+        </p>
+      </div>
+      <div className="flex items-center justify-between">
+        <div>
+          <Label>Show Loan Calculator Button</Label>
+          <p className="text-xs text-muted-foreground">Display a link to the loan calculator</p>
+        </div>
+        <Switch
+          checked={showCalculator}
+          onCheckedChange={(val) => setShowCalculator(val)}
         />
       </div>
       <Button onClick={handleSave} disabled={isPending}>

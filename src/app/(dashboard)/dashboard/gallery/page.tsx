@@ -1,7 +1,14 @@
 import { db } from '@/lib/db'
 import { galleryAlbums, galleryImages } from '../../../../../drizzle/schema'
-import { eq, count } from 'drizzle-orm'
+import { eq, count, asc } from 'drizzle-orm'
 import { desc } from 'drizzle-orm'
+
+function normaliseCoverUrl(url: string | null | undefined): string | null {
+  if (!url) return null
+  if (url.startsWith('http') || url.startsWith('/')) return url
+  // Seeded paths are like "gallery/album/image.jpg" — serve from public/images/
+  return `/images/${url}`
+}
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Plus, Pencil, Images } from 'lucide-react'
@@ -18,6 +25,17 @@ export default async function GalleryPage() {
     .groupBy(galleryImages.albumId)
 
   const countMap = Object.fromEntries(imageCounts.map((r) => [r.albumId, r.count]))
+
+  // Fetch first image per album as cover fallback
+  const allImages = await db
+    .select({ albumId: galleryImages.albumId, url: galleryImages.url })
+    .from(galleryImages)
+    .orderBy(asc(galleryImages.sortOrder))
+
+  const firstImageMap: Record<string, string> = {}
+  for (const img of allImages) {
+    if (!firstImageMap[img.albumId]) firstImageMap[img.albumId] = img.url
+  }
 
   return (
     <div className="space-y-5">
@@ -40,13 +58,16 @@ export default async function GalleryPage() {
           {albums.map((album) => (
             <div key={album.id} className="bg-card rounded-xl border border-border overflow-hidden group">
               <div className="h-36 bg-muted relative overflow-hidden">
-                {album.coverImage ? (
-                  <img src={album.coverImage} alt={album.title} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Images className="w-10 h-10 text-muted-foreground/40" />
-                  </div>
-                )}
+                {(() => {
+                  const cover = normaliseCoverUrl(album.coverImage) ?? normaliseCoverUrl(firstImageMap[album.id])
+                  return cover ? (
+                    <img src={cover} alt={album.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Images className="w-10 h-10 text-muted-foreground/40" />
+                    </div>
+                  )
+                })()}
               </div>
               <div className="p-4">
                 <h3 className="font-semibold text-foreground truncate">{album.title}</h3>

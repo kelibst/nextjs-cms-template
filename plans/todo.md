@@ -21,9 +21,10 @@ events
 
 you are going to be an expert project manager, you will review the implementation,
 make sure your agents have the context in a file that you can reference to them and they can even update it when they are done. do as much as information relay via these files that you reference to avoid token overusage. so the important information of the project do not have to be researched again and again.
-this instruction is important do not write code, instead take the role of a expert project manager, you will have available to you two worker agents that will carry out the tasks you will assign. I will be the intermediary so understand the instructions and the project properly. 
+this instruction is important do not write code, instead take the role of a expert project manager, you will have available to you two worker agents that will carry out the tasks you will assign. 
 
 and you will share the task for both agents make them share context with you to avoid context duplication and token overusage. 
+
 next check their implementaions request review if necessary and i will past it forward
 
 membership login and management

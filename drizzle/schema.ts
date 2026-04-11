@@ -236,6 +236,20 @@ export const siteSettings = pgTable('site_settings', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
 
+export const navigationLinks = pgTable('navigation_links', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  label: text('label').notNull(),
+  href: text('href').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
+  isVisible: boolean('is_visible').notNull().default(true),
+  openInNewTab: boolean('open_in_new_tab').notNull().default(false),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
+export type NavigationLink = typeof navigationLinks.$inferSelect
+export type NewNavigationLink = typeof navigationLinks.$inferInsert
+
 export const fundApplications = pgTable('fund_applications', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').references(() => users.id).notNull(),
@@ -398,6 +412,7 @@ export const blockTypeEnum = pgEnum('block_type', [
   'gallery_teaser',
   'fund_cta',
   'image_banner',
+  'about_preview',
 ])
 
 export const pageBlocks = pgTable('page_blocks', {

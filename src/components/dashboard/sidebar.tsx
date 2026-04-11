@@ -22,8 +22,10 @@ import {
   PanelLeftOpen,
   BarChart2,
   FileEdit,
+  Menu,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import Logo from '../layout/Logo'
 
 const navGroups = [
   {
@@ -116,13 +118,7 @@ export function DashboardSidebar({ role, user }: SidebarProps) {
             </button>
           ) : (
             <>
-              <Image
-                src="/images/logo/logo.png"
-                alt="GAPHTO"
-                width={80}
-                height={24}
-                className="object-contain brightness-0 invert"
-              />
+              <Logo />
               <span className="bg-primary text-white text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider">
                 Admin
               </span>
@@ -201,6 +197,24 @@ export function DashboardSidebar({ role, user }: SidebarProps) {
                 >
                   <FileEdit className="w-4 h-4 flex-shrink-0" />
                   {!isCollapsed && 'Content'}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/dashboard/navigation"
+                  title={isCollapsed ? 'Navigation' : undefined}
+                  className={cn(
+                    'flex items-center rounded-lg text-sm font-medium transition-colors',
+                    isCollapsed
+                      ? 'justify-center w-10 h-10 mx-auto'
+                      : 'gap-3 px-3 py-2',
+                    pathname.startsWith('/dashboard/navigation')
+                      ? 'bg-primary text-white'
+                      : 'text-white/70 hover:bg-primary/20 hover:text-white'
+                  )}
+                >
+                  <Menu className="w-4 h-4 shrink-0" />
+                  {!isCollapsed && 'Navigation'}
                 </Link>
               </li>
             </ul>

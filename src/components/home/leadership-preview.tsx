@@ -8,10 +8,11 @@ import { type LeadershipMember } from '@/lib/data'
 interface Props {
   leaders: LeadershipMember[]
   heading?: string
+  count?: number
 }
 
-export function LeadershipPreview({ leaders, heading = 'Our Leadership' }: Props) {
-  const featured = leaders.slice(0, 6)
+export function LeadershipPreview({ leaders, heading = 'Our Leadership', count }: Props) {
+  const featured = leaders.slice(0, count ?? 6)
 
   return (
     <section className="py-16 bg-background">

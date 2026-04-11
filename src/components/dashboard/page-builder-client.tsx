@@ -77,12 +77,13 @@ const BLOCK_TYPE_LABELS: Record<string, { label: string; description: string; ic
   gallery_teaser: { label: 'Gallery', description: 'Photo gallery section', icon: '🖼️' },
   fund_cta: { label: 'Fund CTA', description: 'Call to action for the welfare fund', icon: '💰' },
   image_banner: { label: 'Image Banner', description: 'Full-width image', icon: '🖼️' },
+  about_preview: { label: 'About Preview', description: 'Two-column about section with image and link', icon: 'ℹ️' },
 }
 
 // ─── Default content for new blocks ───────────────────────────────────────────
 
 const DEFAULT_CONTENT: Record<string, object> = {
-  hero: { title: 'New Section', subtitle: '' },
+  hero: { title: "We are the backbone of Public Health in Ghana", subtitle: "Uniting Disease Control, Health Information, and Nutrition professionals to build a healthier Ghana.", label: "Ghana's Public Health Association", template: 'carousel' },
   stats_bar: { items: [{ count: '0', suffix: '', label: 'Stat' }] },
   rich_text: { heading: 'New Section', body: '<p>Enter content here.</p>' },
   objectives_list: { heading: 'Objectives', items: [''] },
@@ -91,9 +92,10 @@ const DEFAULT_CONTENT: Record<string, object> = {
   news_preview: { heading: 'Latest News', count: 3 },
   events_preview: { heading: 'Events', count: 3 },
   leadership_preview: { heading: 'Leadership', count: 4 },
-  gallery_teaser: { heading: 'Gallery' },
-  fund_cta: { heading: 'Fund', subtitle: '', buttonText: 'Learn More' },
+  gallery_teaser: { heading: 'Gallery', count: 6, selectedAlbumSlugs: [] },
+  fund_cta: { heading: 'GAPHTO Welfare Fund', subtitle: 'Supporting our members when it matters most.', buttonText: 'Learn More', buttonHref: '/fund', pdfUrl: '', showCalculator: true },
   image_banner: { imageUrl: '', alt: '', caption: '' },
+  about_preview: { heading: 'Building a Healthier Ghana Together', imageUrl: '', imageAlt: 'GAPHTO events and activities', linkText: 'Learn More About Us', linkHref: '/about' },
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────────
