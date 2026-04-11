@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Phone, Mail, MapPin } from 'lucide-react'
 
 const quickLinks = [
@@ -23,7 +24,13 @@ export function Footer() {
           {/* Column 1: Logo + About */}
           <div>
             <Link href="/" className="inline-block mb-4">
-              <span className="text-2xl font-bold text-white tracking-tight">GAPHTO</span>
+              <Image
+                src="/images/logo/logo.png"
+                alt="GAPHTO"
+                width={100}
+                height={30}
+                className="object-contain brightness-0 invert"
+              />
             </Link>
             <p className="text-sm text-white/70 leading-relaxed mb-4">
               Ghana Association of Public Health Technical Officers — uniting Disease Control Officers,

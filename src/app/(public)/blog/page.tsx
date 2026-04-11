@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getBlogPosts, getBlocksForPage } from "@/lib/data";
 import { getHeroContent } from "@/lib/blocks";
 import { InnerPageHero } from "@/components/shared/inner-page-hero";
+import { BlockRenderer, type BlockDataSources } from "@/components/shared/block-renderer";
 import { PostCard } from "@/components/shared/post-card";
 
 export const dynamic = 'force-dynamic'
@@ -24,6 +25,9 @@ export default async function BlogPage() {
     subtitle: 'Perspectives from GAPHTO members and public health professionals across Ghana.',
   })
 
+  const contentBlocks = blocks.filter(b => b.type !== 'hero')
+  const dataSources: BlockDataSources = {}
+
   return (
     <>
       <InnerPageHero
@@ -34,6 +38,14 @@ export default async function BlogPage() {
         centered={hero.centered !== false}
         breadcrumb={[{ label: "Home", href: "/" }, { label: "Blog" }]}
       />
+
+      {contentBlocks.length > 0 && (
+        <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
+          {contentBlocks.map(block => (
+            <BlockRenderer key={block.id} block={block} dataSources={dataSources} pageContext="subpage" />
+          ))}
+        </div>
+      )}
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         {posts.length === 0 ? (

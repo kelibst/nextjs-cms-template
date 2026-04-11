@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import {
@@ -115,7 +116,13 @@ export function DashboardSidebar({ role, user }: SidebarProps) {
             </button>
           ) : (
             <>
-              <span className="text-white font-bold text-lg tracking-wide">GAPHTO</span>
+              <Image
+                src="/images/logo/logo.png"
+                alt="GAPHTO"
+                width={80}
+                height={24}
+                className="object-contain brightness-0 invert"
+              />
               <span className="bg-primary text-white text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider">
                 Admin
               </span>

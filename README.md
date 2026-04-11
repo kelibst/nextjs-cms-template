@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GAPHTO — Ghana Association of Public Health Technical Officers
 
-## Getting Started
+Next.js web platform for GAPHTO, migrated from the association's previous WordPress.com site at [www.gaphto.org](https://www.gaphto.org).
 
-First, run the development server:
+---
+
+## Documentation
+
+| Guide | What it covers |
+|-------|---------------|
+| [readme/LOCAL_DEV.md](readme/LOCAL_DEV.md) | Local setup walkthrough — DB, seeding, dev server, test credentials |
+| [readme/SCRAPER.md](readme/SCRAPER.md) | WordPress data scraper — XML vs REST API, image downloads, output files, known issues |
+| [readme/DATABASE.md](readme/DATABASE.md) | Schema overview, seeding sequence, expected counts, migration guide |
+| [readme/DEPLOYMENT.md](readme/DEPLOYMENT.md) | Hetzner VPS deployment — Docker, Nginx, SSL, PM2, re-deploy |
+| [readme/ARCHITECTURE.md](readme/ARCHITECTURE.md) | System design, data flow, tech stack, auth/RBAC, page builder |
+
+---
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4 + shadcn/ui
+- **Auth**: NextAuth v5
+- **Database**: PostgreSQL via Drizzle ORM
+- **Package manager**: Bun
+
+---
+
+## Quick Start (local)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install
+cp .env.example .env          # defaults work for local dev, no changes needed
+bun run db:up                 # start PostgreSQL on port 5434
+bun run db:sync-data          # copy scraper output → src/data/ and public/images/
+bun run db:migrate            # create tables
+bun run db:seed               # populate DB from scraped JSON
+bun run dev                   # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Test login: `superadmin@gaphto.org` / `Test1234!`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+See [readme/LOCAL_DEV.md](readme/LOCAL_DEV.md) for full details and troubleshooting.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Available Scripts
 
-To learn more about Next.js, take a look at the following resources:
+| Script | Description |
+|--------|-------------|
+| `bun run dev` | Start development server |
+| `bun run build` | Build for production |
+| `bun run start` | Start production server |
+| `bun run lint` | Run ESLint |
+| `bun run scrape:xml` | Parse WordPress XML export (authoritative — recommended) |
+| `bun run scrape` | Run the REST API scraper (public posts only) |
+| `bun run db:sync-data` | Copy `scraper/output/*.json` → `src/data/` and `scraped-assets/` → `public/images/` |
+| `bun run db:up` | Start the PostgreSQL container (local dev) |
+| `bun run db:down` | Stop the PostgreSQL container |
+| `bun run db:generate` | Generate a Drizzle migration file after schema changes |
+| `bun run db:migrate` | Apply pending migrations |
+| `bun run db:seed` | Seed the database from scraped JSON |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+gaphto/
+├── src/
+│   ├── app/
+│   │   ├── (public)/       Public-facing pages (home, about, news, events…)
+│   │   ├── (auth)/         Login & register
+│   │   ├── (dashboard)/    Admin dashboard (protected)
+│   │   ├── (member)/       Member centre (protected)
+│   │   └── api/            API routes (auth, uploads, payments)
+│   ├── components/
+│   │   ├── layout/         Header & footer
+│   │   ├── home/           Homepage section components
+│   │   ├── shared/         Page headers, post cards, block renderer
+│   │   ├── dashboard/      Admin UI components
+│   │   └── ui/             shadcn/ui primitives
+│   ├── data/               JSON fallback files (populated by db:sync-data)
+│   └── lib/                Data fetching, DB client, utilities
+├── scraper/                WordPress.com content scraper
+├── drizzle/                Schema, migrations, seed
+├── infrastructure/         Docker Compose, Nginx, PM2
+├── readme/                 Per-component documentation
+└── public/
+    └── images/             Static images (logo, scraped assets)
+```

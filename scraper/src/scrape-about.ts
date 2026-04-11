@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import { fetchPage, saveJson } from './utils';
+import { fetchPageBySlug, saveJson } from './utils';
 
 interface AboutData {
   background: string;
@@ -10,100 +10,37 @@ interface AboutData {
 }
 
 async function scrapeBackground(): Promise<string> {
-  const url = 'https://www.gaphto.org/about-us/background/';
-  console.log(`[INFO] Scraping about/background from ${url}`);
+  console.log(`[INFO] Scraping about/background via REST API (slug: background)`);
 
-  let html: string;
-  try {
-    html = await fetchPage(url);
-  } catch (error: any) {
-    console.warn(`[WARN] Could not fetch background page: ${error.message}`);
+  const { html } = await fetchPageBySlug('background');
+  if (!html) {
+    console.warn(`[WARN] Could not fetch background page`);
     return '';
   }
 
-  const $ = cheerio.load(html);
-
-  // Extract main content - avoid nav, footer, header, sidebars
-  const contentSelectors = [
-    '.entry-content',
-    '.post-content',
-    'article .content',
-    '.page-content',
-    '#content .entry',
-    'main article',
-    '.site-content article',
-  ];
-
-  let content = '';
-  for (const selector of contentSelectors) {
-    const el = $(selector);
-    if (el.length > 0) {
-      // Remove nav, footer, header elements within content
-      el.find('nav, footer, header, .navigation, .breadcrumb, .post-navigation').remove();
-      content = el.html() || '';
-      if (content.trim()) break;
-    }
-  }
-
-  if (!content) {
-    // Fallback to main content area
-    $('nav, footer, header, aside, .sidebar, .widget-area, .navigation').remove();
-    content = $('main, #main, #content, body').first().html() || '';
-  }
-
-  return content;
+  // content.rendered is the page body HTML — use it directly
+  return html;
 }
 
 async function scrapeAimsObjectives(): Promise<{ html: string; vision: string; mission: string; objectives: string[] }> {
-  const url = 'https://www.gaphto.org/about-us/aims-objectives/';
-  console.log(`[INFO] Scraping aims-objectives from ${url}`);
+  console.log(`[INFO] Scraping aims-objectives via REST API (slug: aims-objectives)`);
 
-  let html: string;
-  try {
-    html = await fetchPage(url);
-  } catch (error: any) {
-    console.warn(`[WARN] Could not fetch aims-objectives page: ${error.message}`);
+  const { html } = await fetchPageBySlug('aims-objectives');
+  if (!html) {
+    console.warn(`[WARN] Could not fetch aims-objectives page`);
     return { html: '', vision: '', mission: '', objectives: [] };
   }
 
+  // content.rendered is the page body HTML — parse directly
   const $ = cheerio.load(html);
-
-  // Get main content
-  const contentSelectors = [
-    '.entry-content',
-    '.post-content',
-    'article .content',
-    '.page-content',
-    '#content .entry',
-    'main article',
-  ];
-
-  let contentHtml = '';
-  let $content: ReturnType<typeof $> | null = null;
-
-  for (const selector of contentSelectors) {
-    const el = $(selector);
-    if (el.length > 0) {
-      el.find('nav, footer, header, .navigation, .breadcrumb').remove();
-      contentHtml = el.html() || '';
-      $content = el;
-      if (contentHtml.trim()) break;
-    }
-  }
-
-  if (!contentHtml) {
-    $('nav, footer, header, aside, .sidebar').remove();
-    const mainEl = $('main, #main, #content, body').first();
-    contentHtml = mainEl.html() || '';
-    $content = mainEl;
-  }
+  const contentHtml = html;
 
   // Extract vision statement
   let vision = '';
   let mission = '';
   const objectives: string[] = [];
 
-  const fullText = $content ? $content.text() : $('body').text();
+  const fullText = $('body').text();
 
   // Look for vision
   const visionMatch = fullText.match(/vision[:\s]*([^\.]+\.)/i);

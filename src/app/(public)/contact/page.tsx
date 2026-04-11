@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getContact, getBlocksForPage } from "@/lib/data";
 import { getHeroContent } from "@/lib/blocks";
 import { InnerPageHero } from "@/components/shared/inner-page-hero";
+import { BlockRenderer, type BlockDataSources } from "@/components/shared/block-renderer";
 import { ContactForm } from "./contact-form";
 
 export const dynamic = 'force-dynamic'
@@ -25,6 +26,9 @@ export default async function ContactPage() {
     subtitle: "We'd love to hear from you. Reach out to GAPHTO.",
   })
 
+  const contentBlocks = blocks.filter(b => b.type !== 'hero')
+  const dataSources: BlockDataSources = {}
+
   return (
     <>
       <InnerPageHero
@@ -35,6 +39,14 @@ export default async function ContactPage() {
         centered={hero.centered !== false}
         breadcrumb={[{ label: "Home", href: "/" }, { label: "Contact" }]}
       />
+
+      {contentBlocks.length > 0 && (
+        <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
+          {contentBlocks.map(block => (
+            <BlockRenderer key={block.id} block={block} dataSources={dataSources} pageContext="subpage" />
+          ))}
+        </div>
+      )}
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-2">

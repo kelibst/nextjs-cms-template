@@ -40,3 +40,21 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .claude
+
+# Scraper data and output
+scraper/output/
+scraper/node_modules/
+scraper/bun.lock
+scraper/*.xml
+scraped-assets/
+
+# App data from scraper
+src/data/*.json
+public/images/*
+!public/images/logo/
+!public/images/placeholder.jpg
+!public/images/next.svg
+!public/images/vercel.svg
+!public/images/globe.svg
+!public/images/file.svg
+!public/images/window.svg

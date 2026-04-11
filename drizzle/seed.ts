@@ -13,6 +13,7 @@ import {
   galleryImages,
   events,
   siteSettings,
+  publications,
 } from './schema'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -122,7 +123,8 @@ async function main() {
       content: p.content,
       excerpt: p.excerpt ?? null,
       category,
-      status: 'published' as const,
+      // WXR parser sets status to 'published' or 'draft'; REST API always 'published'
+      status: ((p as any).status === 'draft' ? 'draft' : 'published') as 'draft' | 'published',
       featuredImage: p.localImage ?? p.featuredImage ?? null,
       publishedAt: p.date ? new Date(p.date) : null,
     }))
@@ -236,7 +238,87 @@ async function main() {
     summary['site_settings:contact'] = 1
   }
 
-  // ── 7. Summary ────────────────────────────────────────────────────────────
+  // ── 7. Pages tree → siteSettings ─────────────────────────────────────────
+  const pagesData = loadJson<unknown[]>('pages.json')
+  if (pagesData && Array.isArray(pagesData)) {
+    await db
+      .insert(siteSettings)
+      .values({ key: 'pages', value: JSON.stringify(pagesData) })
+      .onConflictDoUpdate({
+        target: siteSettings.key,
+        set: { value: JSON.stringify(pagesData), updatedAt: new Date() },
+      })
+    summary['site_settings:pages'] = pagesData.length
+  }
+
+  // ── About → siteSettings ──────────────────────────────────────────────────
+  const aboutData = loadJson<Record<string, unknown>>('about.json')
+  if (aboutData && typeof aboutData === 'object') {
+    await db
+      .insert(siteSettings)
+      .values({ key: 'about', value: JSON.stringify(aboutData) })
+      .onConflictDoUpdate({
+        target: siteSettings.key,
+        set: { value: JSON.stringify(aboutData), updatedAt: new Date() },
+      })
+    summary['site_settings:about'] = 1
+  }
+
+  // ── 8. Practice Areas → siteSettings ─────────────────────────────────────
+  const practiceAreasData = loadJson<unknown[]>('practice-areas.json')
+  if (practiceAreasData && Array.isArray(practiceAreasData)) {
+    await db
+      .insert(siteSettings)
+      .values({ key: 'practice-areas', value: JSON.stringify(practiceAreasData) })
+      .onConflictDoUpdate({
+        target: siteSettings.key,
+        set: { value: JSON.stringify(practiceAreasData), updatedAt: new Date() },
+      })
+    summary['site_settings:practice-areas'] = practiceAreasData.length
+  }
+
+  // ── 9. Fund → siteSettings ────────────────────────────────────────────────
+  const fundData = loadJson<Record<string, unknown>>('fund.json')
+  if (fundData && typeof fundData === 'object') {
+    await db
+      .insert(siteSettings)
+      .values({ key: 'fund', value: JSON.stringify(fundData) })
+      .onConflictDoUpdate({
+        target: siteSettings.key,
+        set: { value: JSON.stringify(fundData), updatedAt: new Date() },
+      })
+    summary['site_settings:fund'] = 1
+  }
+
+  // ── 10. Publications ──────────────────────────────────────────────────────
+  type PublicationRecord = {
+    slug: string
+    title: string
+    description?: string | null
+    fileUrl?: string | null
+    type?: string | null
+    year?: string | null
+    isPublic?: boolean
+  }
+
+  const publicationsData = loadJson<PublicationRecord[]>('publications.json')
+  if (publicationsData && Array.isArray(publicationsData)) {
+    const rows = publicationsData.map((p) => ({
+      slug: p.slug,
+      title: p.title,
+      description: p.description ?? null,
+      fileUrl: p.fileUrl ?? null,
+      fileType: p.type ?? null,
+      isMemberOnly: p.isPublic === true ? false : true,
+      publishedAt: p.year ? new Date(parseInt(p.year), 0, 1) : null,
+    }))
+    if (rows.length > 0) {
+      await db.insert(publications).values(rows).onConflictDoNothing()
+    }
+    summary['publications'] = rows.length
+  }
+
+  // ── 11. Summary ───────────────────────────────────────────────────────────
   console.log('\n========== SEED SUMMARY ==========')
   for (const [key, count] of Object.entries(summary)) {
     console.log(`  ${key.padEnd(28)} ${count}`)

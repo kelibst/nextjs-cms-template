@@ -3,8 +3,9 @@ export const dynamic = 'force-dynamic'
 import { sanitizeHtml } from "@/lib/utils";
 import type { Metadata } from "next";
 import { getPracticeAreas, getBlocksForPage, decodeEntities } from "@/lib/data";
-import { parseBlockContent, getHeroContent, type HeroContent, type PracticeAreasContent } from "@/lib/blocks";
+import { getHeroContent } from "@/lib/blocks";
 import { InnerPageHero } from "@/components/shared/inner-page-hero";
+import { BlockRenderer, type BlockDataSources } from "@/components/shared/block-renderer";
 
 export const metadata: Metadata = {
   title: "Areas of Practice",
@@ -33,49 +34,49 @@ const ICONS: Record<string, React.ReactNode> = {
 export default async function PracticeAreasPage() {
   const paBlocks = await getBlocksForPage('practice-areas')
 
-  const heroContent = getHeroContent(paBlocks, {
-    title: 'Areas of Practice',
-    label: 'Our Disciplines',
-    subtitle: 'GAPHTO members serve in three key disciplines of public health in Ghana.',
-  })
+  if (paBlocks.length > 0) {
+    const heroContent = getHeroContent(paBlocks, {
+      title: 'Areas of Practice',
+      label: 'Our Disciplines',
+      subtitle: 'GAPHTO members serve in three key disciplines of public health in Ghana.',
+    })
+    const contentBlocks = paBlocks.filter((b) => b.type !== 'hero')
+    const dataSources: BlockDataSources = { practiceAreas: getPracticeAreas() }
 
-  const gridBlock = paBlocks.find((b) => b.type === 'practice_areas_grid')
-  const gridContent = gridBlock
-    ? parseBlockContent<PracticeAreasContent>(gridBlock.content, { heading: '', items: [] })
-    : null
+    return (
+      <>
+        <InnerPageHero
+          title={heroContent.title}
+          label={heroContent.label}
+          subtitle={heroContent.subtitle}
+          heroImage={heroContent.heroImage}
+          centered={heroContent.centered !== false}
+          breadcrumb={[{ label: "Home", href: "/" }, { label: "Practice Areas" }]}
+        />
 
+        <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8 space-y-16">
+          {contentBlocks.map((block) => (
+            <BlockRenderer key={block.id} block={block} dataSources={dataSources} pageContext="subpage" />
+          ))}
+        </div>
+      </>
+    )
+  }
+
+  // Fallback: no blocks — render full legacy layout with detailed practice areas
   const fallbackAreas = getPracticeAreas()
 
   return (
     <>
       <InnerPageHero
-        title={heroContent.title}
-        label={heroContent.label}
-        subtitle={heroContent.subtitle}
-        heroImage={heroContent.heroImage}
-        centered={heroContent.centered !== false}
+        title="Areas of Practice"
+        label="Our Disciplines"
+        subtitle="GAPHTO members serve in three key disciplines of public health in Ghana."
+        centered
         breadcrumb={[{ label: "Home", href: "/" }, { label: "Practice Areas" }]}
       />
 
       <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8 space-y-16">
-        {gridContent && gridContent.items && gridContent.items.length > 0 ? (
-          <>
-            {gridContent.heading && (
-              <h2 className="text-2xl font-bold text-foreground">{gridContent.heading}</h2>
-            )}
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {gridContent.items.map((item, i) => (
-                <div key={i} className="rounded-xl border border-border bg-card p-6 space-y-2">
-                  <h3 className="text-lg font-semibold text-primary/80">{item.title}</h3>
-                  {item.description && (
-                    <p className="text-sm text-muted-foreground">{item.description}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </>
-        ) : (
-        <>
         {fallbackAreas.map((area, index) => (
           <section key={area.slug} id={area.slug}>
             <div className="flex items-start gap-5 mb-6">
@@ -131,8 +132,6 @@ export default async function PracticeAreasPage() {
             )}
           </section>
         ))}
-        </>
-        )}
       </div>
     </>
   );

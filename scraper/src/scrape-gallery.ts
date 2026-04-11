@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import * as path from 'path';
-import { fetchPage, saveJson, downloadImage, toSlug } from './utils';
+import { fetchPageBySlug, saveJson, downloadImage, toSlug } from './utils';
 import pLimit from 'p-limit';
 
 interface GalleryImage {
@@ -37,15 +37,20 @@ function extractEventDate($: ReturnType<typeof cheerio.load>): string | null {
   return null;
 }
 
-async function scrapeAlbumPage(albumUrl: string, albumTitle: string): Promise<GalleryAlbum | null> {
-  console.log(`[INFO] Scraping album: ${albumTitle} at ${albumUrl}`);
-  const albumSlug = toSlug(albumTitle);
+async function scrapeAlbumPage(albumUrlOrSlug: string, albumTitle: string): Promise<GalleryAlbum | null> {
+  // Extract slug from URL or use directly
+  const albumSlug = albumUrlOrSlug.startsWith('http')
+    ? toSlug(albumTitle)
+    : albumUrlOrSlug;
+  const pageSlug = albumUrlOrSlug.startsWith('http')
+    ? albumUrlOrSlug.replace(/^https?:\/\/www\.gaphto\.org\//, '').replace(/\/$/, '')
+    : albumUrlOrSlug;
 
-  let html: string;
-  try {
-    html = await fetchPage(albumUrl);
-  } catch (error: any) {
-    console.warn(`[WARN] Could not fetch album ${albumUrl}: ${error.message}`);
+  console.log(`[INFO] Scraping album via REST API: ${albumTitle} (slug: ${pageSlug})`);
+
+  const { html } = await fetchPageBySlug(pageSlug);
+  if (!html) {
+    console.warn(`[WARN] Could not fetch album page: ${pageSlug}`);
     return null;
   }
 
@@ -242,85 +247,55 @@ async function scrapeAlbumPage(albumUrl: string, albumTitle: string): Promise<Ga
 }
 
 async function scrapeGallery(): Promise<GalleryAlbum[]> {
-  const GALLERY_URL = 'https://www.gaphto.org/gallery/';
-  console.log(`[INFO] Scraping gallery from ${GALLERY_URL}`);
+  console.log(`[INFO] Scraping gallery via REST API (slug: gallery)`);
 
-  let html: string;
-  try {
-    html = await fetchPage(GALLERY_URL);
-  } catch (error: any) {
-    console.error(`[ERROR] Could not fetch gallery page: ${error.message}`);
+  const { html } = await fetchPageBySlug('gallery');
+  if (!html) {
+    console.error(`[ERROR] Could not fetch gallery page`);
     return [];
   }
 
   const $ = cheerio.load(html);
   const albums: GalleryAlbum[] = [];
-  const processedUrls = new Set<string>();
+  const processedSlugs = new Set<string>();
 
-  // BWG album/gallery listing selectors
-  const albumSelectors = [
-    // BWG plugin album list
-    '[id^="bwg_container"] a',
-    '.bwg-container a',
-    // NextGen gallery
-    '.ngg-album-galleryoverview a',
-    '.gallery-album a',
-    '.album a',
-    // Generic
-    'a[href*="/gallery/"]',
-  ];
+  // Look for links to sub-gallery pages (album links within the gallery page content)
+  const albumLinks: { slug: string; title: string }[] = [];
 
-  const albumLinks: { url: string; title: string }[] = [];
+  $('a').each((_, el) => {
+    const href = $(el).attr('href') || '';
+    if (!href || href === '#') return;
 
-  for (const selector of albumSelectors) {
-    $(selector).each((_, el) => {
-      const href = $(el).attr('href') || '';
-      if (!href || href === GALLERY_URL || href === '#') return;
-      if (!href.includes('gaphto.org') && !href.startsWith('/') && !href.startsWith('https://www.gaphto.org')) return;
+    // Match gaphto.org internal links that look like album pages
+    const match = href.match(/(?:https?:\/\/www\.gaphto\.org\/)?([a-z0-9-]+)\/?$/);
+    if (!match) return;
+    const slug = match[1];
+    if (!slug || slug === 'gallery' || processedSlugs.has(slug)) return;
 
-      const fullUrl = href.startsWith('http') ? href : `https://www.gaphto.org${href}`;
-      if (processedUrls.has(fullUrl)) return;
+    // Skip obvious non-album hrefs
+    if (['contact', 'about', 'home', '#', ''].includes(slug)) return;
 
-      // Only include sub-gallery pages, not external links
-      if (!fullUrl.includes('gaphto.org')) return;
+    const title = $(el).find('img').attr('alt')
+      || $(el).attr('title')
+      || $(el).text().trim()
+      || `Album`;
 
-      const title = $(el).find('img').attr('alt')
-        || $(el).find('.album-title, h2, h3, h4, .title, .bwg-album-title').text().trim()
-        || $(el).attr('title')
-        || $(el).text().trim()
-        || `Album ${albumLinks.length + 1}`;
-
-      processedUrls.add(fullUrl);
-      albumLinks.push({ url: fullUrl, title: title.trim() });
-    });
-
-    if (albumLinks.length > 0) break;
-  }
-
-  // Also check for heading + gallery container structure on the main gallery page
-  // BWG often renders everything on one page
-  if (albumLinks.length === 0) {
-    // Look for multiple BWG gallery containers with headings nearby
-    $('[id^="bwg_container"]').each((idx, container) => {
-      const $container = $(container);
-      const nearbyHeading = $container.prev('h1, h2, h3, h4').first();
-      const title = nearbyHeading.text().trim() || `Gallery ${idx + 1}`;
-      // The gallery container IS the album — treat gallery URL as the album URL
-      // but we'll scrape images directly from the page below
-      console.log(`[INFO] Found BWG container on main gallery page: ${title}`);
-    });
-  }
+    if (title && href.includes('gaphto.org')) {
+      processedSlugs.add(slug);
+      albumLinks.push({ slug, title: title.trim() });
+    }
+  });
 
   console.log(`[INFO] Found ${albumLinks.length} album links`);
 
   if (albumLinks.length === 0) {
-    // Gallery is on the main page itself
+    // Gallery images are all on the main gallery page
     console.log('[INFO] No sub-album links found, treating gallery page as single album');
-    const singleAlbum = await scrapeAlbumPage(GALLERY_URL, 'Gallery');
+    const singleAlbum = await scrapeAlbumPage('gallery', 'GAPHTO Gallery');
     if (singleAlbum) albums.push(singleAlbum);
   } else {
-    for (const { url, title } of albumLinks) {
-      const album = await scrapeAlbumPage(url, title);
+    for (const { slug, title } of albumLinks) {
+      const album = await scrapeAlbumPage(slug, title);
       if (album) albums.push(album);
     }
   }

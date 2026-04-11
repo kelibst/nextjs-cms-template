@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import { fetchPage, saveJson } from './utils';
+import { fetchPageBySlug, saveJson } from './utils';
 
 interface ContactData {
   phone: string;
@@ -89,47 +89,27 @@ async function main() {
     youtube: '',
   };
 
-  // Primary: contact page
-  const contactUrl = 'https://www.gaphto.org/contact-us/';
-  console.log(`[INFO] Scraping contact from ${contactUrl}`);
-
-  try {
-    const html = await fetchPage(contactUrl);
-    const data = await extractContactFromPage(html);
+  // Primary: contact page via REST API
+  console.log(`[INFO] Scraping contact via REST API (slug: contact-us)`);
+  const { html: contactHtml } = await fetchPageBySlug('contact-us');
+  if (contactHtml) {
+    const data = await extractContactFromPage(contactHtml);
     Object.assign(contact, data);
-  } catch (error: any) {
-    console.warn(`[WARN] Could not fetch contact page: ${error.message}`);
+  } else {
+    console.warn(`[WARN] Could not fetch contact-us page`);
   }
 
-  // Supplement from homepage (footer often has contact + social links)
-  const homeUrl = 'https://www.gaphto.org/';
-  console.log(`[INFO] Checking homepage footer for supplemental contact info`);
-
-  try {
-    const homeHtml = await fetchPage(homeUrl);
-    const $ = cheerio.load(homeHtml);
-
-    // Focus on footer for contact info
-    const $footer = $('footer, #footer, .site-footer, .footer').first();
-    const footerHtml = $footer.length ? $.html($footer) : homeHtml;
-    const footerData = await extractContactFromPage(footerHtml);
-
+  // Supplement from homepage via REST API (front page often has social links in content)
+  console.log(`[INFO] Checking home page for supplemental contact info`);
+  const { html: homeHtml } = await fetchPageBySlug('home');
+  if (homeHtml) {
+    const footerData = await extractContactFromPage(homeHtml);
     if (!contact.phone && footerData.phone) contact.phone = footerData.phone;
     if (!contact.email && footerData.email) contact.email = footerData.email;
     if (!contact.address && footerData.address) contact.address = footerData.address;
     if (!contact.facebook && footerData.facebook) contact.facebook = footerData.facebook;
     if (!contact.twitter && footerData.twitter) contact.twitter = footerData.twitter;
     if (!contact.youtube && footerData.youtube) contact.youtube = footerData.youtube;
-
-    // Also scan entire homepage for social links
-    $('a').each((_, el) => {
-      const href = $(el).attr('href') || '';
-      if (href.includes('facebook.com') && !contact.facebook) contact.facebook = href;
-      if ((href.includes('twitter.com') || href.includes('x.com')) && !contact.twitter) contact.twitter = href;
-      if (href.includes('youtube.com') && !contact.youtube) contact.youtube = href;
-    });
-  } catch (error: any) {
-    console.warn(`[WARN] Could not fetch homepage: ${error.message}`);
   }
 
   await saveJson('contact.json', contact);

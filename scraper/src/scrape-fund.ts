@@ -2,7 +2,7 @@ import * as cheerio from 'cheerio';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import axios from 'axios';
-import { fetchPage, saveJson } from './utils';
+import { fetchPageBySlug, saveJson } from './utils';
 
 interface FundData {
   description: string;
@@ -46,43 +46,18 @@ async function downloadPdf(pdfUrl: string, localPath: string): Promise<string | 
 }
 
 async function scrapeFund(): Promise<FundData> {
-  const FUND_URL = 'https://www.gaphto.org/gaphto-fund/';
-  console.log(`[INFO] Scraping fund from ${FUND_URL}`);
+  console.log(`[INFO] Scraping fund via REST API (slug: gaphto-fund)`);
 
-  let html: string;
-  try {
-    html = await fetchPage(FUND_URL);
-  } catch (error: any) {
-    console.warn(`[WARN] Could not fetch fund page: ${error.message}`);
+  const { html } = await fetchPageBySlug('gaphto-fund');
+  if (!html) {
+    console.warn(`[WARN] Could not fetch gaphto-fund page`);
     return { description: '', pdfUrl: null, localPdf: null };
   }
 
+  // content.rendered is the page body — use it directly
+  const description = html;
+
   const $ = cheerio.load(html);
-
-  // Extract main content
-  const contentSelectors = [
-    '.entry-content',
-    '.post-content',
-    '.page-content',
-    'article .content',
-    '#content article',
-    'main article',
-  ];
-
-  let description = '';
-  for (const selector of contentSelectors) {
-    const el = $(selector);
-    if (el.length > 0) {
-      el.find('nav, footer, header, .navigation, .breadcrumb').remove();
-      description = el.html() || '';
-      if (description.trim()) break;
-    }
-  }
-
-  if (!description) {
-    $('nav, footer, header, aside, .sidebar').remove();
-    description = $('main, #main, #content, body').first().html() || '';
-  }
 
   // Find PDF link
   let pdfUrl: string | null = null;

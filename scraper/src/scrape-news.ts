@@ -3,7 +3,7 @@ import * as path from 'path';
 import { saveJson, downloadImage } from './utils';
 import pLimit from 'p-limit';
 
-const BASE_API = 'https://www.gaphto.org/wp-json/wp/v2';
+const BASE_API = 'https://public-api.wordpress.com/wp/v2/sites/www.gaphto.org';
 
 interface WpPost {
   id: number;
@@ -16,17 +16,15 @@ interface WpPost {
   categories: number[];
   featured_media: number;
   author: number;
+  _embedded?: {
+    'wp:featuredmedia'?: Array<{ source_url: string }>;
+  };
 }
 
 interface WpCategory {
   id: number;
   slug: string;
   name: string;
-}
-
-interface WpMedia {
-  id: number;
-  source_url: string;
 }
 
 interface Post {
@@ -47,6 +45,15 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+/**
+ * Extract the first image URL from post HTML content — used as a fallback
+ * when the embedded featured media is unavailable.
+ */
+function extractFirstImageUrl(html: string): string | null {
+  const match = html.match(/src="(https?:\/\/[^"]+\.(?:jpg|jpeg|png|gif|webp)[^"]*)"/i);
+  return match ? match[1] : null;
+}
+
 async function fetchAllPosts(): Promise<WpPost[]> {
   const allPosts: WpPost[] = [];
   let page = 1;
@@ -55,7 +62,8 @@ async function fetchAllPosts(): Promise<WpPost[]> {
   while (page <= totalPages) {
     console.log(`[INFO] Fetching posts page ${page}/${totalPages}...`);
     const response = await axios.get<WpPost[]>(`${BASE_API}/posts`, {
-      params: { per_page: 100, page },
+      // _embed includes wp:featuredmedia so we never need a separate /media/{id} call
+      params: { per_page: 100, page, _embed: true },
       timeout: 30000,
     });
 
@@ -79,28 +87,6 @@ async function fetchCategories(): Promise<Map<number, string>> {
   for (const cat of response.data) {
     map.set(cat.id, cat.slug);
   }
-  return map;
-}
-
-async function fetchMediaUrls(mediaIds: number[]): Promise<Map<number, string>> {
-  const map = new Map<number, string>();
-  if (mediaIds.length === 0) return map;
-
-  const limit = pLimit(5);
-  await Promise.all(
-    mediaIds.map(id =>
-      limit(async () => {
-        try {
-          const response = await axios.get<WpMedia>(`${BASE_API}/media/${id}`, {
-            timeout: 30000,
-          });
-          map.set(id, response.data.source_url);
-        } catch (e: any) {
-          console.warn(`[WARN] Could not fetch media ${id}: ${e.message}`);
-        }
-      })
-    )
-  );
   return map;
 }
 
@@ -137,17 +123,14 @@ export async function scrapeNews(): Promise<Record<string, number>> {
     return results;
   }
 
-  // Collect unique featured media IDs
-  const mediaIds = [...new Set(allPosts.filter(p => p.featured_media > 0).map(p => p.featured_media))];
-  console.log(`[INFO] Fetching ${mediaIds.length} featured media items...`);
-  const mediaMap = await fetchMediaUrls(mediaIds);
-
-  // Process posts into buckets
+  // Process posts into category buckets
   const newsPosts: Post[] = [];
   const healthNewsPosts: Post[] = [];
   const blogPosts: Post[] = [];
 
-  for (const wpPost of allPosts) {
+  const limit = pLimit(5);
+
+  await Promise.all(allPosts.map(wpPost => limit(async () => {
     // Determine category
     let resolvedCategory = 'blog';
     for (const catId of wpPost.categories) {
@@ -168,9 +151,14 @@ export async function scrapeNews(): Promise<Record<string, number>> {
     const rawExcerpt = stripHtml(wpPost.excerpt.rendered);
     const excerpt = rawExcerpt.length > 300 ? rawExcerpt.substring(0, 300) : rawExcerpt;
     const date = wpPost.date ? wpPost.date.split('T')[0] : '';
-    const featuredImage = wpPost.featured_media > 0 ? (mediaMap.get(wpPost.featured_media) || null) : null;
 
-    // Download featured image
+    // Featured image: prefer _embedded (no extra API call), fall back to content scan
+    const featuredImage =
+      wpPost._embedded?.['wp:featuredmedia']?.[0]?.source_url
+      ?? extractFirstImageUrl(content)
+      ?? null;
+
+    // Download featured image (downloadImage auto-rewrites to i0.wp.com CDN)
     let localImage: string | null = null;
     if (featuredImage) {
       const imgFilename = path.basename(featuredImage.split('?')[0]);
@@ -203,7 +191,7 @@ export async function scrapeNews(): Promise<Record<string, number>> {
     } else {
       blogPosts.push(post);
     }
-  }
+  })));
 
   try {
     await saveJson('news.json', newsPosts);

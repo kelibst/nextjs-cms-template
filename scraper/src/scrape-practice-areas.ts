@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import { fetchPage, saveJson, toSlug } from './utils';
+import { fetchPageBySlug, saveJson } from './utils';
 
 interface PracticeArea {
   slug: string;
@@ -8,64 +8,33 @@ interface PracticeArea {
   roles: string[];
 }
 
-const PRACTICE_AREA_URLS = [
-  { url: 'https://www.gaphto.org/disease-control-prevention/', slug: 'disease-control-prevention' },
-  { url: 'https://www.gaphto.org/health-information-management/', slug: 'health-information-management' },
-  { url: 'https://www.gaphto.org/nutrition/', slug: 'nutrition' },
+const PRACTICE_AREAS = [
+  { slug: 'disease-control-prevention', title: 'Disease Control & Prevention' },
+  { slug: 'health-information-management', title: 'Health Information Management' },
+  { slug: 'nutrition', title: 'Nutrition' },
 ];
 
-async function scrapePracticeArea(url: string, slug: string): Promise<PracticeArea | null> {
-  console.log(`[INFO] Scraping practice area: ${url}`);
+async function scrapePracticeArea(slug: string, fallbackTitle: string): Promise<PracticeArea | null> {
+  console.log(`[INFO] Scraping practice area via REST API (slug: ${slug})`);
 
-  let html: string;
-  try {
-    html = await fetchPage(url);
-  } catch (error: any) {
-    console.warn(`[WARN] Could not fetch ${url}: ${error.message}`);
+  const { title: apiTitle, html } = await fetchPageBySlug(slug);
+  if (!html) {
+    console.warn(`[WARN] Could not fetch practice area: ${slug}`);
     return null;
   }
 
+  const title = apiTitle || fallbackTitle;
+
+  // content.rendered is the page body — use it directly
+  const content = html;
+
   const $ = cheerio.load(html);
-
-  // Extract title
-  const title = $('h1.entry-title, h1.page-title, h1').first().text().trim()
-    || $('title').text().replace(/ [-|].*$/, '').trim();
-
-  // Extract main content
-  const contentSelectors = [
-    '.entry-content',
-    '.post-content',
-    '.page-content',
-    'article .content',
-    '#content article',
-    'main article',
-  ];
-
-  let content = '';
-  let $content: ReturnType<typeof $> | null = null;
-
-  for (const selector of contentSelectors) {
-    const el = $(selector);
-    if (el.length > 0) {
-      el.find('nav, footer, header, .navigation, .breadcrumb, .post-navigation').remove();
-      content = el.html() || '';
-      $content = el;
-      if (content.trim()) break;
-    }
-  }
-
-  if (!content) {
-    $('nav, footer, header, aside, .sidebar, .widget-area').remove();
-    const mainEl = $('main, #main, #content, body').first();
-    content = mainEl.html() || '';
-    $content = mainEl;
-  }
 
   // Extract professional roles - look for list items describing job titles
   const roles: string[] = [];
   const roleKeywords = ['officer', 'technician', 'specialist', 'manager', 'coordinator', 'analyst', 'administrator', 'health', 'nurse', 'doctor', 'physician', 'supervisor', 'director', 'professional'];
 
-  const $el = $content || $('body');
+  const $el = $('body');
   $el.find('li').each((i, el) => {
     const text = $(el).text().trim();
     const lowerText = text.toLowerCase();
@@ -97,8 +66,8 @@ async function main() {
   try {
     const practiceAreas: PracticeArea[] = [];
 
-    for (const { url, slug } of PRACTICE_AREA_URLS) {
-      const area = await scrapePracticeArea(url, slug);
+    for (const { slug, title } of PRACTICE_AREAS) {
+      const area = await scrapePracticeArea(slug, title);
       if (area) {
         practiceAreas.push(area);
       }

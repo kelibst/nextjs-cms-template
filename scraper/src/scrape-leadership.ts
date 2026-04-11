@@ -1,9 +1,9 @@
 import * as cheerio from 'cheerio';
 import * as path from 'path';
 import axios from 'axios';
-import { fetchPage, saveJson, downloadImage } from './utils';
+import { fetchPageBySlug, saveJson, downloadImage } from './utils';
 
-const BASE_API = 'https://www.gaphto.org/wp-json/wp/v2';
+const BASE_API = 'https://public-api.wordpress.com/wp/v2/sites/www.gaphto.org';
 
 interface LeadershipMember {
   name: string;
@@ -32,14 +32,11 @@ const KNOWN_EXECUTIVES = [
 ];
 
 async function scrapeLeadershipFromHtml(): Promise<LeadershipMember[]> {
-  const TARGET_URL = 'https://www.gaphto.org/leadership/';
-  console.log(`[INFO] Fetching leadership page: ${TARGET_URL}`);
+  console.log(`[INFO] Fetching leadership page via REST API (slug: leadership)`);
 
-  let html: string;
-  try {
-    html = await fetchPage(TARGET_URL);
-  } catch (error: any) {
-    console.error(`[ERROR] Could not fetch leadership page: ${error.message}`);
+  const { html } = await fetchPageBySlug('leadership');
+  if (!html) {
+    console.error(`[ERROR] Could not fetch leadership page`);
     return [];
   }
 

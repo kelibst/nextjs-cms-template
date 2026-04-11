@@ -24,7 +24,7 @@ import pLimit from 'p-limit';
 // ─── Paths ────────────────────────────────────────────────────────────────────
 const OUTPUT_DIR = path.resolve(__dirname, '../output');
 const ASSETS_DIR = path.resolve(__dirname, '../../scraped-assets');
-const BASE_API = 'https://www.gaphto.org/wp-json/wp/v2';
+const BASE_API = 'https://public-api.wordpress.com/wp/v2/sites/www.gaphto.org';
 
 fs.ensureDirSync(OUTPUT_DIR);
 fs.ensureDirSync(ASSETS_DIR);

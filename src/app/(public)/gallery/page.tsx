@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getGallery, getBlocksForPage } from "@/lib/data";
 import { getHeroContent } from "@/lib/blocks";
 import { InnerPageHero } from "@/components/shared/inner-page-hero";
+import { BlockRenderer, type BlockDataSources } from "@/components/shared/block-renderer";
 import { GalleryClient } from "./gallery-client";
 
 export const dynamic = 'force-dynamic'
@@ -23,6 +24,9 @@ export default async function GalleryPage() {
     subtitle: 'Moments captured from GAPHTO events and activities.',
   })
 
+  const contentBlocks = blocks.filter(b => b.type !== 'hero')
+  const dataSources: BlockDataSources = { albums }
+
   return (
     <>
       <InnerPageHero
@@ -33,6 +37,15 @@ export default async function GalleryPage() {
         centered={hero.centered !== false}
         breadcrumb={[{ label: "Home", href: "/" }, { label: "Gallery" }]}
       />
+
+      {contentBlocks.length > 0 && (
+        <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
+          {contentBlocks.map(block => (
+            <BlockRenderer key={block.id} block={block} dataSources={dataSources} pageContext="subpage" />
+          ))}
+        </div>
+      )}
+
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <GalleryClient albums={albums} />
       </div>

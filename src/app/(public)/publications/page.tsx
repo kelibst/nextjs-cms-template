@@ -6,6 +6,7 @@ import { Lock, FileText, Download } from "lucide-react";
 import { auth } from "@/auth";
 import { getAllPublications, getBlocksForPage } from "@/lib/data";
 import { getHeroContent } from "@/lib/blocks";
+import { BlockRenderer, type BlockDataSources } from "@/components/shared/block-renderer";
 
 export const metadata: Metadata = {
   title: "Publications | GAPHTO",
@@ -35,6 +36,9 @@ export default async function PublicationsPage() {
     subtitle: 'Journals, reports, guidelines, and policy documents from GAPHTO.',
   })
 
+  const contentBlocks = blocks.filter(b => b.type !== 'hero')
+  const dataSources: BlockDataSources = {}
+
   return (
     <>
       <InnerPageHero
@@ -45,6 +49,14 @@ export default async function PublicationsPage() {
         centered={hero.centered !== false}
         breadcrumb={[{ label: "Home", href: "/" }, { label: "Publications" }]}
       />
+
+      {contentBlocks.length > 0 && (
+        <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
+          {contentBlocks.map(block => (
+            <BlockRenderer key={block.id} block={block} dataSources={dataSources} pageContext="subpage" />
+          ))}
+        </div>
+      )}
 
       <section className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
         {isAuthenticated ? (

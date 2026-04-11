@@ -5,6 +5,7 @@ import { asc, eq } from "drizzle-orm";
 import { getBlocksForPage } from "@/lib/data";
 import { getHeroContent } from "@/lib/blocks";
 import { InnerPageHero } from "@/components/shared/inner-page-hero";
+import { BlockRenderer, type BlockDataSources } from "@/components/shared/block-renderer";
 import { LeadershipGrid } from "./leadership-grid";
 
 export const metadata: Metadata = {
@@ -27,6 +28,9 @@ export default async function LeadershipPage() {
     subtitle: 'Meet the dedicated officers guiding GAPHTO\'s mission across Ghana.',
   })
 
+  const contentBlocks = blocks.filter(b => b.type !== 'hero')
+  const dataSources: BlockDataSources = { leaders: members }
+
   return (
     <>
       <InnerPageHero
@@ -37,6 +41,15 @@ export default async function LeadershipPage() {
         centered={hero.centered !== false}
         breadcrumb={[{ label: "Home", href: "/" }, { label: "Leadership" }]}
       />
+
+      {contentBlocks.length > 0 && (
+        <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
+          {contentBlocks.map(block => (
+            <BlockRenderer key={block.id} block={block} dataSources={dataSources} pageContext="subpage" />
+          ))}
+        </div>
+      )}
+
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <LeadershipGrid members={members} />
       </div>

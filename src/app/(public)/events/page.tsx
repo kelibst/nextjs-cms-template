@@ -5,6 +5,7 @@ import { asc, desc, gte, lt } from 'drizzle-orm'
 import { getBlocksForPage } from '@/lib/data'
 import { getHeroContent } from '@/lib/blocks'
 import { InnerPageHero } from '@/components/shared/inner-page-hero'
+import { BlockRenderer, type BlockDataSources } from '@/components/shared/block-renderer'
 import { EventsListClient } from './events-list-client'
 
 export const metadata: Metadata = {
@@ -27,6 +28,9 @@ export default async function EventsPage() {
     subtitle: 'Continuing Professional Development events, conferences, and training opportunities from GAPHTO.',
   })
 
+  const contentBlocks = blocks.filter(b => b.type !== 'hero')
+  const dataSources: BlockDataSources = { events: [...upcomingEvents, ...pastEvents] }
+
   return (
     <>
       <InnerPageHero
@@ -37,6 +41,15 @@ export default async function EventsPage() {
         centered={hero.centered !== false}
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Events' }]}
       />
+
+      {contentBlocks.length > 0 && (
+        <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
+          {contentBlocks.map(block => (
+            <BlockRenderer key={block.id} block={block} dataSources={dataSources} pageContext="subpage" />
+          ))}
+        </div>
+      )}
+
       <EventsListClient upcoming={upcomingEvents} past={pastEvents} />
     </>
   )

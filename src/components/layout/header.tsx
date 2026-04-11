@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 
@@ -77,9 +78,14 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-2xl font-bold text-primary tracking-tight group-hover:text-primary/80 transition-colors">
-              GAPHTO
-            </span>
+            <Image
+              src="/images/logo/logo.png"
+              alt="GAPHTO"
+              width={120}
+              height={36}
+              className="object-contain"
+              priority
+            />
             <span className="hidden sm:block text-xs text-muted-foreground leading-tight max-w-35">
               Ghana Association of Public Health Technical Officers
             </span>

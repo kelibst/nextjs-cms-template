@@ -1,6 +1,5 @@
 import * as cheerio from 'cheerio';
-import * as path from 'path';
-import { fetchPage, saveJson, toSlug } from './utils';
+import { fetchPageBySlug, saveJson, toSlug } from './utils';
 
 interface Event {
   title: string;
@@ -31,40 +30,24 @@ function determineStatus(startDate: string | null, endDate: string | null): 'upc
   return 'upcoming'; // currently ongoing
 }
 
-async function scrapeEventPage(url: string): Promise<Event | null> {
-  console.log(`[INFO] Scraping event: ${url}`);
+async function scrapeEventPage(pageSlug: string): Promise<Event | null> {
+  console.log(`[INFO] Scraping event via REST API (slug: ${pageSlug})`);
 
-  let html: string;
-  try {
-    html = await fetchPage(url);
-  } catch (error: any) {
-    console.warn(`[WARN] Could not fetch event page ${url}: ${error.message}`);
+  const { title: apiTitle, html } = await fetchPageBySlug(pageSlug);
+  if (!html) {
+    console.warn(`[WARN] Could not fetch event page: ${pageSlug}`);
     return null;
   }
 
   const $ = cheerio.load(html);
 
-  // Extract title
-  const title = $('h1.entry-title, h1.page-title, h1').first().text().trim()
-    || $('title').text().replace(/ [-|].*$/, '').trim()
+  // Title comes from the REST API response (apiTitle) or falls back to cheerio extraction
+  const title = apiTitle
+    || $('h1').first().text().trim()
     || 'GAPHTO Event';
 
-  // Extract description/content
-  const contentSelectors = ['.entry-content', '.post-content', '.page-content', 'article .content'];
-  let description = '';
-  for (const selector of contentSelectors) {
-    const el = $(selector);
-    if (el.length > 0) {
-      el.find('nav, footer, .navigation').remove();
-      description = el.html() || '';
-      if (description.trim()) break;
-    }
-  }
-
-  if (!description) {
-    $('nav, footer, header, aside').remove();
-    description = $('main, #main, article, body').first().html() || '';
-  }
+  // content.rendered is the page body — use it directly as description
+  const description = html;
 
   // Extract location
   let location: string | null = null;
@@ -162,9 +145,8 @@ async function scrapeEventPage(url: string): Promise<Event | null> {
     || $('.wp-post-image, .featured-image img').first().attr('src')
     || null;
 
-  // Slug from URL
-  const urlParts = url.replace(/\/$/, '').split('/');
-  const slug = urlParts[urlParts.length - 1] || toSlug(title);
+  // Use the page slug directly, falling back to a generated slug from title
+  const slug = pageSlug || toSlug(title);
 
   const status = determineStatus(startDate, endDate);
 
@@ -179,23 +161,23 @@ async function scrapeEventPage(url: string): Promise<Event | null> {
     priceGhs,
     status,
     featuredImage: featuredImage || null,
-    sourceUrl: url,
+    sourceUrl: `https://www.gaphto.org/${pageSlug}/`,
   };
 }
 
 async function main() {
-  const eventUrls = [
-    'https://www.gaphto.org/cpd-registration/',
+  const eventSlugs = [
+    'cpd-registration',
   ];
 
   const events: Event[] = [];
 
-  for (const url of eventUrls) {
+  for (const slug of eventSlugs) {
     try {
-      const event = await scrapeEventPage(url);
+      const event = await scrapeEventPage(slug);
       if (event) events.push(event);
     } catch (error: any) {
-      console.warn(`[WARN] Failed to scrape event ${url}: ${error.message}`);
+      console.warn(`[WARN] Failed to scrape event ${slug}: ${error.message}`);
     }
   }
 
