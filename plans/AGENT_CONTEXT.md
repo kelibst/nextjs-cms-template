@@ -4,9 +4,56 @@
 
 ---
 
-## ACTIVE SPRINT — UI/UX Polish + Navigation Management (2026-04-11)
+## ACTIVE SPRINT — MinIO Object Storage + Media Manager (2026-04-11)
 
-**PM Summary:** Two agents working in parallel. Agent 1 fixes logo display issues + enhances homepage hero. Agent 2 builds the navigation links management system (DB-driven nav).
+**PM Summary:** Sequential two-agent sprint. Agent 1 (INFRA) sets up MinIO Docker services, DB schema, storage lib, and updates the upload API. Agent 2 (UI) builds the Media Manager dashboard and integrates the file picker into all forms — runs only after Agent 1 completes.
+
+### Agent 1 — Infrastructure + Backend Storage Layer
+Task file: `plans/TASK_STORAGE_A_INFRA.md`
+**Status: DONE ✅**
+**Scope:**
+- `infrastructure/docker-compose.yml` — Add MinIO service (ports 9000/9001) + named volume
+- `infrastructure/docker-compose.prod.yml` — Add MinIO service (127.0.0.1:9000 only, no console)
+- `infrastructure/nginx.conf` — Add `/media/` reverse-proxy block to MinIO
+- `drizzle/schema.ts` — Add `mediaFiles` table + run migration
+- `src/lib/storage.ts` — NEW MinIO singleton client (upload, delete, list, getPublicUrl)
+- `src/lib/media-url.ts` — NEW URL compatibility helper (`getMediaUrl()`)
+- `src/app/api/upload/route.ts` — Replace fs.writeFile with MinIO upload + DB record
+- `src/app/actions/media.ts` — NEW server actions (getMediaFiles, deleteMediaFile)
+- `.env` + `.env.example` — Add MINIO_* vars
+- Install `minio` package via bun
+
+### Agent 2 — Media Manager UI + Form Integration
+Task file: `plans/TASK_STORAGE_B_UI.md`
+**Status: DONE ✅**
+**Scope:**
+- `src/app/(dashboard)/dashboard/media/page.tsx` — NEW Media Manager page
+- `src/components/dashboard/media-picker-modal.tsx` — NEW reusable file picker modal
+- `src/components/dashboard/sidebar.tsx` — Add Media nav link
+- `src/components/dashboard/post-editor.tsx` — Use MediaPickerModal
+- `src/components/dashboard/event-form.tsx` — Use MediaPickerModal
+- `src/components/dashboard/leadership-form.tsx` — Use MediaPickerModal
+- `src/components/dashboard/publication-form.tsx` — Use MediaPickerModal
+- `src/components/dashboard/gallery-image-manager.tsx` — Add picker option
+- Block editors (hero, image-banner, about-preview) — Add image picker
+- `src/lib/data.ts` — Update `localImagePath()` to use `getMediaUrl()`
+
+### Key technical facts for both agents
+- MinIO bucket name: `gaphto-media`; folder convention: `uploads/`, `gallery/`, `posts/`, `leadership/`, `documents/`
+- Local env: `MINIO_ENDPOINT=localhost`, `MINIO_PORT=9000`, `MINIO_USE_SSL=false`, `MINIO_ACCESS_KEY=minioadmin`, `MINIO_SECRET_KEY=minioadmin`, `NEXT_PUBLIC_MEDIA_BASE_URL=http://localhost:9000/gaphto-media`
+- Prod env: same but `NEXT_PUBLIC_MEDIA_BASE_URL=https://gaphto.org/media/gaphto-media`
+- URL compatibility: `getMediaUrl(url)` in `src/lib/media-url.ts` — if starts with `http` return as-is; if starts with `/` return as-is; else prepend `NEXT_PUBLIC_MEDIA_BASE_URL`
+- Legacy `/images/…` paths continue to work via nginx static serving — no breaking changes
+- NEVER create `src/middleware.ts` — use `src/proxy.ts`
+- Package manager: `bun` (not npm/yarn)
+- Migration command: `bunx drizzle-kit generate --config=drizzle/drizzle.config.ts && bunx tsx drizzle/migrate.ts`
+- Auth: `src/lib/permissions.ts` — `posts:create` permission guards uploads; `gallery:manage` guards gallery
+
+---
+
+## COMPLETED SPRINT — UI/UX Polish + Navigation Management (2026-04-11) ✅
+
+**PM Summary:** Two agents working in parallel. Agent 1 fixed logo display issues + enhanced homepage hero. Agent 2 built the navigation links management system (DB-driven nav).
 
 ### Agent 1 — Logo Fix + Hero Enhancement
 Task file: `plans/TASK_PM6_AGENT1_UI.md`
@@ -111,6 +158,35 @@ Task file: `plans/TASK_SCRAPER_B_RECOVERY.md`
 - practice_areas_grid uses block content items when provided (homepage)
 - stats-bar supports generic items[] for dynamic stat display
 - All changes wired in block-renderer.tsx
+
+### Agent 1 — MinIO Infrastructure + Backend Storage — 2026-04-11 — DONE
+- Installed `minio` package via bun (v8.0.7)
+- `infrastructure/docker-compose.yml`: Added `minio` service (ports 9000/9001, console, named volume `gaphto_minio_data`)
+- `infrastructure/docker-compose.prod.yml`: Added `minio` service (127.0.0.1:9000 only, named volume with explicit name)
+- `infrastructure/nginx.conf`: Added `/media/` reverse-proxy block to MinIO before catch-all `location /`
+- `drizzle/schema.ts`: Added `serial` import + `mediaFiles` table (12 cols); fixed `uploadedBy` from `integer` to `uuid` to match `users.id` type; generated migration 0010 and applied it successfully
+- `src/lib/storage.ts`: Created MinIO singleton client with `ensureBucket`, `uploadFile`, `deleteFile`, `getPublicUrl`, `listFiles`
+- `src/lib/media-url.ts`: Created `getMediaUrl()` URL compatibility helper
+- `src/app/api/upload/route.ts`: Replaced fs.writeFile with MinIO upload + `mediaFiles` DB record; returns `{ url, id }`
+- `src/app/actions/media.ts`: Created `getMediaFiles`, `deleteMediaFile`, `getMediaFile` server actions
+- `.env` + `.env.example`: Added MINIO_* vars block
+- `bunx tsc --noEmit` passes with zero errors
+
+### Agent 2 — Media Manager UI + Form Integration — 2026-04-11 — DONE
+- `src/components/dashboard/media-picker-modal.tsx`: Created `MediaPickerModal` (Dialog with search, filter by accept type, paginated grid, inline upload) and `ImageField` (reusable image/document picker field with thumbnail preview, "Choose from Media Library", "Upload New", and "Clear" buttons)
+- `src/app/(dashboard)/dashboard/media/page.tsx` + `media-manager-client.tsx`: Full Media Library page — filter tabs (All/Images/Documents), debounced search, 5-col responsive grid with hover overlay (Copy URL / Delete), file detail dialog with metadata, multi-file upload, load-more pagination, sonner toasts
+- `src/components/dashboard/sidebar.tsx`: Added "Media Library" nav item (ImageIcon) before Gallery in the Media group
+- `src/components/dashboard/post-editor.tsx`: Replaced `<input type="file">` featured image with `ImageField`; removed dead `handleImageUpload`
+- `src/components/dashboard/event-form.tsx`: Same as above; removed `apiRequest` import
+- `src/components/dashboard/leadership-form.tsx`: Replaced photo upload with `ImageField avatar` (round preview); removed `apiRequest`
+- `src/components/dashboard/publication-form.tsx`: Replaced file upload with `ImageField accept="document"`; auto-detects file extension from URL on select
+- `src/components/dashboard/gallery-image-manager.tsx`: Added "Choose from Library" button + `MediaPickerModal`; selecting a file calls `addImageToAlbum` directly
+- `src/components/dashboard/block-editor/hero-block-editor.tsx`: Replaced heroImage URL input with `ImageField`
+- `src/components/dashboard/block-editor/image-banner-block-editor.tsx`: Replaced imageUrl input with `ImageField`
+- `src/lib/data.ts`: Updated `localImagePath`, `leadershipImagePath`, `galleryImagePath`, `postImagePath` to wrap with `getMediaUrl()`
+- `src/app/(public)/gallery/gallery-client.tsx`: Updated image src to `getMediaUrl(img.url || \`/images/\${img.localPath}\`)`
+- `src/components/home/leadership-preview.tsx`: Wrapped localImage path with `getMediaUrl()`
+- `bunx tsc --noEmit` passes with zero errors
 
 ### Agent 2 — Navigation Management — 2026-04-11 — DONE
 - Added navigationLinks table to drizzle/schema.ts; migration 0008 generated and applied

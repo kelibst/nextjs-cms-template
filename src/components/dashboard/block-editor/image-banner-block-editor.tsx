@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { ImageField } from '@/components/dashboard/media-picker-modal'
 
 interface ImageBannerContent {
   imageUrl: string
@@ -35,14 +36,13 @@ export function ImageBannerBlockEditor({ blockId: _blockId, initialContent, onSa
 
   return (
     <div className="p-4 space-y-4">
-      <div className="space-y-1">
-        <label className="text-sm font-medium text-foreground">Image URL</label>
-        <Input
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          placeholder="https://example.com/image.jpg"
-        />
-      </div>
+      <ImageField
+        label="Image"
+        value={imageUrl}
+        onChange={setImageUrl}
+        accept="image"
+        pickerTitle="Choose Banner Image"
+      />
       <div className="space-y-1">
         <label className="text-sm font-medium text-foreground">Alt Text</label>
         <Input

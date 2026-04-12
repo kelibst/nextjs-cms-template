@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { writeFile } from 'fs/promises'
-import { join } from 'path'
 import { can, type Role } from '@/lib/permissions'
+import { uploadFile } from '@/lib/storage'
+import { db } from '@/lib/db'
+import { mediaFiles } from '../../../../drizzle/schema'
 
 const MAX_SIZE = 5 * 1024 * 1024 // 5MB
 
@@ -28,9 +29,18 @@ export async function POST(req: NextRequest) {
   const buffer = Buffer.from(bytes)
 
   const ext = file.name.split('.').pop() ?? 'bin'
-  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-  const uploadDir = join(process.cwd(), 'public', 'uploads')
-  await writeFile(join(uploadDir, filename), buffer)
+  const key = `uploads/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
-  return NextResponse.json({ url: `/uploads/${filename}` })
+  const publicUrl = await uploadFile(key, buffer, file.type, buffer.length)
+
+  const [record] = await db.insert(mediaFiles).values({
+    key,
+    filename: `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`,
+    originalName: file.name,
+    mimeType: file.type,
+    fileSize: buffer.length,
+    uploadedBy: session.user.id ?? null,
+  }).returning()
+
+  return NextResponse.json({ url: publicUrl, id: record.id })
 }

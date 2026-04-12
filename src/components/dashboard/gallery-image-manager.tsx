@@ -8,7 +8,9 @@ import { addImageToAlbum, updateImageCaption, updateImageOrder, deleteGalleryIma
 import type { GalleryImage } from '../../../drizzle/schema'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Trash2, Upload, ChevronUp, ChevronDown } from 'lucide-react'
+import { Trash2, Upload, ChevronUp, ChevronDown, ImageIcon } from 'lucide-react'
+import { MediaPickerModal } from '@/components/dashboard/media-picker-modal'
+import { getMediaUrl } from '@/lib/media-url'
 
 interface GalleryImageManagerProps {
   albumId: string
@@ -19,6 +21,7 @@ export function GalleryImageManager({ albumId, images: initialImages }: GalleryI
   const [images, setImages] = useState(initialImages)
   const [editingCaption, setEditingCaption] = useState<string | null>(null)
   const [captionValue, setCaptionValue] = useState('')
+  const [pickerOpen, setPickerOpen] = useState(false)
 
   const imagesRef = useRef<typeof images>([])
   useEffect(() => { imagesRef.current = images }, [images])
@@ -87,16 +90,45 @@ export function GalleryImageManager({ albumId, images: initialImages }: GalleryI
     ])
   }
 
+  const handlePickerSelect = async (url: string) => {
+    try {
+      const newImage = await addImageToAlbum(albumId, { url, caption: '', sortOrder: imagesRef.current.length })
+      setImages(prev => [...prev, newImage])
+      toast.success('Image added from library')
+    } catch {
+      toast.error('Failed to add image')
+    }
+  }
+
   const isUploading = uploadMutation.isPending
 
   return (
     <div className="space-y-4">
-      {/* Upload */}
-      <label className={`flex items-center gap-2 w-fit px-4 py-2 rounded-lg border-2 border-dashed border-border cursor-pointer hover:border-primary transition-colors text-sm text-muted-foreground hover:text-primary ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
-        <Upload className="w-4 h-4" />
-        {isUploading ? 'Uploading…' : 'Upload Images'}
-        <input type="file" accept="image/*" multiple onChange={handleUpload} className="hidden" />
-      </label>
+      {/* Upload + Library picker */}
+      <div className="flex flex-wrap gap-3">
+        <label className={`flex items-center gap-2 w-fit px-4 py-2 rounded-lg border-2 border-dashed border-border cursor-pointer hover:border-primary transition-colors text-sm text-muted-foreground hover:text-primary ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+          <Upload className="w-4 h-4" />
+          {isUploading ? 'Uploading…' : 'Upload Images'}
+          <input type="file" accept="image/*" multiple onChange={handleUpload} className="hidden" />
+        </label>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setPickerOpen(true)}
+        >
+          <ImageIcon className="w-4 h-4 mr-2" />
+          Choose from Library
+        </Button>
+      </div>
+
+      <MediaPickerModal
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={handlePickerSelect}
+        accept="image"
+        title="Choose Image for Album"
+      />
 
       {images.length === 0 ? (
         <p className="text-sm text-muted-foreground/70">No images yet. Upload some above.</p>
@@ -104,7 +136,7 @@ export function GalleryImageManager({ albumId, images: initialImages }: GalleryI
         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
           {images.map((img, idx) => (
             <div key={img.id} className="relative group rounded-lg overflow-hidden border border-border bg-muted/30">
-              <img src={img.url} alt={img.caption ?? ''} className="w-full h-32 object-cover" />
+              <img src={getMediaUrl(img.url)} alt={img.caption ?? img.altText ?? ''} className="w-full h-32 object-cover" />
 
               {/* Overlay actions */}
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-start justify-between p-2">

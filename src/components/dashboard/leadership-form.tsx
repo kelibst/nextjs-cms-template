@@ -4,13 +4,13 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { apiRequest } from '@/lib/api'
 import { createLeadership, updateLeadership } from '@/app/actions/leadership'
 import type { Leadership } from '../../../drizzle/schema'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
+import { ImageField } from '@/components/dashboard/media-picker-modal'
 
 interface LeadershipFormProps {
   leader?: Leadership
@@ -56,15 +56,6 @@ export function LeadershipForm({ leader }: LeadershipFormProps) {
     },
   })
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const fd = new FormData()
-    fd.append('file', file)
-    const data = await apiRequest<{ url: string }>('/api/upload', { method: 'POST', body: fd })
-    setImageUrl(data.url)
-  }
-
   const handleSave = () => {
     if (!name || !role) return
     mutation.mutate()
@@ -92,13 +83,14 @@ export function LeadershipForm({ leader }: LeadershipFormProps) {
           <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@example.com" />
         </div>
       </div>
-      <div className="space-y-1">
-        <label className="text-sm font-medium">Photo</label>
-        <input type="file" accept="image/*" onChange={handleImageUpload} className="text-sm" />
-        {imageUrl && (
-          <img src={imageUrl} alt="Preview" className="mt-2 w-20 h-20 rounded-full object-cover border" />
-        )}
-      </div>
+      <ImageField
+        label="Photo"
+        value={imageUrl}
+        onChange={setImageUrl}
+        accept="image"
+        pickerTitle="Choose Member Photo"
+        avatar
+      />
       <div className="space-y-1">
         <label className="text-sm font-medium">Bio</label>
         <Textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} placeholder="Short biography…" />

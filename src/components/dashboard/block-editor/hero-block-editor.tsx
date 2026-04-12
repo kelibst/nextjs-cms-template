@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
 import type { HeroContent } from '@/lib/blocks'
+import { ImageField } from '@/components/dashboard/media-picker-modal'
 
 interface HeroBlockEditorProps {
   blockId: string
@@ -105,17 +106,16 @@ export function HeroBlockEditor({ blockId: _blockId, initialContent, onSave }: H
       </div>
 
       {/* Background image */}
-      <div className="space-y-1">
-        <label className="text-sm font-medium text-foreground">Background Image URL</label>
-        <Input
-          value={heroImage}
-          onChange={(e) => setHeroImage(e.target.value)}
-          placeholder="https://... or /images/..."
-        />
-        <p className="text-xs text-muted-foreground">
-          Optional. When set, the hero displays a full-bleed image with a dark overlay.
-        </p>
-      </div>
+      <ImageField
+        label="Background Image"
+        value={heroImage}
+        onChange={setHeroImage}
+        accept="image"
+        pickerTitle="Choose Hero Background Image"
+      />
+      <p className="text-xs text-muted-foreground -mt-2">
+        Optional. When set, the hero displays a full-bleed image with a dark overlay.
+      </p>
 
       {/* Centered toggle */}
       <div className="flex items-center justify-between rounded-lg border border-border p-3">

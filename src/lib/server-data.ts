@@ -36,13 +36,7 @@ export async function getPublicPosts(): Promise<Post[]> {
       date: (p.publishedAt ?? p.createdAt).toISOString().split('T')[0],
       category: p.category as Post['category'],
       author: p.authorName ?? 'GAPHTO',
-      // Normalize featuredImage: relative paths get /images/ prefix; absolute/root-relative kept as-is
-      featuredImage: (() => {
-        const img = p.featuredImage ?? ''
-        if (!img) return ''
-        if (img.startsWith('http') || img.startsWith('/')) return img
-        return `/images/${img}`
-      })(),
+      featuredImage: p.featuredImage ?? '',
       localImage: '',
       tags: [],
       sourceUrl: '',
@@ -89,10 +83,7 @@ export async function getPublicPostBySlug(slug: string): Promise<Post | null> {
       .limit(1)
 
     if (dbPost && dbPost.status === 'published') {
-      const img = dbPost.featuredImage ?? ''
-      const featuredImage = img && !img.startsWith('http') && !img.startsWith('/')
-        ? `/images/${img}`
-        : img
+      const featuredImage = dbPost.featuredImage ?? ''
       return {
         slug: dbPost.slug,
         title: dbPost.title,

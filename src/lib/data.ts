@@ -1,3 +1,4 @@
+import { getMediaUrl } from '@/lib/media-url';
 import newsData from "@/data/news.json";
 import healthNewsData from "@/data/health-news.json";
 import blogData from "@/data/blog.json";
@@ -212,19 +213,19 @@ export function decodeEntities(str: string): string {
 /** Return a public image path for a local scraped image */
 export function localImagePath(localPath: string, prefix: "leadership" | "gallery" | "posts"): string {
   const stripped = localPath.startsWith(`${prefix}/`) ? localPath : `${prefix}/${localPath}`;
-  return `/images/${stripped}`;
+  return getMediaUrl(`/images/${stripped}`);
 }
 
 export function leadershipImagePath(localImage: string): string {
-  return `/images/${localImage}`;
+  return getMediaUrl(`/images/${localImage}`);
 }
 
 export function galleryImagePath(localPath: string): string {
-  return `/images/${localPath}`;
+  return getMediaUrl(`/images/${localPath}`);
 }
 
 export function postImagePath(localImage: string): string {
-  return `/images/${localImage}`;
+  return getMediaUrl(`/images/${localImage}`);
 }
 
 // ─── Page Builder ──────────────────────────────────────────────────────────────

@@ -8,7 +8,8 @@ Next.js web platform for GAPHTO, migrated from the association's previous WordPr
 
 | Guide | What it covers |
 |-------|---------------|
-| [readme/LOCAL_DEV.md](readme/LOCAL_DEV.md) | Local setup walkthrough — DB, seeding, dev server, test credentials |
+| [readme/LOCAL_DEV.md](readme/LOCAL_DEV.md) | Local setup walkthrough — DB, MinIO, seeding, dev server, test credentials |
+| [readme/STORAGE.md](readme/STORAGE.md) | MinIO object storage — setup, credentials, migration, Media Manager |
 | [readme/SCRAPER.md](readme/SCRAPER.md) | WordPress data scraper — XML vs REST API, image downloads, output files, known issues |
 | [readme/DATABASE.md](readme/DATABASE.md) | Schema overview, seeding sequence, expected counts, migration guide |
 | [readme/DEPLOYMENT.md](readme/DEPLOYMENT.md) | Hetzner VPS deployment — Docker, Nginx, SSL, PM2, re-deploy |
@@ -23,6 +24,7 @@ Next.js web platform for GAPHTO, migrated from the association's previous WordPr
 - **Styling**: Tailwind CSS v4 + shadcn/ui
 - **Auth**: NextAuth v5
 - **Database**: PostgreSQL via Drizzle ORM
+- **Storage**: MinIO (S3-compatible object storage)
 - **Package manager**: Bun
 
 ---
@@ -32,14 +34,17 @@ Next.js web platform for GAPHTO, migrated from the association's previous WordPr
 ```bash
 bun install
 cp .env.example .env          # defaults work for local dev, no changes needed
-bun run db:up                 # start PostgreSQL on port 5434
+docker compose -f infrastructure/docker-compose.yml up -d   # Postgres + MinIO
 bun run db:sync-data          # copy scraper output → src/data/ and public/images/
 bun run db:migrate            # create tables
 bun run db:seed               # populate DB from scraped JSON
+bunx tsx scripts/migrate-to-minio.ts   # upload images to MinIO (fixes image errors)
 bun run dev                   # http://localhost:3000
 ```
 
 Test login: `superadmin@gaphto.org` / `Test1234!`
+
+MinIO console: **http://localhost:9001** — login `minioadmin` / `minioadmin`
 
 See [readme/LOCAL_DEV.md](readme/LOCAL_DEV.md) for full details and troubleshooting.
 
@@ -58,6 +63,7 @@ See [readme/LOCAL_DEV.md](readme/LOCAL_DEV.md) for full details and troubleshoot
 | `bun run db:sync-data` | Copy `scraper/output/*.json` → `src/data/` and `scraped-assets/` → `public/images/` |
 | `bun run db:up` | Start the PostgreSQL container (local dev) |
 | `bun run db:down` | Stop the PostgreSQL container |
+| `bunx tsx scripts/migrate-to-minio.ts` | Upload all scraped images from `public/images/` into MinIO |
 | `bun run db:generate` | Generate a Drizzle migration file after schema changes |
 | `bun run db:migrate` | Apply pending migrations |
 | `bun run db:seed` | Seed the database from scraped JSON |
@@ -87,6 +93,7 @@ gaphto/
 ├── drizzle/                Schema, migrations, seed
 ├── infrastructure/         Docker Compose, Nginx, PM2
 ├── readme/                 Per-component documentation
+├── scripts/                Migration utilities (e.g. migrate-to-minio.ts)
 └── public/
-    └── images/             Static images (logo, scraped assets)
+    └── images/             Static images (logo, legacy scraped assets)
 ```

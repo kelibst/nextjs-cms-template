@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Post, decodeEntities, postImagePath } from "@/lib/data";
+import { getMediaUrl } from "@/lib/media-url";
 
 const categoryColors: Record<string, string> = {
   "gaphto-news": "bg-primary-muted text-primary/90",
@@ -31,9 +32,7 @@ function resolveImageSrc(post: Post): string | null {
   if (post.localImage) return postImagePath(post.localImage)
   const img = post.featuredImage
   if (!img) return null
-  if (img.startsWith("http") || img.startsWith("/")) return img
-  // relative path stored in DB — prepend /images/
-  return `/images/${img}`
+  return getMediaUrl(img)
 }
 
 export function PostCard({ post }: PostCardProps) {

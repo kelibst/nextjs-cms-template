@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { getAllPosts, getLeadership, getGalleryAlbums, getEvents, getAbout, getPracticeAreas, getFund, getBlocksForPage } from "@/lib/data";
+import { getMediaUrl } from "@/lib/media-url";
 import { HeroCarousel } from "@/components/home/hero-carousel";
 import { StatsBar } from "@/components/home/stats-bar";
 import { NewsPreview } from "@/components/home/news-preview";
@@ -29,8 +30,8 @@ export default async function Home() {
   const homepageBlocks = await getBlocksForPage('homepage');
 
   // Pick a gallery image for the about section
-  const aboutGalleryImg = albums[0]?.images?.[0]?.localPath
-    ? `/images/${albums[0].images[0].localPath}`
+  const aboutGalleryImg = albums[0]?.images?.[0]
+    ? getMediaUrl(albums[0].images[0].localPath || albums[0].images[0].url)
     : undefined;
 
   // ── Dynamic block rendering ──────────────────────────────────────────────────

@@ -12,6 +12,7 @@ import {
   Users,
   Trophy,
   Images,
+  ImageIcon,
   BookOpen,
   Mail,
   Settings,
@@ -48,6 +49,7 @@ const navGroups = [
   {
     label: 'Media',
     items: [
+      { label: 'Media Library', href: '/dashboard/media', icon: ImageIcon },
       { label: 'Gallery', href: '/dashboard/gallery', icon: Images },
       { label: 'Publications', href: '/dashboard/publications', icon: BookOpen },
     ],

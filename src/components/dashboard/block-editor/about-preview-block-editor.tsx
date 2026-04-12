@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { ImageField } from '@/components/dashboard/media-picker-modal'
 import type { AboutPreviewContent } from '@/lib/blocks'
 
 interface AboutPreviewBlockEditorProps {
@@ -45,17 +46,16 @@ export function AboutPreviewBlockEditor({
         />
       </div>
 
-      <div className="space-y-1">
-        <label className="text-sm font-medium text-foreground">Image URL</label>
-        <Input
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          placeholder="Leave blank to use the latest gallery image"
-        />
-        <p className="text-xs text-muted-foreground">
-          Enter a full URL or an internal path (e.g. /images/about.jpg). Leave blank to auto-pick from the gallery.
-        </p>
-      </div>
+      <ImageField
+        label="Image"
+        value={imageUrl}
+        onChange={setImageUrl}
+        accept="image"
+        pickerTitle="Choose About Section Image"
+      />
+      <p className="text-xs text-muted-foreground -mt-2">
+        Leave blank to auto-pick the latest gallery image.
+      </p>
 
       <div className="space-y-1">
         <label className="text-sm font-medium text-foreground">Image Alt Text</label>

@@ -31,9 +31,24 @@ scraper/src/parse-wxr.ts          ← authoritative data pipeline
         │
         ▼
    PostgreSQL (via Drizzle ORM)
+        │
+        ▼ (scripts/migrate-to-minio.ts)
+   MinIO (gaphto-media bucket)   ← authoritative media store
 ```
 
-At runtime, `src/lib/server-data.ts` tries the database first and falls back to `src/data/*.json` if the DB is unavailable. This ensures the site works even if the DB connection is temporarily lost.
+At runtime, `src/lib/server-data.ts` tries the database first and falls back to `src/data/*.json` if the DB is unavailable. `src/lib/media-url.ts` (`getMediaUrl()`) resolves all image paths to MinIO URLs transparently.
+
+### Media URL resolution
+
+```
+DB stores bare key: "gallery/2016-gallery/logo-u.png"
+        │
+        ▼  getMediaUrl()
+http://localhost:9000/gaphto-media/gallery/2016-gallery/logo-u.png  (local)
+https://gaphto.org/media/gaphto-media/gallery/2016-gallery/logo-u.png  (prod)
+```
+
+Legacy root-relative paths (`/images/…`) and external URLs are passed through unchanged.
 
 ---
 
@@ -47,6 +62,7 @@ At runtime, `src/lib/server-data.ts` tries the database first and falls back to 
 | Auth | NextAuth v5 (credentials provider, bcrypt passwords) |
 | Database | PostgreSQL 16 via Drizzle ORM |
 | Package manager | Bun |
+| Object storage | MinIO (S3-compatible, Docker) |
 | Rich text editor | Tiptap v3 |
 | Map | Leaflet + react-leaflet |
 | Carousel | Embla Carousel |
@@ -89,12 +105,14 @@ gaphto/
 │   ├── seed.ts               DB seeder
 │   └── migrations/           SQL migration files (0000–0007)
 ├── infrastructure/
-│   ├── docker-compose.yml         Local dev (Postgres + pgAdmin)
-│   ├── docker-compose.prod.yml    Production (Postgres only)
-│   ├── nginx.conf                 Nginx reverse proxy
+│   ├── docker-compose.yml         Local dev (Postgres + pgAdmin + MinIO)
+│   ├── docker-compose.prod.yml    Production (Postgres + MinIO)
+│   ├── nginx.conf                 Nginx reverse proxy (incl. /media/ → MinIO)
 │   └── ecosystem.config.js        PM2 process config
+├── scripts/
+│   └── migrate-to-minio.ts        Bulk upload public/images/ → MinIO
 └── public/
-    └── images/               Static images (populated by db:sync-data)
+    └── images/               Static fallback images (logo, legacy scraped assets)
 ```
 
 ---

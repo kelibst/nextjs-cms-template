@@ -4,13 +4,13 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { apiRequest } from '@/lib/api'
 import { createPublication, updatePublication } from '@/app/actions/publications'
 import type { Publication } from '../../../drizzle/schema'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
+import { ImageField } from '@/components/dashboard/media-picker-modal'
 
 function slugify(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -59,17 +59,6 @@ export function PublicationForm({ publication }: PublicationFormProps) {
     },
   })
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const fd = new FormData()
-    fd.append('file', file)
-    const data = await apiRequest<{ url: string }>('/api/upload', { method: 'POST', body: fd })
-    setFileUrl(data.url)
-    const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
-    setFileType(ext)
-  }
-
   const handleSave = () => {
     if (!title) return
     mutation.mutate()
@@ -85,18 +74,19 @@ export function PublicationForm({ publication }: PublicationFormProps) {
         <label className="text-sm font-medium">Description</label>
         <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
       </div>
-      <div className="space-y-1">
-        <label className="text-sm font-medium">File (PDF / DOC / XLSX)</label>
-        <input type="file" accept=".pdf,.doc,.docx,.xlsx" onChange={handleFileUpload} className="text-sm" />
-        {fileUrl && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-            <span className="font-medium uppercase text-xs bg-muted px-2 py-0.5 rounded">{fileType}</span>
-            <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate">
-              {fileUrl}
-            </a>
-          </div>
-        )}
-      </div>
+      <ImageField
+        label="File (PDF / DOC / XLSX)"
+        value={fileUrl}
+        onChange={(url) => {
+          setFileUrl(url)
+          if (url) {
+            const ext = url.split('.').pop()?.toLowerCase() ?? ''
+            setFileType(ext)
+          }
+        }}
+        accept="document"
+        pickerTitle="Choose Document"
+      />
       <div className="space-y-1">
         <label className="text-sm font-medium">Published Date</label>
         <Input type="date" value={publishedAt} onChange={(e) => setPublishedAt(e.target.value)} />

@@ -7,6 +7,7 @@ import Captions from "yet-another-react-lightbox/plugins/captions";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/captions.css";
 import type { GalleryAlbum } from "@/lib/data";
+import { getMediaUrl } from "@/lib/media-url";
 
 interface GalleryClientProps {
   albums: GalleryAlbum[];
@@ -52,7 +53,7 @@ export function GalleryClient({ albums }: GalleryClientProps) {
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {album.images.map((img, imgIdx) => {
-              const src = `/images/${img.localPath}`;
+              const src = getMediaUrl(img.url || `/images/${img.localPath}`);
               return (
                 <button
                   key={imgIdx}
@@ -96,7 +97,7 @@ export function GalleryClient({ albums }: GalleryClientProps) {
           close={closeLightbox}
           index={lightboxIndex}
           slides={currentAlbum.images.map((img) => ({
-            src: `/images/${img.localPath}`,
+            src: getMediaUrl(img.url || img.localPath),
             title: img.caption ?? undefined,
             description: currentAlbum.albumTitle,
           }))}

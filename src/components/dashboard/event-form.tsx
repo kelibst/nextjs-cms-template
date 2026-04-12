@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { apiRequest } from '@/lib/api'
 import { createEvent, updateEvent } from '@/app/actions/events'
 import type { Event } from '../../../drizzle/schema'
 import { Input } from '@/components/ui/input'
@@ -14,6 +13,7 @@ import { Switch } from '@/components/ui/switch'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
+import { ImageField } from '@/components/dashboard/media-picker-modal'
 
 function toDatetimeLocal(d: Date | null | undefined) {
   if (!d) return ''
@@ -73,15 +73,6 @@ export function EventForm({ event }: EventFormProps) {
       toast.error(err instanceof Error ? err.message : 'Something went wrong')
     },
   })
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const fd = new FormData()
-    fd.append('file', file)
-    const data = await apiRequest<{ url: string }>('/api/upload', { method: 'POST', body: fd })
-    setFeaturedImage(data.url)
-  }
 
   const handleSave = () => {
     if (!title) return
@@ -151,13 +142,13 @@ export function EventForm({ event }: EventFormProps) {
         </Select>
       </div>
 
-      <div className="space-y-1">
-        <label className="text-sm font-medium">Featured Image</label>
-        <input type="file" accept="image/*" onChange={handleImageUpload} className="text-sm" />
-        {featuredImage && (
-          <img src={featuredImage} alt="Featured" className="mt-2 h-28 w-full object-cover rounded-lg border" />
-        )}
-      </div>
+      <ImageField
+        label="Featured Image"
+        value={featuredImage}
+        onChange={setFeaturedImage}
+        accept="image"
+        pickerTitle="Choose Featured Image"
+      />
 
       <div className="flex gap-3">
         <Button className="bg-primary hover:bg-primary-hover text-primary-foreground" onClick={handleSave} disabled={mutation.isPending || !title}>

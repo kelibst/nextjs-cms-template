@@ -2,13 +2,7 @@ import { db } from '@/lib/db'
 import { galleryAlbums, galleryImages } from '../../../../../drizzle/schema'
 import { eq, count, asc } from 'drizzle-orm'
 import { desc } from 'drizzle-orm'
-
-function normaliseCoverUrl(url: string | null | undefined): string | null {
-  if (!url) return null
-  if (url.startsWith('http') || url.startsWith('/')) return url
-  // Seeded paths are like "gallery/album/image.jpg" — serve from public/images/
-  return `/images/${url}`
-}
+import { getMediaUrl } from '@/lib/media-url'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Plus, Pencil, Images } from 'lucide-react'
@@ -59,7 +53,7 @@ export default async function GalleryPage() {
             <div key={album.id} className="bg-card rounded-xl border border-border overflow-hidden group">
               <div className="h-36 bg-muted relative overflow-hidden">
                 {(() => {
-                  const cover = normaliseCoverUrl(album.coverImage) ?? normaliseCoverUrl(firstImageMap[album.id])
+                  const cover = getMediaUrl(album.coverImage) !== '/images/placeholder.jpg' ? getMediaUrl(album.coverImage) : getMediaUrl(firstImageMap[album.id])
                   return cover ? (
                     <img src={cover} alt={album.title} className="w-full h-full object-cover" />
                   ) : (

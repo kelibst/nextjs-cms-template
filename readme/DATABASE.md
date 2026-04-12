@@ -64,6 +64,12 @@ bun run db:seed      # populate DB from scraper/output/*.json
 |-------|-------------|
 | `page_blocks` | Dynamic page sections (hero, stats_bar, rich_text, practice_areas_grid, news_preview, leadership_preview, gallery_teaser, fund_cta, image_banner). Stored as typed JSON blobs with sort order. |
 
+### Media Storage
+
+| Table | Description |
+|-------|-------------|
+| `media_files` | Tracks every file uploaded to MinIO. Stores the object key, bucket, filename, original name, MIME type, file size, optional dimensions, uploader, and upload timestamp. Soft-deleted via `deleted_at`. |
+
 ---
 
 ## Seeding sequence
@@ -107,7 +113,7 @@ publications                 18
 
 ## Migrations
 
-8 migration files exist in `drizzle/migrations/` (`0000` → `0007`). They are applied in order by `bun run db:migrate` and are tracked in the `drizzle.__drizzle_migrations` table.
+11 migration files exist in `drizzle/migrations/` (`0000` → `0010`). They are applied in order by `bun run db:migrate` and are tracked in the `drizzle.__drizzle_migrations` table.
 
 To add a column or table:
 1. Edit `drizzle/schema.ts`

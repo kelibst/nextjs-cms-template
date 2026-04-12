@@ -71,6 +71,13 @@
       "when": 1775928532258,
       "tag": "0009_foamy_clea",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1775929702526,
+      "tag": "0010_breezy_microchip",
+      "breakpoints": true
     }
   ]
 }

@@ -27,6 +27,7 @@ import {
   Bold, Italic, Heading2, Heading3,
   List, ListOrdered, Quote, Code, ImageIcon,
 } from 'lucide-react'
+import { ImageField } from '@/components/dashboard/media-picker-modal'
 
 function slugify(str: string) {
   return str
@@ -119,13 +120,6 @@ export function PostEditor({ post }: PostEditorProps) {
     input.click()
   }, [editor, uploadMutation])
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const data = await uploadMutation.mutateAsync(file)
-    setFeaturedImage(data.url)
-  }
-
   const isPending = uploadMutation.isPending || saveMutation.isPending
 
   return (
@@ -205,13 +199,13 @@ export function PostEditor({ post }: PostEditorProps) {
       </div>
 
       {/* Featured image */}
-      <div className="space-y-1">
-        <label className="text-xs font-medium text-muted-foreground">Featured Image</label>
-        <input type="file" accept="image/*" onChange={handleImageUpload} className="text-sm" />
-        {featuredImage && (
-          <img src={featuredImage} alt="Featured" className="mt-2 h-32 w-full object-cover rounded-lg border" />
-        )}
-      </div>
+      <ImageField
+        label="Featured Image"
+        value={featuredImage}
+        onChange={setFeaturedImage}
+        accept="image"
+        pickerTitle="Choose Featured Image"
+      />
 
       {/* Editor */}
       <div className="space-y-1">

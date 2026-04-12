@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { type GalleryAlbum } from '@/lib/data'
+import { getMediaUrl } from '@/lib/media-url'
 
 interface Props {
   albums: GalleryAlbum[]
@@ -28,7 +29,7 @@ function collectImages(albums: GalleryAlbum[], maxCount: number, selectedAlbumSl
     for (const img of album.images) {
       if (items.length >= maxCount) break
       items.push({
-        src: img.localPath ? `/images/${img.localPath}` : '/images/placeholder.jpg',
+        src: getMediaUrl(img.localPath || img.url),
         caption: img.caption,
         albumTitle: album.albumTitle,
         albumSlug: album.albumSlug,

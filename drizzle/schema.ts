@@ -8,6 +8,7 @@ import {
   numeric,
   timestamp,
   primaryKey,
+  serial,
 } from 'drizzle-orm/pg-core'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -427,3 +428,21 @@ export const pageBlocks = pgTable('page_blocks', {
 
 export type PageBlock = typeof pageBlocks.$inferSelect
 export type NewPageBlock = typeof pageBlocks.$inferInsert
+
+export const mediaFiles = pgTable('media_files', {
+  id: serial('id').primaryKey(),
+  key: text('key').notNull().unique(),
+  bucket: text('bucket').notNull().default('gaphto-media'),
+  filename: text('filename').notNull(),
+  originalName: text('original_name').notNull(),
+  mimeType: text('mime_type').notNull(),
+  fileSize: integer('file_size').notNull(),
+  width: integer('width'),
+  height: integer('height'),
+  uploadedBy: uuid('uploaded_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  deletedAt: timestamp('deleted_at'),
+})
+
+export type MediaFile = typeof mediaFiles.$inferSelect
+export type NewMediaFile = typeof mediaFiles.$inferInsert

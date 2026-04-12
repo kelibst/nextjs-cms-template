@@ -49,6 +49,13 @@ Edit `.env` and set real production values:
 | `NEXTAUTH_URL` | `https://gaphto.org` |
 | `NEXT_PUBLIC_APP_URL` | `https://gaphto.org` |
 | `NODE_ENV` | `production` |
+| `MINIO_ACCESS_KEY` | Strong random key (e.g. `openssl rand -hex 16`) |
+| `MINIO_SECRET_KEY` | Strong random secret (e.g. `openssl rand -hex 32`) |
+| `MINIO_ENDPOINT` | `localhost` |
+| `MINIO_PORT` | `9000` |
+| `MINIO_USE_SSL` | `false` (Nginx handles TLS) |
+| `MINIO_BUCKET` | `gaphto-media` |
+| `NEXT_PUBLIC_MEDIA_BASE_URL` | `https://gaphto.org/media/gaphto-media` |
 
 ### 4. Run the deploy script
 
@@ -58,13 +65,22 @@ chmod +x deploy.sh && ./deploy.sh
 
 `deploy.sh` runs these steps automatically:
 1. `bun install` (app + scraper dependencies)
-2. Start PostgreSQL via Docker (`infrastructure/docker-compose.prod.yml` — no pgAdmin, binds to 127.0.0.1)
+2. Start PostgreSQL + MinIO via Docker (`infrastructure/docker-compose.prod.yml`)
 3. `bun run scrape:xml` — parses the WordPress XML export
 4. `bun run db:sync-data` — copies JSON → `src/data/` and images → `public/images/`
 5. `bun run db:migrate` — applies all Drizzle migrations
 6. `bun run db:seed` — seeds DB from scraped JSON
 7. `bun run build` — production Next.js build
 8. Starts app on port 3000 via PM2
+
+**After a fresh deploy, run the image migration manually:**
+
+```bash
+cd /var/www/gaphto
+bunx tsx scripts/migrate-to-minio.ts
+```
+
+This uploads all 367 scraped images to the MinIO bucket. Only needed once — subsequent deploys keep the MinIO volume intact.
 
 ### 5. Set up Nginx
 
@@ -125,14 +141,18 @@ Logs are written to `/var/log/gaphto/out.log` and `/var/log/gaphto/error.log`.
 
 ---
 
-## Docker commands (production DB)
+## Docker commands (production)
 
 ```bash
-# Uses docker-compose.prod.yml (no pgAdmin, Postgres on 127.0.0.1:5432)
+# Uses docker-compose.prod.yml (no pgAdmin, Postgres + MinIO on 127.0.0.1)
 docker compose -f infrastructure/docker-compose.prod.yml ps
 docker compose -f infrastructure/docker-compose.prod.yml logs postgres
+docker compose -f infrastructure/docker-compose.prod.yml logs minio
 docker compose -f infrastructure/docker-compose.prod.yml restart postgres
+docker compose -f infrastructure/docker-compose.prod.yml restart minio
 ```
+
+MinIO data is stored in the `gaphto_minio_data` named volume — it persists across container restarts and image updates.
 
 ---
 
@@ -151,3 +171,9 @@ The Next.js process isn't running. Check `pm2 list` and `pm2 start infrastructur
 
 ### SSL certificate not found
 Ensure DNS A records point to the server IP, then re-run Certbot.
+
+### Images not loading on production
+1. Confirm MinIO is running: `docker compose -f infrastructure/docker-compose.prod.yml ps`
+2. Check `NEXT_PUBLIC_MEDIA_BASE_URL=https://gaphto.org/media/gaphto-media` in `.env`
+3. Ensure Nginx has the `/media/` proxy block: `sudo nginx -t && sudo systemctl reload nginx`
+4. Run the image migration if not done yet: `bunx tsx scripts/migrate-to-minio.ts`
