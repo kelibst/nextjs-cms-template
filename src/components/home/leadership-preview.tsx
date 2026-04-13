@@ -44,7 +44,7 @@ export function LeadershipPreview({ leaders, heading = 'Our Leadership', count }
               <div className="relative w-20 h-20 transition-transform duration-300 group-hover:scale-105">
                 <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary-subtle group-hover:border-primary transition-colors duration-300">
                   <Image
-                    src={getMediaUrl(`/images/${leader.localImage || 'placeholder.jpg'}`)}
+                    src={leader.imageUrl ? getMediaUrl(leader.imageUrl) : getMediaUrl('/images/placeholder.jpg')}
                     alt={leader.name}
                     width={80}
                     height={80}

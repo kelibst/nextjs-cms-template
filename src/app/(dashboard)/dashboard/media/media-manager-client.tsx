@@ -2,30 +2,42 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { toast } from 'sonner'
-import { getMediaFiles, deleteMediaFile } from '@/app/actions/media'
-import { getMediaUrl } from '@/lib/media-url'
+import {
+  getMediaFiles, deleteMediaFile, updateMediaFile,
+  bulkDeleteMediaFiles, getMediaCategories
+} from '@/app/actions/media'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
-  ImageIcon,
-  FileText,
-  Trash2,
-  Copy,
-  Upload,
-  Search,
-  X,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from '@/components/ui/select'
+import {
+  FileText, Video, Trash2, Copy, Upload,
+  Search, X, Grid2X2, List, Check
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type MediaFile = Awaited<ReturnType<typeof getMediaFiles>>[number]
+type FilterTab = 'all' | 'images' | 'videos' | 'documents'
+type SortOption = 'createdAt-desc' | 'createdAt-asc' | 'originalName-asc' | 'originalName-desc' | 'fileSize-desc' | 'fileSize-asc'
+type ViewMode = 'grid' | 'list'
 
-type FilterTab = 'all' | 'images' | 'documents'
+const DATE_PRESETS = [
+  { label: 'All time', value: '__all__' },
+  { label: 'Today', value: 'today' },
+  { label: 'This week', value: 'week' },
+  { label: 'This month', value: 'month' },
+  { label: 'This year', value: 'year' },
+] as const
 
-function isImage(mimeType: string) {
-  return mimeType.startsWith('image/')
-}
+const CATEGORY_OPTIONS = [
+  'gallery', 'news', 'events', 'leadership', 'documents', 'videos', 'general'
+]
+
+function isImage(mime: string) { return mime.startsWith('image/') }
+function isVideo(mime: string) { return mime.startsWith('video/') }
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
@@ -33,32 +45,97 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+function formatDuration(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${m}:${s.toString().padStart(2, '0')}`
+}
+
+function getMimeFilter(tab: FilterTab): string | undefined {
+  if (tab === 'images') return 'image'
+  if (tab === 'videos') return 'video'
+  if (tab === 'documents') return 'application'
+  return undefined
+}
+
+function getDateRange(preset: string): { dateFrom?: string; dateTo?: string } {
+  if (!preset || preset === '__all__') return {}
+  const now = new Date()
+  const pad = (n: number) => n.toString().padStart(2, '0')
+  const fmt = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  const today = fmt(now)
+  if (preset === 'today') return { dateFrom: today, dateTo: today }
+  if (preset === 'week') {
+    const start = new Date(now)
+    start.setDate(now.getDate() - now.getDay())
+    return { dateFrom: fmt(start), dateTo: today }
+  }
+  if (preset === 'month') return { dateFrom: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-01`, dateTo: today }
+  if (preset === 'year') return { dateFrom: `${now.getFullYear()}-01-01`, dateTo: today }
+  return {}
+}
+
 export function MediaManagerClient() {
   const [files, setFiles] = useState<MediaFile[]>([])
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
-  const [activeTab, setActiveTab] = useState<FilterTab>('all')
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(false)
-  const [uploading, setUploading] = useState(false)
-  const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [uploading, setUploading] = useState<{ current: number; total: number } | null>(null)
+  const [viewMode, setViewMode] = useState<ViewMode>('grid')
+
+  // Filters
+  const [activeTab, setActiveTab] = useState<FilterTab>('all')
+  const [search, setSearch] = useState('')
+  const [category, setCategory] = useState<string>('all')
+  const [datePreset, setDatePreset] = useState<string>('__all__')
+  const [sortOption, setSortOption] = useState<SortOption>('createdAt-desc')
+  const [categories, setCategories] = useState<string[]>([])
+
+  // Selection
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+  const [lastClickedIdx, setLastClickedIdx] = useState<number | null>(null)
+
+  // Detail panel
   const [detailFile, setDetailFile] = useState<MediaFile | null>(null)
+  const [editAlt, setEditAlt] = useState('')
+  const [editDesc, setEditDesc] = useState('')
+  const [editCategory, setEditCategory] = useState('')
+  const [savingField, setSavingField] = useState<string | null>(null)
+
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const dropZoneRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const getMimeFilter = (tab: FilterTab) => {
-    if (tab === 'images') return 'image'
-    if (tab === 'documents') return 'application'
-    return undefined
-  }
+  // Load categories on mount
+  useEffect(() => {
+    getMediaCategories().then(cats => setCategories(cats)).catch(() => {})
+  }, [])
 
-  const loadFiles = useCallback(async (searchVal: string, tab: FilterTab, pageNum: number, append = false) => {
+  // Close detail panel on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setDetailFile(null)
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
+
+  const loadFiles = useCallback(async (
+    searchVal: string, tab: FilterTab, cat: string,
+    dateP: string, sort: SortOption, pageNum: number, append = false
+  ) => {
     setLoading(true)
     try {
+      const [sortBy, sortDir] = sort.split('-') as [string, string]
+      const dateRange = getDateRange(dateP)
       const limit = 40
       const results = await getMediaFiles({
         mimeType: getMimeFilter(tab),
         search: searchVal || undefined,
+        category: cat === 'all' ? undefined : cat,
+        sortBy: sortBy as 'createdAt' | 'originalName' | 'fileSize',
+        sortDir: sortDir as 'asc' | 'desc',
+        ...dateRange,
         page: pageNum,
         limit,
       })
@@ -71,262 +148,480 @@ export function MediaManagerClient() {
     }
   }, [])
 
+  // Reload on filter changes
   useEffect(() => {
-    loadFiles(search, activeTab, 1, false)
     setPage(1)
+    loadFiles(search, activeTab, category, datePreset, sortOption, 1, false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab])
+  }, [activeTab, category, datePreset, sortOption])
 
   const handleSearchChange = (val: string) => {
     setSearch(val)
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
       setPage(1)
-      loadFiles(val, activeTab, 1, false)
+      loadFiles(val, activeTab, category, datePreset, sortOption, 1, false)
     }, 350)
   }
 
-  const handleLoadMore = () => {
-    const next = page + 1
-    setPage(next)
-    loadFiles(search, activeTab, next, true)
+  // Drag-and-drop handlers
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.currentTarget.classList.add('border-primary', 'bg-primary/5')
+  }
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.currentTarget.classList.remove('border-primary', 'bg-primary/5')
+  }
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault()
+    e.currentTarget.classList.remove('border-primary', 'bg-primary/5')
+    const droppedFiles = Array.from(e.dataTransfer.files)
+    if (droppedFiles.length > 0) await uploadFiles(droppedFiles)
   }
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const picked = Array.from(e.target.files ?? [])
-    if (!picked.length) return
-    setUploading(true)
-    let succeeded = 0
-    for (const file of picked) {
+  async function uploadFiles(filesToUpload: File[]) {
+    setUploading({ current: 0, total: filesToUpload.length })
+    let uploaded = 0
+    for (const f of filesToUpload) {
       try {
         const fd = new FormData()
-        fd.append('file', file)
+        fd.append('file', f)
         const res = await fetch('/api/upload', { method: 'POST', body: fd })
-        if (!res.ok) throw new Error('Upload failed')
-        succeeded++
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: 'Upload failed' }))
+          toast.error(`${f.name}: ${(err as { error?: string }).error || 'Upload failed'}`)
+        } else {
+          uploaded++
+          const data = await res.json() as { id?: number; url?: string }
+          if (f.type.startsWith('video/') && data.id && data.url) {
+            captureVideoDuration(data.url, data.id)
+          }
+        }
       } catch {
-        toast.error(`Failed to upload ${file.name}`)
+        toast.error(`${f.name}: Upload failed`)
       }
+      setUploading({ current: uploaded, total: filesToUpload.length })
     }
-    if (succeeded > 0) {
-      toast.success(`${succeeded} file${succeeded > 1 ? 's' : ''} uploaded`)
+    setUploading(null)
+    if (uploaded > 0) {
+      toast.success(`${uploaded} file${uploaded > 1 ? 's' : ''} uploaded`)
+      loadFiles(search, activeTab, category, datePreset, sortOption, 1, false)
       setPage(1)
-      loadFiles(search, activeTab, 1, false)
-    }
-    setUploading(false)
-    e.target.value = ''
-  }
-
-  const handleCopyUrl = async (file: MediaFile) => {
-    const url = getMediaUrl(file.key)
-    try {
-      await navigator.clipboard.writeText(url)
-      toast.success('URL copied to clipboard')
-    } catch {
-      toast.error('Could not copy to clipboard')
     }
   }
 
-  const handleDelete = async (file: MediaFile) => {
-    if (!confirm(`Delete "${file.originalName}"? This cannot be undone.`)) return
-    setDeletingId(file.id)
+  function captureVideoDuration(url: string, id: number) {
+    const video = document.createElement('video')
+    video.src = url
+    video.preload = 'metadata'
+    video.onloadedmetadata = () => {
+      const duration = Math.round(video.duration)
+      if (duration > 0) {
+        updateMediaFile(id, { duration }).catch(() => {})
+      }
+      video.remove()
+    }
+  }
+
+  function toggleSelect(file: MediaFile, idx: number, e: React.MouseEvent) {
+    if (e.shiftKey && lastClickedIdx !== null) {
+      const min = Math.min(idx, lastClickedIdx)
+      const max = Math.max(idx, lastClickedIdx)
+      const rangeIds = files.slice(min, max + 1).map(f => f.id)
+      setSelectedIds(prev => {
+        const next = new Set(prev)
+        rangeIds.forEach(id => next.add(id))
+        return next
+      })
+    } else {
+      setSelectedIds(prev => {
+        const next = new Set(prev)
+        if (next.has(file.id)) next.delete(file.id)
+        else next.add(file.id)
+        return next
+      })
+      setLastClickedIdx(idx)
+    }
+  }
+
+  async function handleBulkDelete() {
+    if (selectedIds.size === 0) return
+    if (!confirm(`Delete ${selectedIds.size} file${selectedIds.size > 1 ? 's' : ''}? This cannot be undone.`)) return
     try {
-      await deleteMediaFile(file.id)
-      setFiles(prev => prev.filter(f => f.id !== file.id))
-      toast.success('File deleted')
-      if (detailFile?.id === file.id) setDetailFile(null)
+      await bulkDeleteMediaFiles(Array.from(selectedIds))
+      toast.success(`${selectedIds.size} files deleted`)
+      setSelectedIds(new Set())
+      if (detailFile && selectedIds.has(detailFile.id)) setDetailFile(null)
+      loadFiles(search, activeTab, category, datePreset, sortOption, 1, false)
+      setPage(1)
     } catch {
-      toast.error('Failed to delete file')
+      toast.error('Bulk delete failed')
+    }
+  }
+
+  function openDetail(file: MediaFile) {
+    setDetailFile(file)
+    setEditAlt(file.altText ?? '')
+    setEditDesc(file.description ?? '')
+    setEditCategory(file.category ?? '')
+  }
+
+  async function handleFieldBlur(field: 'altText' | 'description' | 'category', value: string) {
+    if (!detailFile) return
+    setSavingField(field)
+    try {
+      await updateMediaFile(detailFile.id, { [field]: value || undefined })
+      setDetailFile(prev => prev ? { ...prev, [field]: value } : prev)
+    } catch {
+      toast.error('Failed to save')
     } finally {
-      setDeletingId(null)
+      setSavingField(null)
     }
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Media Library</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Manage uploaded files and images</p>
-        </div>
-        <div className="flex items-center gap-3">
+    <div className="flex h-full">
+      {/* Main content area */}
+      <div className="flex-1 min-w-0 flex flex-col gap-4">
+
+        {/* Upload drop zone */}
+        <div
+          ref={dropZoneRef}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
+          className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors hover:border-primary hover:bg-primary/5"
+        >
+          <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+          {uploading ? (
+            <p className="text-sm font-medium">Uploading {uploading.current} / {uploading.total}…</p>
+          ) : (
+            <>
+              <p className="text-sm font-medium">Drop files here or click to upload</p>
+              <p className="text-xs text-muted-foreground mt-1">Images up to 10 MB · Documents up to 20 MB · Videos up to 200 MB</p>
+            </>
+          )}
           <input
             ref={fileInputRef}
             type="file"
-            multiple
-            onChange={handleUpload}
             className="hidden"
+            multiple
+            accept="image/*,video/*,.pdf,.doc,.docx,.xlsx"
+            onChange={e => { if (e.target.files?.length) uploadFiles(Array.from(e.target.files)) }}
           />
-          <Button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            className="bg-primary hover:bg-primary-hover text-primary-foreground"
-          >
-            <Upload className="w-4 h-4 mr-2" />
-            {uploading ? 'Uploading…' : 'Upload'}
-          </Button>
         </div>
-      </div>
 
-      {/* Filters + Search */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as FilterTab)}>
-          <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="images">Images</TabsTrigger>
-            <TabsTrigger value="documents">Documents</TabsTrigger>
-          </TabsList>
-        </Tabs>
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Search files…"
-            className="pl-9"
-          />
-          {search && (
-            <button
-              onClick={() => handleSearchChange('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
-      </div>
+        {/* Filter bar */}
+        <div className="flex flex-wrap gap-2 items-center">
+          <Tabs value={activeTab} onValueChange={v => setActiveTab(v as FilterTab)}>
+            <TabsList>
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="images">Images</TabsTrigger>
+              <TabsTrigger value="videos">Videos</TabsTrigger>
+              <TabsTrigger value="documents">Documents</TabsTrigger>
+            </TabsList>
+          </Tabs>
 
-      {/* Grid */}
-      {loading && files.length === 0 ? (
-        <div className="flex items-center justify-center py-24 text-muted-foreground">
-          Loading…
-        </div>
-      ) : files.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 text-muted-foreground gap-3">
-          <ImageIcon className="w-12 h-12 opacity-20" />
-          <p className="text-sm">{search ? 'No files match your search.' : 'No files uploaded yet.'}</p>
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4">
-            {files.map((file) => (
-              <div
-                key={file.id}
-                className="group relative rounded-xl border border-border bg-muted/30 overflow-hidden cursor-pointer hover:border-primary/50 hover:shadow-md transition-all"
-                onClick={() => setDetailFile(file)}
-              >
-                {/* Thumbnail */}
-                <div className="aspect-square flex items-center justify-center bg-muted/50 overflow-hidden">
-                  {isImage(file.mimeType) ? (
-                    <img
-                      src={getMediaUrl(file.key)}
-                      alt={file.originalName}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <FileText className="w-10 h-10 text-muted-foreground/40" />
-                  )}
-                </div>
+          {/* Category filter */}
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger className="w-36 h-9"><SelectValue placeholder="Category" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All categories</SelectItem>
+              {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
 
-                {/* Name */}
-                <div className="px-2 py-2">
-                  <p className="text-xs text-muted-foreground truncate">{file.originalName}</p>
-                </div>
+          {/* Date filter */}
+          <Select value={datePreset} onValueChange={setDatePreset}>
+            <SelectTrigger className="w-36 h-9"><SelectValue placeholder="Date" /></SelectTrigger>
+            <SelectContent>
+              {DATE_PRESETS.map(p => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
 
-                {/* Hover overlay */}
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  <button
-                    title="Copy URL"
-                    onClick={(e) => { e.stopPropagation(); handleCopyUrl(file) }}
-                    className="p-2 rounded-lg bg-white/90 hover:bg-white text-foreground transition-colors"
-                  >
-                    <Copy className="w-4 h-4" />
-                  </button>
-                  <button
-                    title="Delete"
-                    onClick={(e) => { e.stopPropagation(); handleDelete(file) }}
-                    disabled={deletingId === file.id}
-                    className={cn(
-                      'p-2 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-colors',
-                      deletingId === file.id && 'opacity-50 pointer-events-none'
-                    )}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
+          {/* Sort */}
+          <Select value={sortOption} onValueChange={v => setSortOption(v as SortOption)}>
+            <SelectTrigger className="w-40 h-9"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="createdAt-desc">Newest first</SelectItem>
+              <SelectItem value="createdAt-asc">Oldest first</SelectItem>
+              <SelectItem value="originalName-asc">Name A–Z</SelectItem>
+              <SelectItem value="originalName-desc">Name Z–A</SelectItem>
+              <SelectItem value="fileSize-desc">Largest first</SelectItem>
+              <SelectItem value="fileSize-asc">Smallest first</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Search */}
+          <div className="relative flex-1 min-w-48">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input className="pl-8 h-9" placeholder="Search files…" value={search} onChange={e => handleSearchChange(e.target.value)} />
           </div>
 
-          {hasMore && (
-            <div className="flex justify-center pt-2">
-              <Button variant="outline" onClick={handleLoadMore} disabled={loading}>
-                {loading ? 'Loading…' : 'Load more'}
-              </Button>
+          {/* View toggle */}
+          <div className="flex border rounded-md overflow-hidden">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={cn('p-2', viewMode === 'grid' ? 'bg-muted' : 'hover:bg-muted/50')}
+            ><Grid2X2 className="h-4 w-4" /></button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={cn('p-2', viewMode === 'list' ? 'bg-muted' : 'hover:bg-muted/50')}
+            ><List className="h-4 w-4" /></button>
+          </div>
+        </div>
+
+        {/* File count */}
+        <p className="text-sm text-muted-foreground">{files.length} files{selectedIds.size > 0 ? ` · ${selectedIds.size} selected` : ''}</p>
+
+        {/* Grid view */}
+        {viewMode === 'grid' && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3">
+            {files.map((file, idx) => {
+              const selected = selectedIds.has(file.id)
+              return (
+                <div
+                  key={file.id}
+                  className={cn(
+                    'group relative aspect-square rounded-lg overflow-hidden border cursor-pointer',
+                    'hover:border-primary transition-colors',
+                    selected && 'ring-2 ring-primary border-primary',
+                    detailFile?.id === file.id && 'ring-2 ring-primary/50'
+                  )}
+                  onClick={e => {
+                    if (e.ctrlKey || e.metaKey || e.shiftKey || selectedIds.size > 0) {
+                      toggleSelect(file, idx, e)
+                    } else {
+                      openDetail(file)
+                    }
+                  }}
+                >
+                  {/* Thumbnail */}
+                  {isImage(file.mimeType) ? (
+                    <img src={file.url} alt={file.altText ?? file.originalName} className="w-full h-full object-cover" />
+                  ) : isVideo(file.mimeType) ? (
+                    <div className="w-full h-full bg-slate-900 flex flex-col items-center justify-center gap-1">
+                      <Video className="h-8 w-8 text-white/70" />
+                      {file.duration != null && (
+                        <span className="text-xs text-white/60">{formatDuration(file.duration)}</span>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="w-full h-full bg-muted flex flex-col items-center justify-center gap-1 p-2">
+                      <FileText className="h-8 w-8 text-muted-foreground" />
+                      <span className="text-xs text-center text-muted-foreground truncate w-full">{file.originalName}</span>
+                    </div>
+                  )}
+
+                  {/* Checkbox (hover-visible or always when any selected) */}
+                  <div
+                    className={cn(
+                      'absolute top-1.5 left-1.5 w-5 h-5 rounded border bg-background/80 flex items-center justify-center transition-opacity',
+                      selectedIds.size > 0 ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+                      selected && 'bg-primary border-primary'
+                    )}
+                    onClick={e => { e.stopPropagation(); toggleSelect(file, idx, e) }}
+                  >
+                    {selected && <Check className="h-3 w-3 text-primary-foreground" />}
+                  </div>
+
+                  {/* Category badge */}
+                  {file.category && (
+                    <span className="absolute bottom-1 right-1 text-xs bg-black/60 text-white px-1 rounded">
+                      {file.category}
+                    </span>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* List view */}
+        {viewMode === 'list' && (
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="w-8 p-2"></th>
+                  <th className="w-10 p-2"></th>
+                  <th className="p-2 text-left">Name</th>
+                  <th className="p-2 text-left">Type</th>
+                  <th className="p-2 text-left">Size</th>
+                  <th className="p-2 text-left">Category</th>
+                  <th className="p-2 text-left">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {files.map((file, idx) => {
+                  const selected = selectedIds.has(file.id)
+                  return (
+                    <tr
+                      key={file.id}
+                      className={cn('border-t hover:bg-muted/30 cursor-pointer', selected && 'bg-primary/5')}
+                      onClick={() => openDetail(file)}
+                    >
+                      <td className="p-2">
+                        <div
+                          className={cn('w-4 h-4 rounded border flex items-center justify-center', selected && 'bg-primary border-primary')}
+                          onClick={e => { e.stopPropagation(); toggleSelect(file, idx, e) }}
+                        >
+                          {selected && <Check className="h-2.5 w-2.5 text-primary-foreground" />}
+                        </div>
+                      </td>
+                      <td className="p-2">
+                        {isImage(file.mimeType) ? (
+                          <img src={file.url} alt="" className="w-8 h-8 rounded object-cover" />
+                        ) : isVideo(file.mimeType) ? (
+                          <div className="w-8 h-8 bg-slate-900 rounded flex items-center justify-center">
+                            <Video className="h-4 w-4 text-white/70" />
+                          </div>
+                        ) : (
+                          <div className="w-8 h-8 bg-muted rounded flex items-center justify-center">
+                            <FileText className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        )}
+                      </td>
+                      <td className="p-2 max-w-48 truncate">{file.originalName}</td>
+                      <td className="p-2 text-muted-foreground">{file.mimeType.split('/')[1]}</td>
+                      <td className="p-2 text-muted-foreground">{formatBytes(file.fileSize)}</td>
+                      <td className="p-2 text-muted-foreground">{file.category || '—'}</td>
+                      <td className="p-2 text-muted-foreground">{new Date(file.createdAt).toLocaleDateString()}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Load more */}
+        {hasMore && (
+          <Button variant="outline" onClick={() => { const next = page + 1; setPage(next); loadFiles(search, activeTab, category, datePreset, sortOption, next, true) }}>
+            Load more
+          </Button>
+        )}
+
+        {!loading && files.length === 0 && (
+          <p className="text-center text-muted-foreground py-16">No files found</p>
+        )}
+      </div>
+
+      {/* Detail side panel */}
+      {detailFile && (
+        <div className="w-80 shrink-0 border-l ml-4 pl-4 flex flex-col gap-4 overflow-y-auto">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-sm">File Details</h3>
+            <button onClick={() => setDetailFile(null)} className="text-muted-foreground hover:text-foreground">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Preview */}
+          {isImage(detailFile.mimeType) ? (
+            <img src={detailFile.url} alt={detailFile.altText ?? ''} className="w-full rounded-lg object-cover max-h-48" />
+          ) : isVideo(detailFile.mimeType) ? (
+            <video src={detailFile.url} controls className="w-full rounded-lg max-h-48" />
+          ) : (
+            <div className="w-full h-24 bg-muted rounded-lg flex items-center justify-center">
+              <FileText className="h-10 w-10 text-muted-foreground" />
             </div>
           )}
-        </>
+
+          {/* Metadata */}
+          <div className="space-y-1 text-xs text-muted-foreground">
+            <p className="truncate font-medium text-foreground">{detailFile.originalName}</p>
+            <p>{detailFile.mimeType} · {formatBytes(detailFile.fileSize)}</p>
+            {detailFile.duration != null && <p>Duration: {formatDuration(detailFile.duration)}</p>}
+            <p>Uploaded: {new Date(detailFile.createdAt).toLocaleString()}</p>
+          </div>
+
+          {/* Editable fields */}
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-xs font-medium">Alt Text</label>
+              <Input
+                value={editAlt}
+                onChange={e => setEditAlt(e.target.value)}
+                onBlur={() => handleFieldBlur('altText', editAlt)}
+                placeholder="Describe the image for accessibility"
+                className="text-xs h-8"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium">Description</label>
+              <Textarea
+                value={editDesc}
+                onChange={e => setEditDesc(e.target.value)}
+                onBlur={() => handleFieldBlur('description', editDesc)}
+                placeholder="Optional caption or description"
+                rows={2}
+                className="text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium">Category</label>
+              <Select
+                value={editCategory || '__none__'}
+                onValueChange={v => {
+                  const val = v === '__none__' ? '' : v
+                  setEditCategory(val)
+                  handleFieldBlur('category', val)
+                }}
+              >
+                <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Uncategorised" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Uncategorised</SelectItem>
+                  {CATEGORY_OPTIONS.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            {savingField && <p className="text-xs text-muted-foreground">Saving…</p>}
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => { navigator.clipboard.writeText(detailFile.url); toast.success('URL copied') }}
+            >
+              <Copy className="h-3 w-3 mr-1" /> Copy URL
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={async () => {
+                if (!confirm('Delete this file?')) return
+                try {
+                  await deleteMediaFile(detailFile.id)
+                  setDetailFile(null)
+                  setFiles(prev => prev.filter(f => f.id !== detailFile.id))
+                  toast.success('File deleted')
+                } catch {
+                  toast.error('Delete failed')
+                }
+              }}
+            >
+              <Trash2 className="h-3 w-3 mr-1" /> Delete
+            </Button>
+          </div>
+        </div>
       )}
 
-      {/* File detail dialog */}
-      <Dialog open={!!detailFile} onOpenChange={(v) => !v && setDetailFile(null)}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="truncate text-sm font-semibold">
-              {detailFile?.originalName}
-            </DialogTitle>
-          </DialogHeader>
-          {detailFile && (
-            <div className="space-y-4">
-              {isImage(detailFile.mimeType) ? (
-                <img
-                  src={getMediaUrl(detailFile.key)}
-                  alt={detailFile.originalName}
-                  className="w-full max-h-72 object-contain rounded-lg border bg-muted/30"
-                />
-              ) : (
-                <div className="flex items-center justify-center h-32 bg-muted/30 rounded-lg border">
-                  <FileText className="w-12 h-12 text-muted-foreground/40" />
-                </div>
-              )}
-              <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                <dt className="text-muted-foreground">File name</dt>
-                <dd className="font-medium truncate">{detailFile.originalName}</dd>
-                <dt className="text-muted-foreground">Type</dt>
-                <dd className="font-medium">{detailFile.mimeType}</dd>
-                <dt className="text-muted-foreground">Size</dt>
-                <dd className="font-medium">{formatBytes(detailFile.fileSize)}</dd>
-                <dt className="text-muted-foreground">Uploaded</dt>
-                <dd className="font-medium">
-                  {detailFile.createdAt
-                    ? new Date(detailFile.createdAt).toLocaleDateString()
-                    : '—'}
-                </dd>
-              </dl>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleCopyUrl(detailFile)}
-                >
-                  <Copy className="w-3.5 h-3.5 mr-1.5" />
-                  Copy URL
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => handleDelete(detailFile)}
-                  disabled={deletingId === detailFile.id}
-                >
-                  <Trash2 className="w-3.5 h-3.5 mr-1.5" />
-                  Delete
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Bulk action floating bar */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-background border shadow-lg rounded-full px-4 py-2 flex items-center gap-3 z-50">
+          <span className="text-sm font-medium">{selectedIds.size} selected</span>
+          <button className="text-sm text-muted-foreground hover:text-foreground" onClick={() => setSelectedIds(new Set())}>
+            Deselect all
+          </button>
+          <Button size="sm" variant="destructive" onClick={handleBulkDelete}>
+            <Trash2 className="h-3 w-3 mr-1" /> Delete {selectedIds.size}
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

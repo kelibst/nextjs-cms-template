@@ -2,6 +2,7 @@ import { db } from '@/lib/db'
 import { eventRegistrations } from '@/lib/db'
 import { eq } from 'drizzle-orm'
 import { verifyPayment } from '@/lib/paystack'
+import { audit } from '@/lib/audit'
 
 export async function GET(req: Request) {
   const url = new URL(req.url)
@@ -23,6 +24,8 @@ export async function GET(req: Request) {
         .update(eventRegistrations)
         .set({ paymentStatus: 'complete', paymentReference: reference })
         .where(eq(eventRegistrations.id, registrationId))
+
+      void audit({ action: 'payment.verified', metadata: { reference, registrationId } })
 
       const destination = slug
         ? `${appUrl}/events/${slug}?registered=true`

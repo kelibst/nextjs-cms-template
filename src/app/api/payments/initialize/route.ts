@@ -3,8 +3,15 @@ import { db } from '@/lib/db'
 import { eventRegistrations, events } from '@/lib/db'
 import { eq } from 'drizzle-orm'
 import { initializePayment } from '@/lib/paystack'
+import { auth } from '@/auth'
+import { audit } from '@/lib/audit'
 
 export async function POST(req: Request) {
+  const session = await auth()
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { registrationId } = (await req.json()) as { registrationId: string }
 
   if (!registrationId) {
@@ -16,6 +23,11 @@ export async function POST(req: Request) {
   })
   if (!registration) {
     return NextResponse.json({ error: 'Registration not found' }, { status: 404 })
+  }
+
+  // Verify ownership: registration must belong to the authenticated user
+  if (registration.userId !== session.user.id && registration.email !== session.user.email) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
   const event = await db.query.events.findFirst({
@@ -45,6 +57,7 @@ export async function POST(req: Request) {
       },
     })
 
+    void audit({ userId: session.user.id, action: 'payment.initialized', metadata: { registrationId, reference } })
     return NextResponse.json({ authorizationUrl: result.authorizationUrl })
   } catch (err) {
     console.error('[payments/initialize] Paystack error:', err)

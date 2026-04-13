@@ -12,14 +12,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { getMediaFiles } from '@/app/actions/media'
 import { getMediaUrl } from '@/lib/media-url'
-import { ImageIcon, FileText, Upload, Search } from 'lucide-react'
+import { ImageIcon, FileText, Video, Upload, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface MediaPickerModalProps {
   open: boolean
   onClose: () => void
   onSelect: (url: string) => void
-  accept?: 'image' | 'document' | 'all'
+  accept?: 'image' | 'video' | 'document' | 'all'
   title?: string
 }
 
@@ -27,6 +27,10 @@ type MediaFile = Awaited<ReturnType<typeof getMediaFiles>>[number]
 
 function isImage(mimeType: string) {
   return mimeType.startsWith('image/')
+}
+
+function isVideo(mimeType: string) {
+  return mimeType.startsWith('video/')
 }
 
 export function MediaPickerModal({
@@ -47,6 +51,7 @@ export function MediaPickerModal({
 
   const getMimeFilter = () => {
     if (accept === 'image') return 'image'
+    if (accept === 'video') return 'video'
     if (accept === 'document') return 'application'
     return undefined
   }
@@ -130,7 +135,12 @@ export function MediaPickerModal({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept={accept === 'image' ? 'image/*' : accept === 'document' ? '.pdf,.doc,.docx,.xlsx' : '*'}
+                accept={
+                  accept === 'image' ? 'image/*' :
+                  accept === 'video' ? 'video/*' :
+                  accept === 'document' ? '.pdf,.doc,.docx,.xlsx' :
+                  'image/*,video/*,.pdf,.doc,.docx,.xlsx'
+                }
                 onChange={handleUpload}
                 className="hidden"
               />
@@ -182,8 +192,14 @@ export function MediaPickerModal({
                           alt={file.originalName}
                           className="w-full h-full object-cover"
                         />
+                      ) : isVideo(file.mimeType) ? (
+                        <div className="w-full h-full bg-slate-900 flex items-center justify-center">
+                          <Video className="h-6 w-6 text-white/70" />
+                        </div>
                       ) : (
-                        <FileText className="w-8 h-8 text-muted-foreground/50" />
+                        <div className="w-full h-full bg-muted flex items-center justify-center">
+                          <FileText className="h-6 w-6 text-muted-foreground" />
+                        </div>
                       )}
                     </div>
                     <div className="px-1.5 py-1.5">
@@ -216,7 +232,7 @@ interface ImageFieldProps {
   label?: string
   value: string
   onChange: (url: string) => void
-  accept?: 'image' | 'document' | 'all'
+  accept?: 'image' | 'video' | 'document' | 'all'
   pickerTitle?: string
   /** If true, shows a round avatar preview instead of a wide banner */
   avatar?: boolean
@@ -236,7 +252,11 @@ export function ImageField({
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const acceptAttr = accept === 'image' ? 'image/*' : accept === 'document' ? '.pdf,.doc,.docx,.xlsx' : '*'
+  const acceptAttr =
+    accept === 'image' ? 'image/*' :
+    accept === 'video' ? 'video/*' :
+    accept === 'document' ? '.pdf,.doc,.docx,.xlsx' :
+    'image/*,video/*,.pdf,.doc,.docx,.xlsx'
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -264,7 +284,9 @@ export function ImageField({
 
       {/* Preview */}
       {value && accept !== 'document' && (
-        avatar ? (
+        value.match(/\.(mp4|webm|ogg|mov)$/i) || value.includes('/videos/') ? (
+          <video src={value} className="h-16 w-16 rounded object-cover" />
+        ) : avatar ? (
           <img src={value} alt="Preview" className="w-20 h-20 rounded-full object-cover border" />
         ) : (
           <img src={value} alt="Preview" className="h-32 w-full object-cover rounded-lg border" />

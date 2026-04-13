@@ -7,6 +7,7 @@ import { eq } from 'drizzle-orm'
 import { can } from '@/lib/permissions'
 import type { Role } from '@/lib/permissions'
 import { revalidatePath } from 'next/cache'
+import { audit } from '@/lib/audit'
 
 export async function submitLoanApplication(data: {
   applicantName: string
@@ -56,7 +57,7 @@ export async function reviewApplication(
 ) {
   const session = await auth()
   if (!session) throw new Error('Unauthorized')
-  if (!can(session.user.role as Role, 'members:manage')) throw new Error('Forbidden')
+  if (!can(session.user.role as Role, 'fund:review')) throw new Error('Forbidden')
 
   await db
     .update(fundApplications)
@@ -67,6 +68,8 @@ export async function reviewApplication(
       reviewedBy: session.user.id,
     })
     .where(eq(fundApplications.id, id))
+
+  void audit({ userId: session.user.id, action: 'fund.reviewed', metadata: { applicationId: id, status, notes: notes ?? null } })
 
   revalidatePath('/dashboard/fund-applications')
   return { success: true }

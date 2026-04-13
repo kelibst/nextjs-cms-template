@@ -4,9 +4,10 @@ import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { auth, signOut } from "@/auth";
 import { db, users, members } from "@/lib/db";
-import { eq, ilike } from "drizzle-orm";
+import { eq, ilike, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { sendPasswordResetEmail } from "@/lib/email";
+import { audit } from "@/lib/audit";
 
 export async function handleSignOut() {
   await signOut({ redirectTo: "/" });
@@ -43,6 +44,8 @@ export async function requestPasswordReset(email: string) {
       passwordResetTokenExpiry: expiry,
     })
     .where(eq(users.id, user.id));
+
+  void audit({ userId: user.id, action: 'auth.password_reset.requested', metadata: { email: user.email } })
 
   // Send email with raw token in URL
   const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${rawToken}`;
@@ -93,8 +96,11 @@ export async function resetPassword(rawToken: string, newPassword: string) {
       passwordResetToken: null,
       passwordResetTokenExpiry: null,
       updatedAt: new Date(),
+      tokenVersion: sql`${users.tokenVersion} + 1`,
     })
     .where(eq(users.id, user.id));
+
+  void audit({ userId: user.id, action: 'auth.password_reset.completed' })
 
   return { success: true };
 }

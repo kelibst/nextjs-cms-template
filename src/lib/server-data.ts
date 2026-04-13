@@ -1,5 +1,5 @@
 import 'server-only'
-import { getAllPosts, getPostBySlug, type Post } from '@/lib/data'
+import { getAllPosts, getPostBySlug, type Post, type LeadershipMember } from '@/lib/data'
 
 /**
  * Fetches posts: DB-published posts first, then falls back to JSON scraped data.
@@ -52,6 +52,30 @@ export async function getPublicPosts(): Promise<Post[]> {
     // DB not available — fall back to JSON data
     return getAllPosts()
   }
+}
+
+/**
+ * Fetches active leadership members from the DB, ordered by sortOrder.
+ * Only for use in server components / server actions.
+ */
+export async function getLeadershipFromDb(): Promise<LeadershipMember[]> {
+  const { db } = await import('@/lib/db')
+  const { leadership } = await import('../../drizzle/schema')
+  const { asc, eq } = await import('drizzle-orm')
+  const rows = await db
+    .select()
+    .from(leadership)
+    .where(eq(leadership.isActive, true))
+    .orderBy(asc(leadership.sortOrder))
+  return rows.map((r) => ({
+    name: r.name,
+    role: r.role,
+    imageUrl: r.imageUrl ?? '',
+    localImage: '',
+    bio: r.bio ?? null,
+    facebookUrl: r.facebookUrl ?? null,
+    sortOrder: r.sortOrder,
+  }))
 }
 
 /**

@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { getAllPosts, getLeadership, getGalleryAlbums, getEvents, getAbout, getPracticeAreas, getFund, getBlocksForPage } from "@/lib/data";
+import { getAllPosts, getGalleryAlbums, getEvents, getAbout, getPracticeAreas, getFund, getBlocksForPage } from "@/lib/data";
+import { getLeadershipFromDb } from "@/lib/server-data";
 import { getMediaUrl } from "@/lib/media-url";
 import { HeroCarousel } from "@/components/home/hero-carousel";
 import { StatsBar } from "@/components/home/stats-bar";
@@ -19,7 +20,7 @@ export default async function Home() {
   const isLoggedIn = !!session?.user;
 
   const posts = getAllPosts();
-  const leaders = getLeadership();
+  const leaders = await getLeadershipFromDb();
   const albums = getGalleryAlbums();
   const events = getEvents();
   const about = getAbout();

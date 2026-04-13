@@ -9,6 +9,7 @@ import {
   timestamp,
   primaryKey,
   serial,
+  json,
 } from 'drizzle-orm/pg-core'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -74,6 +75,7 @@ export const users = pgTable('users', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   passwordResetToken: text('password_reset_token'),
   passwordResetTokenExpiry: timestamp('password_reset_token_expiry'),
+  tokenVersion: integer('token_version').notNull().default(0),
 })
 
 export const posts = pgTable('posts', {
@@ -330,6 +332,20 @@ export const emailPreferences = pgTable('email_preferences', {
 })
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Audit Logs
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const auditLogs = pgTable('audit_logs', {
+  id:          uuid('id').primaryKey().defaultRandom(),
+  userId:      uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+  action:      text('action').notNull(),
+  metadata:    json('metadata'),
+  ipAddress:   text('ip_address'),
+  userAgent:   text('user_agent'),
+  createdAt:   timestamp('created_at').notNull().defaultNow(),
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Type inference helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -365,6 +381,9 @@ export type NewPublication = typeof publications.$inferInsert
 
 export type Member = typeof members.$inferSelect
 export type NewMember = typeof members.$inferInsert
+
+export type AuditLog = typeof auditLogs.$inferSelect
+export type NewAuditLog = typeof auditLogs.$inferInsert
 
 export type Announcement = typeof announcements.$inferSelect
 export type NewAnnouncement = typeof announcements.$inferInsert
@@ -441,6 +460,11 @@ export const mediaFiles = pgTable('media_files', {
   height: integer('height'),
   uploadedBy: uuid('uploaded_by').references(() => users.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+  category:    text('category'),
+  altText:     text('alt_text'),
+  description: text('description'),
+  duration:    integer('duration'),
+  updatedAt:   timestamp('updated_at').defaultNow().notNull(),
   deletedAt: timestamp('deleted_at'),
 })
 

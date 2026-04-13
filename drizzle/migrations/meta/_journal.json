@@ -78,6 +78,20 @@
       "when": 1775929702526,
       "tag": "0010_breezy_microchip",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1775969034230,
+      "tag": "0011_broken_greymalkin",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1775969403281,
+      "tag": "0012_polite_red_shift",
+      "breakpoints": true
     }
   ]
 }
