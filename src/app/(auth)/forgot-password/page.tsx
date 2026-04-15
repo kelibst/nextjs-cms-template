@@ -21,7 +21,7 @@ export default function ForgotPasswordPage() {
                 />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold tracking-wide text-primary-foreground">GAPHTO</h1>
+            <h1 className="text-2xl font-bold tracking-wide text-primary-foreground">{process.env.NEXT_PUBLIC_SITE_NAME ?? 'My CMS'}</h1>
             <p className="mt-1 text-sm text-primary-foreground/70">Member Portal</p>
           </Link>
         </div>
@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
 
       {/* Footer note */}
       <p className="mt-8 text-sm text-muted-foreground/60">
-        &copy; {new Date().getFullYear()} GAPHTO. All rights reserved.
+        &copy; {new Date().getFullYear()} {process.env.NEXT_PUBLIC_SITE_NAME ?? 'My CMS'}. All rights reserved.
       </p>
     </div>
   );

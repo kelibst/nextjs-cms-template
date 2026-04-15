@@ -103,7 +103,7 @@ export default async function MemberLearningPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">CPD Learning</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Continuing Professional Development courses for GAPHTO members
+          Continuing Professional Development courses for members
         </p>
       </div>
 

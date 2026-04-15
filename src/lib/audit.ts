@@ -6,10 +6,7 @@ export type AuditAction =
   | 'auth.logout'
   | 'auth.password_reset.requested'
   | 'auth.password_reset.completed'
-  | 'payment.initialized'
-  | 'payment.verified'
   | 'media.deleted'
-  | 'fund.reviewed'
   | 'admin.content.published'
 
 interface AuditOptions {

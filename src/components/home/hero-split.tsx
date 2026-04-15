@@ -27,17 +27,17 @@ export function HeroSplit({ heroTitle, heroSubtitle, heroLabel, heroImage, isLog
         {/* Badge */}
         <span className="inline-flex items-center gap-2 bg-primary-subtle text-primary text-sm font-medium px-4 py-1.5 rounded-full w-fit">
           <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          {heroLabel || "Ghana's Public Health Association"}
+          {heroLabel || (process.env.NEXT_PUBLIC_SITE_NAME ?? 'My CMS')}
         </span>
 
         {/* Headline */}
         <h1 className="text-4xl lg:text-6xl font-black text-foreground tracking-tight leading-[1.05]">
-          {heroTitle || 'We are the backbone of Public Health in Ghana'}
+          {heroTitle || 'Welcome to Our Platform'}
         </h1>
 
         {/* Subtitle */}
         <p className="text-lg text-muted-foreground leading-relaxed max-w-lg">
-          {heroSubtitle || 'Uniting Disease Control, Health Information, and Nutrition professionals to build a healthier Ghana.'}
+          {heroSubtitle || 'Connecting professionals and communities through shared purpose.'}
         </p>
 
         {/* CTA buttons */}
@@ -70,7 +70,7 @@ export function HeroSplit({ heroTitle, heroSubtitle, heroLabel, heroImage, isLog
           <span className="text-muted-foreground/40">·</span>
           <span className="flex items-center gap-1.5">
             <MapPin className="w-4 h-4 text-primary" />
-            <strong className="text-foreground">16</strong> Regions
+            <strong className="text-foreground">Local</strong> Presence
           </span>
         </div>
       </motion.div>

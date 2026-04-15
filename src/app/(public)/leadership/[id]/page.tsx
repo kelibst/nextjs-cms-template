@@ -55,8 +55,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!leader) return { title: "Leader Not Found" };
 
   return {
-    title: `${leader.name} — GAPHTO Leadership`,
-    description: leader.bio ?? `${leader.name}, ${leader.role} at GAPHTO`,
+    title: leader.name,
+    description: leader.bio ?? `${leader.name}, ${leader.role}`,
   };
 }
 

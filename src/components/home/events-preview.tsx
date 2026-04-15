@@ -121,7 +121,7 @@ export function EventsPreview({ events, heading = 'Events & Programs', count }: 
 
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-foreground/80">
-                        {event.priceGhs > 0 ? `GH₵ ${event.priceGhs.toLocaleString()}` : 'Free'}
+                        {event.price > 0 ? `$${event.price.toLocaleString()}` : 'Free'}
                       </span>
                       <Button
                         asChild

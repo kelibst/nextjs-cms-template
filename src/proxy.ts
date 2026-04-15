@@ -14,15 +14,13 @@ export default auth((req) => {
   const isMemberArea =
     nextUrl.pathname.startsWith('/member-centre') ||
     nextUrl.pathname.startsWith('/publications')
-  const isFundApply = nextUrl.pathname === '/fund/apply'
-
   if (isDashboard) {
     if (!isLoggedIn) return NextResponse.redirect(new URL('/login', nextUrl))
     if (!['super_admin', 'admin', 'editor'].includes(role))
       return NextResponse.redirect(new URL('/member-centre', nextUrl))
   }
 
-  if (isMemberArea || isFundApply) {
+  if (isMemberArea) {
     if (!isLoggedIn) {
       const loginUrl = new URL('/login', nextUrl)
       loginUrl.searchParams.set('callbackUrl', nextUrl.pathname)
@@ -38,6 +36,5 @@ export const config = {
     '/dashboard/:path*',
     '/member-centre/:path*',
     '/publications/:path*',
-    '/fund/apply',
   ],
 }

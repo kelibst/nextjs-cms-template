@@ -1,18 +1,16 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Phone, Mail, MapPin } from 'lucide-react'
+import { Mail, MapPin } from 'lucide-react'
 import Logo from './Logo'
 
 const fallbackQuickLinks = [
   { label: 'Home', href: '/' },
   { label: 'About Us', href: '/about' },
-  { label: 'GAPHTO News', href: '/news' },
-  { label: 'Health News', href: '/news/health-news' },
+  { label: 'News', href: '/news' },
   { label: 'Leadership', href: '/leadership' },
   { label: 'Gallery', href: '/gallery' },
   { label: 'Events', href: '/events' },
   { label: 'Contact', href: '/contact' },
-  { label: 'GAPHTO Fund', href: '/fund' },
 ]
 
 interface FooterProps {
@@ -30,15 +28,12 @@ export function Footer({ navLinks = fallbackQuickLinks }: FooterProps) {
           <div>
             <Logo />
             <p className="text-sm text-white/70 leading-relaxed mb-4">
-              Ghana Association of Public Health Technical Officers — uniting Disease Control Officers,
-              Health Information Officers, Nutrition Officers, and Field Technicians nationwide.
+              A modern CMS and membership platform template for organisations of any size.
             </p>
             <div className="flex items-center gap-3 mt-4">
               {/* Facebook */}
               <a
-                href="https://web.facebook.com/gaphto"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#"
                 aria-label="Facebook"
                 className="text-white/70 hover:text-white transition-colors"
               >
@@ -48,9 +43,7 @@ export function Footer({ navLinks = fallbackQuickLinks }: FooterProps) {
               </a>
               {/* X / Twitter */}
               <a
-                href="https://twitter.com/gaphto"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#"
                 aria-label="X (Twitter)"
                 className="text-white/70 hover:text-white transition-colors"
               >
@@ -60,9 +53,7 @@ export function Footer({ navLinks = fallbackQuickLinks }: FooterProps) {
               </a>
               {/* YouTube */}
               <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#"
                 aria-label="YouTube"
                 className="text-white/70 hover:text-white transition-colors"
               >
@@ -101,21 +92,17 @@ export function Footer({ navLinks = fallbackQuickLinks }: FooterProps) {
             </h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-2 text-sm text-white/70">
-                <Phone className="size-4 shrink-0 mt-0.5" />
-                <span>030 296 4402</span>
-              </li>
-              <li className="flex items-start gap-2 text-sm text-white/70">
                 <Mail className="size-4 shrink-0 mt-0.5" />
                 <a
-                  href="mailto:info@gaphto.org"
+                  href="mailto:contact@example.com"
                   className="hover:text-white transition-colors"
                 >
-                  info@gaphto.org
+                  contact@example.com
                 </a>
               </li>
               <li className="flex items-start gap-2 text-sm text-white/70">
                 <MapPin className="size-4 shrink-0 mt-0.5" />
-                <span>GAPHTO National Secretariat, Accra, Ghana</span>
+                <span>Your Organisation Address</span>
               </li>
             </ul>
           </div>
@@ -126,7 +113,7 @@ export function Footer({ navLinks = fallbackQuickLinks }: FooterProps) {
       <div className="border-t border-primary/30">
         <div className="px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <p className="text-xs text-white/60">
-            &copy; {currentYear} GAPHTO. All rights reserved.
+            &copy; {currentYear} {process.env.NEXT_PUBLIC_SITE_NAME ?? 'My CMS'}. All rights reserved.
           </p>
         </div>
       </div>

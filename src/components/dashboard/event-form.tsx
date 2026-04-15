@@ -35,7 +35,7 @@ export function EventForm({ event }: EventFormProps) {
   const [regDeadline, setRegDeadline] = useState(
     event?.registrationDeadline ? new Date(event.registrationDeadline).toISOString().split('T')[0] : ''
   )
-  const [priceGhs, setPriceGhs] = useState(event?.priceGhs ? String(event.priceGhs) : '0')
+  const [price, setPrice] = useState(event?.price ? String(event.price) : '0')
   const [maxAttendees, setMaxAttendees] = useState(event?.maxAttendees ? String(event.maxAttendees) : '')
   const [status, setStatus] = useState(event?.status ?? 'upcoming')
   const [featuredImage, setFeaturedImage] = useState(event?.featuredImage ?? '')
@@ -54,7 +54,7 @@ export function EventForm({ event }: EventFormProps) {
         startDate: startDate || null,
         endDate: endDate || null,
         registrationDeadline: regDeadline || null,
-        priceGhs: priceGhs || '0',
+        price: price || '0',
         maxAttendees: maxAttendees ? Number(maxAttendees) : null,
         status,
         featuredImage: featuredImage || null,
@@ -120,8 +120,8 @@ export function EventForm({ event }: EventFormProps) {
           <Input type="date" value={regDeadline} onChange={(e) => setRegDeadline(e.target.value)} />
         </div>
         <div className="space-y-1">
-          <label className="text-sm font-medium">Price (GHS)</label>
-          <Input type="number" min="0" step="0.01" value={priceGhs} onChange={(e) => setPriceGhs(e.target.value)} />
+          <label className="text-sm font-medium">Ticket Price (optional)</label>
+          <Input type="number" min="0" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} />
         </div>
         <div className="space-y-1">
           <label className="text-sm font-medium">Max Attendees</label>

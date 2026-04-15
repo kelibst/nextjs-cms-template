@@ -1,6 +1,6 @@
 // Required environment variables:
 //   RESEND_API_KEY=re_...       — Resend API key (get from resend.com)
-//   ADMIN_EMAIL=admin@gaphto.org — email address that receives contact notifications
+//   ADMIN_EMAIL=admin@example.com — email address that receives contact notifications
 
 import { Resend } from 'resend'
 
@@ -17,8 +17,9 @@ function getResend(): Resend {
   return _resend
 }
 
-const FROM = 'GAPHTO <noreply@gaphto.org>'
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'admin@gaphto.org'
+const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? 'My CMS'
+const FROM = `${SITE_NAME} <noreply@example.com>`
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'admin@example.com'
 
 // Sent to the person who submitted the contact form
 export async function sendContactAcknowledgement(
@@ -30,7 +31,7 @@ export async function sendContactAcknowledgement(
     from: FROM,
     to,
     subject: `We received your message: ${subject}`,
-    html: `<p>Hi ${name},</p><p>Thank you for contacting GAPHTO. We have received your message and will get back to you shortly.</p><p>— GAPHTO Team</p>`,
+    html: `<p>Hi ${name},</p><p>Thank you for contacting ${SITE_NAME}. We have received your message and will get back to you shortly.</p><p>— ${SITE_NAME} Team</p>`,
   })
 }
 
@@ -60,14 +61,14 @@ export async function sendPasswordResetEmail(to: string, name: string, resetUrl:
   await r.emails.send({
     from: FROM,
     to,
-    subject: 'Reset your GAPHTO password',
+    subject: `Reset your ${SITE_NAME} password`,
     html: `
       <p>Hi ${name},</p>
       <p>Click the link below to reset your password (valid for 1 hour):</p>
       <p><a href="${resetUrl}" style="background:#166534;color:white;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">Reset Password</a></p>
       <p>Or copy this link: ${resetUrl}</p>
       <p>If you didn't request this, ignore this email — your password won't change.</p>
-      <p>— GAPHTO Team</p>
+      <p>— ${SITE_NAME} Team</p>
     `,
   })
 }
@@ -87,14 +88,14 @@ export async function sendNewsletterEmail(
     html: `
       <div style="max-width:600px;margin:0 auto;font-family:sans-serif;">
         <div style="background:#166534;padding:20px;text-align:center;">
-          <h1 style="color:white;margin:0;">GAPHTO Newsletter</h1>
+          <h1 style="color:white;margin:0;">${SITE_NAME} Newsletter</h1>
         </div>
         <div style="padding:24px;">
           <p>Dear ${name},</p>
           ${htmlContent}
         </div>
         <div style="padding:16px;text-align:center;font-size:12px;color:#666;border-top:1px solid #eee;">
-          <p>You are receiving this because you are a GAPHTO member.<br/>
+          <p>You are receiving this because you are a ${SITE_NAME} member.<br/>
           <a href="${unsubscribeUrl}">Unsubscribe from newsletters</a></p>
         </div>
       </div>
@@ -114,13 +115,13 @@ export async function sendEventAlertEmail(
   await getResend().emails.send({
     from: FROM,
     to,
-    subject: `Upcoming GAPHTO Event: ${eventTitle}`,
+    subject: `Upcoming Event: ${eventTitle}`,
     html: `
       <p>Hi ${name},</p>
-      <p>A new GAPHTO event has been scheduled: <strong>${eventTitle}</strong></p>
+      <p>A new event has been scheduled: <strong>${eventTitle}</strong></p>
       <p>Date: ${eventDate}</p>
       <p><a href="${appUrl}/events/${eventSlug}" style="background:#166534;color:white;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">View Event Details</a></p>
-      <p>— GAPHTO Team</p>
+      <p>— ${SITE_NAME} Team</p>
     `,
   })
 }
@@ -143,7 +144,7 @@ export async function sendEventRegistrationConfirmation(params: {
       : ''
 
   const paymentLine = params.isPaid
-    ? `<p>Your registration is <strong>pending payment</strong> of GHS ${params.amount}. Please complete payment to confirm your spot.</p>`
+    ? `<p>Your registration is <strong>pending payment</strong> of ${params.amount}. Please complete payment to confirm your spot.</p>`
     : `<p>Your registration is <strong>confirmed</strong>. No payment required.</p>`
 
   await getResend().emails.send({
@@ -156,8 +157,8 @@ export async function sendEventRegistrationConfirmation(params: {
       <p>Date: ${params.eventDate}</p>
       ${locationLine ? `<p>${locationLine}</p>` : ''}
       ${paymentLine}
-      <p>If you have any questions, contact us at info@gaphto.org.</p>
-      <p>— GAPHTO Team</p>
+      <p>If you have any questions, contact us at ${ADMIN_EMAIL}.</p>
+      <p>— ${SITE_NAME} Team</p>
     `,
   })
 }

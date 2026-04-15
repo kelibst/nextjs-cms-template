@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: "Contact Us",
   description:
-    "Get in touch with GAPHTO — Ghana Association of Public Health Technical Officers.",
+    "Get in touch with us — we'd love to hear from you.",
 };
 
 export default async function ContactPage() {
@@ -23,7 +23,7 @@ export default async function ContactPage() {
   const hero = getHeroContent(blocks, {
     title: 'Contact Us',
     label: 'Get in Touch',
-    subtitle: "We'd love to hear from you. Reach out to GAPHTO.",
+    subtitle: "We'd love to hear from you.",
   })
 
   const contentBlocks = blocks.filter(b => b.type !== 'hero')
@@ -57,7 +57,7 @@ export default async function ContactPage() {
                 Get In Touch
               </h2>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                Have a question or want to connect with GAPHTO? Use the contact
+                Have a question or want to connect? Use the contact
                 details below or send us a message using the form.
               </p>
             </div>
@@ -159,11 +159,9 @@ export default async function ContactPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                 </svg>
                 <div>
-                  <p className="text-sm font-semibold text-primary/80">National Secretariat</p>
+                  <p className="text-sm font-semibold text-primary/80">Main Office</p>
                   <p className="mt-1 text-sm text-primary">
-                    Ghana Association of Public Health Technical Officers (GAPHTO)
-                    <br />
-                    Accra, Ghana
+                    Your Organisation Address
                   </p>
                   {contact.address && (
                     <p className="mt-1 text-sm text-primary">{contact.address}</p>

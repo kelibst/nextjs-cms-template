@@ -5,10 +5,10 @@ import {
   type RichTextContent,
   type NewsPreviewContent,
   type EventsPreviewContent,
-  type PracticeAreasContent,
+  type FeaturesGridContent,
   type LeadershipPreviewContent,
   type GalleryTeaserContent,
-  type FundCtaContent,
+  type CtaSectionContent,
   type ImageBannerContent,
   type ObjectivesContent,
   type TimelineContent,
@@ -24,11 +24,11 @@ import { HeroBold } from "@/components/home/hero-bold"
 import { StatsBar } from "@/components/home/stats-bar"
 import { NewsPreview } from "@/components/home/news-preview"
 import { EventsPreview } from "@/components/home/events-preview"
-import { PracticeAreas } from "@/components/home/practice-areas"
+import { FeaturesGrid } from "@/components/home/features-grid"
 import { LeadershipPreview } from "@/components/home/leadership-preview"
 import { GalleryTeaser } from "@/components/home/gallery-teaser"
 import { AboutSection } from "@/components/home/about-section"
-import { FundCta } from "@/components/home/fund-cta"
+import { CtaSection } from "@/components/home/cta-section"
 import { ImageBanner } from "@/components/home/image-banner"
 
 // About-specific section components
@@ -58,8 +58,6 @@ export interface BlockDataSources {
   leaders?: any[]
   albums?: any[]
   about?: any
-  practiceAreas?: any[]
-  fund?: any
   isLoggedIn?: boolean
   galleryImageSrc?: string
 }
@@ -153,18 +151,35 @@ function renderHomepageBlock(block: BlockRow, dataSources: BlockDataSources) {
       )
     }
 
-    case "practice_areas_grid": {
-      const content = parseBlockContent<PracticeAreasContent>(block.content, {
+    case "features_grid": {
+      const content = parseBlockContent<FeaturesGridContent>(block.content, {
         heading: "Our Areas of Practice",
         items: [],
       })
       const areas = (content.items && content.items.length > 0)
         ? (content.items as any[])
-        : (dataSources.practiceAreas ?? [])
+        : []
       return (
-        <PracticeAreas
+        <FeaturesGrid
           areas={areas}
           heading={content.heading}
+        />
+      )
+    }
+
+    case "cta_section": {
+      const c = parseBlockContent<CtaSectionContent>(block.content, {
+        heading: 'Join Our Community',
+        subtitle: 'Become a member and get access to exclusive resources, events, and professional development opportunities.',
+        buttonText: 'Register Now',
+        buttonHref: '/register',
+      })
+      return (
+        <CtaSection
+          heading={c.heading}
+          subtitle={c.subtitle}
+          buttonText={c.buttonText}
+          buttonHref={c.buttonHref}
         />
       )
     }
@@ -226,25 +241,6 @@ function renderHomepageBlock(block: BlockRow, dataSources: BlockDataSources) {
           imageAlt={content.imageAlt}
           linkText={content.linkText}
           linkHref={content.linkHref}
-        />
-      )
-    }
-
-    case "fund_cta": {
-      const c = parseBlockContent<FundCtaContent>(block.content, {
-        heading: "GAPHTO Welfare Fund",
-        subtitle: "",
-        buttonText: "Learn More",
-        showCalculator: true,
-      })
-      return (
-        <FundCta
-          heading={c.heading}
-          subtitle={c.subtitle}
-          buttonText={c.buttonText}
-          buttonHref={c.buttonHref}
-          pdfUrl={c.pdfUrl ?? dataSources.fund?.pdfUrl}
-          showCalculator={c.showCalculator}
         />
       )
     }
@@ -326,8 +322,8 @@ function renderAboutBlock(block: BlockRow, dataSources: BlockDataSources) {
       )
     }
 
-    case "practice_areas_grid": {
-      const content = parseBlockContent<PracticeAreasContent>(block.content, {
+    case "features_grid": {
+      const content = parseBlockContent<FeaturesGridContent>(block.content, {
         heading: "Areas of Practice",
         items: [],
       })

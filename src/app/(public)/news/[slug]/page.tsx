@@ -14,15 +14,15 @@ import { PostCard } from "@/components/shared/post-card";
 import { ArticleHero } from "@/components/shared/article-hero";
 
 const categoryLabels: Record<string, string> = {
-  "gaphto-news": "GAPHTO News",
-  "health-news": "Health News",
+  news: "News",
   blog: "Blog",
+  announcement: "Announcement",
 };
 
 const categoryColors: Record<string, string> = {
-  "gaphto-news": "bg-primary-muted text-primary/90",
-  "health-news": "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+  news: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
   blog: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
+  announcement: "bg-primary-muted text-primary/90",
 };
 
 export async function generateMetadata({

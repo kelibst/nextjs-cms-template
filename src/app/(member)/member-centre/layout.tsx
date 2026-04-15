@@ -19,7 +19,7 @@ export default async function MemberCentreLayout({
       <div className="border-b border-primary/30 bg-primary-deep px-6 py-3">
         <div className="flex items-center justify-between">
           <Link href="/" className="text-lg font-bold tracking-wide text-white">
-            GAPHTO
+            {process.env.NEXT_PUBLIC_SITE_NAME ?? 'My CMS'}
           </Link>
           <span className="text-sm text-white/70">Member Portal</span>
         </div>

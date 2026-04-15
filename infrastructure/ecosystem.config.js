@@ -1,10 +1,10 @@
 module.exports = {
   apps: [
     {
-      name: 'gaphto',
+      name: 'cms',
       script: 'node_modules/.bin/next',
       args: 'start',
-      cwd: '/var/www/gaphto',
+      cwd: '/var/www/cms',
       instances: 1,
       exec_mode: 'fork',
       env: {
@@ -17,8 +17,8 @@ module.exports = {
       restart_delay: 3000,
       // Log rotation
       log_date_format: 'YYYY-MM-DD HH:mm:ss',
-      error_file: '/var/log/gaphto/error.log',
-      out_file: '/var/log/gaphto/out.log',
+      error_file: '/var/log/cms/error.log',
+      out_file: '/var/log/cms/out.log',
       merge_logs: true,
     },
   ],

@@ -1,1 +1,0 @@
-ALTER TYPE "public"."block_type" ADD VALUE 'about_preview';

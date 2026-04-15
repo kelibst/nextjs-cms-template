@@ -14,13 +14,13 @@ import { registerForEvent, type RegistrationInput } from '@/app/actions/event-re
 interface EventRegistrationFormProps {
   eventId: string
   eventTitle: string
-  priceGhs: string | null
+  price: string | null
 }
 
 export function EventRegistrationForm({
   eventId,
   eventTitle,
-  priceGhs,
+  price,
 }: EventRegistrationFormProps) {
   const router = useRouter()
   const [registered, setRegistered] = useState(false)
@@ -34,7 +34,8 @@ export function EventRegistrationForm({
     mutationFn: (data: RegistrationInput) => registerForEvent(eventId, data),
     onSuccess: (result) => {
       if (result.requiresPayment) {
-        router.push(`/events/payment/${result.registrationId}`)
+        // Payment integration point — redirect to your payment provider here
+        toast.info('This event requires payment. Please contact us to complete registration.')
       } else {
         setRegistered(true)
         toast.success('Registration successful! Check your email for confirmation.')
@@ -74,7 +75,7 @@ export function EventRegistrationForm({
     )
   }
 
-  const isPaid = priceGhs !== null && Number(priceGhs) > 0
+  const isPaid = price !== null && Number(price) > 0
 
   return (
     <motion.div
@@ -139,7 +140,7 @@ export function EventRegistrationForm({
               Registering...
             </>
           ) : isPaid ? (
-            `Register — GH₵ ${Number(priceGhs).toLocaleString()}`
+            `Register — $${Number(price).toLocaleString()}`
           ) : (
             'Register — Free'
           )}

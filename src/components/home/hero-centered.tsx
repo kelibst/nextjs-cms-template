@@ -12,7 +12,7 @@ interface Props {
 }
 
 export function HeroCentered({ heroTitle, heroSubtitle, heroLabel, isLoggedIn }: Props) {
-  const title = heroTitle || 'We are the backbone of Public Health in Ghana'
+  const title = heroTitle || 'Welcome to Our Platform'
   const words = title.split(' ')
 
   return (
@@ -50,7 +50,7 @@ export function HeroCentered({ heroTitle, heroSubtitle, heroLabel, isLoggedIn }:
         >
           <span className="inline-flex items-center gap-2 bg-white/20 text-white text-sm font-medium px-4 py-1.5 rounded-full border border-white/30">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            {heroLabel || "Ghana's Public Health Association"}
+            {heroLabel || (process.env.NEXT_PUBLIC_SITE_NAME ?? 'My CMS')}
           </span>
         </motion.div>
 
@@ -85,7 +85,7 @@ export function HeroCentered({ heroTitle, heroSubtitle, heroLabel, isLoggedIn }:
           transition={{ duration: 0.55, ease: 'easeOut', delay: 0.5 }}
           className="text-lg text-white/80 max-w-xl leading-relaxed"
         >
-          {heroSubtitle || 'Uniting Disease Control, Health Information, and Nutrition professionals to build a healthier Ghana.'}
+          {heroSubtitle || 'Connecting professionals and communities through shared purpose.'}
         </motion.p>
 
         {/* CTA buttons */}
@@ -128,7 +128,7 @@ export function HeroCentered({ heroTitle, heroSubtitle, heroLabel, isLoggedIn }:
           <span className="text-muted-foreground/40">·</span>
           <span className="flex items-center gap-1.5">
             <MapPin className="w-4 h-4 text-primary" />
-            <strong className="text-white/90">16</strong> Regions
+            <strong className="text-white/90">Local</strong> Presence
           </span>
         </motion.div>
 

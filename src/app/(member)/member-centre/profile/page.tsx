@@ -159,7 +159,7 @@ export default async function ProfilePage() {
           <div className="px-6 py-4 border-b border-border/50">
             <h2 className="text-base font-semibold text-foreground">Email Preferences</h2>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Control which emails you receive from GAPHTO
+              Control which emails you receive
             </p>
           </div>
           <div className="px-6 py-5">

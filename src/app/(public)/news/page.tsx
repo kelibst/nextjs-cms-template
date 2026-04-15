@@ -11,7 +11,7 @@ import { NewsClient } from "./news-client";
 export const metadata: Metadata = {
   title: "News & Updates",
   description:
-    "Stay up to date with the latest news, health updates, and blog posts from GAPHTO.",
+    "Stay up to date with the latest news and blog posts.",
 };
 
 export default async function NewsPage() {
@@ -23,7 +23,7 @@ export default async function NewsPage() {
   const hero = getHeroContent(blocks, {
     title: 'News & Updates',
     label: 'Stay Informed',
-    subtitle: 'Stay informed with the latest from GAPHTO, health news, and our blog.',
+    subtitle: 'Stay informed with the latest news and updates.',
   })
 
   const contentBlocks = blocks.filter(b => b.type !== 'hero')

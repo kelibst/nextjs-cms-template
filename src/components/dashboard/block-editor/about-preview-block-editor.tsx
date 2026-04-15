@@ -42,7 +42,7 @@ export function AboutPreviewBlockEditor({
         <Input
           value={heading}
           onChange={(e) => setHeading(e.target.value)}
-          placeholder="Building a Healthier Ghana Together"
+          placeholder="About Our Organisation"
         />
       </div>
 
@@ -62,7 +62,7 @@ export function AboutPreviewBlockEditor({
         <Input
           value={imageAlt}
           onChange={(e) => setImageAlt(e.target.value)}
-          placeholder="GAPHTO events and activities"
+          placeholder="Organisation activities"
         />
       </div>
 

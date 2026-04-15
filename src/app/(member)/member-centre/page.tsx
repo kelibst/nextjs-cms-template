@@ -4,7 +4,6 @@ import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { courses, lessons, courseEnrollments, lessonCompletions } from "@/lib/db";
 import { eq, and, count } from "drizzle-orm";
-import newsData from "@/data/news.json";
 import { Badge } from "@/components/ui/badge";
 import {
   BookOpen,
@@ -24,9 +23,8 @@ export default async function MemberCentrePage() {
   const firstName = user.name?.split(" ")[0] ?? "Member";
   const role = (user as { role?: string }).role ?? "member";
 
-  // Get 3 most recent news posts
-  const latestNews = (newsData as Array<{ slug: string; title: string; date: string }>)
-    .slice(0, 3);
+  // Latest news: fetched from DB in a full implementation; empty array as placeholder
+  const latestNews: Array<{ slug: string; title: string; date: string }> = [];
 
   // Fetch learning progress for the current user
   const userId = user.id as string | undefined
@@ -92,7 +90,7 @@ export default async function MemberCentrePage() {
           <div>
             <h1 className="text-2xl font-bold">Welcome back, {firstName}!</h1>
             <p className="mt-0.5 text-primary-foreground/80">
-              Your GAPHTO member dashboard
+              Your member dashboard
             </p>
           </div>
           <Badge className="ml-auto capitalize border-white/30 bg-white/20 text-white">

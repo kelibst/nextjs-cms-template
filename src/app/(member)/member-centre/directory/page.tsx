@@ -6,7 +6,7 @@ import type { MemberCardProps } from '@/components/member/member-card'
 
 export const metadata: Metadata = {
   title: 'Member Directory',
-  description: 'Search and connect with GAPHTO members across Ghana.',
+  description: 'Search and connect with members.',
 }
 
 interface Props {
@@ -29,7 +29,7 @@ export default async function MemberDirectoryPage({ searchParams }: Props) {
       conditions.push(
         eq(
           members.specialty,
-          specialty as 'disease-control' | 'health-information' | 'nutrition',
+          specialty as 'general' | 'specialist' | 'associate',
         ),
       )
     }
@@ -62,7 +62,7 @@ export default async function MemberDirectoryPage({ searchParams }: Props) {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Member Directory</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Search and connect with GAPHTO members across Ghana.
+          Search and connect with members.
         </p>
       </div>
 

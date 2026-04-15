@@ -47,7 +47,7 @@ export function PostEditor({ post }: PostEditorProps) {
   const [title, setTitle] = useState(post?.title ?? '')
   const [slug, setSlug] = useState(post?.slug ?? '')
   const [slugEdited, setSlugEdited] = useState(!!post)
-  const [category, setCategory] = useState(post?.category ?? 'gaphto-news')
+  const [category, setCategory] = useState(post?.category ?? 'news')
   const [status, setStatus] = useState(post?.status ?? 'draft')
   const [excerpt, setExcerpt] = useState(post?.excerpt ?? '')
   const [featuredImage, setFeaturedImage] = useState(post?.featuredImage ?? '')
@@ -164,8 +164,7 @@ export function PostEditor({ post }: PostEditorProps) {
           <Select value={category} onValueChange={(v) => setCategory(v as typeof category)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="gaphto-news">GAPHTO News</SelectItem>
-              <SelectItem value="health-news">Health News</SelectItem>
+              <SelectItem value="news">News</SelectItem>
               <SelectItem value="blog">Blog</SelectItem>
               <SelectItem value="announcement">Announcement</SelectItem>
             </SelectContent>

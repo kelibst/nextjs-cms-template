@@ -9,9 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
 const SPECIALTIES = [
-  { value: "disease-control", label: "Disease Control" },
-  { value: "health-information", label: "Health Information" },
-  { value: "nutrition", label: "Nutrition" },
+  { value: "general", label: "General" },
+  { value: "specialist", label: "Specialist" },
+  { value: "associate", label: "Associate" },
 ];
 
 export function RegisterForm() {
@@ -100,7 +100,7 @@ export function RegisterForm() {
           name="name"
           type="text"
           autoComplete="name"
-          placeholder="Dr. Kwame Mensah"
+          placeholder="Your full name"
           value={formData.name}
           onChange={handleChange}
           required

@@ -26,7 +26,7 @@ export default async function EventsPage() {
       title: events.title,
       status: events.status,
       startDate: events.startDate,
-      priceGhs: events.priceGhs,
+      price: events.price,
       isOnline: events.isOnline,
       location: events.location,
     })
@@ -85,7 +85,7 @@ export default async function EventsPage() {
                     {e.startDate ? new Date(e.startDate).toLocaleDateString() : '—'}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {e.priceGhs && Number(e.priceGhs) > 0 ? `GHS ${e.priceGhs}` : 'Free'}
+                    {e.price && Number(e.price) > 0 ? `$${e.price}` : 'Free'}
                   </TableCell>
                   <TableCell>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${e.isOnline ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'}`}>

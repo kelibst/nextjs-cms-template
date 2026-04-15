@@ -1,5 +1,5 @@
 {
-  "name": "gaphto",
+  "name": "nextjs-cms-template",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,10 +11,7 @@
     "db:down": "docker-compose -f infrastructure/docker-compose.yml down",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "bun drizzle/migrate.ts",
-    "db:seed": "bun drizzle/seed.ts",
-    "scrape": "cd scraper && bun src/index.ts",
-    "scrape:xml": "cd scraper && bun src/parse-wxr.ts",
-    "db:sync-data": "mkdir -p src/data public/images && cp scraper/output/*.json src/data/ && cp -r scraped-assets/. public/images/"
+    "db:seed": "bun drizzle/seed.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

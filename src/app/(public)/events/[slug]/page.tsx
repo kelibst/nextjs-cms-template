@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: event.title,
-    description: plainDescription ?? `GAPHTO event: ${event.title}`,
+    description: plainDescription ?? `Event: ${event.title}`,
     openGraph: {
       title: event.title,
       description: plainDescription,
@@ -72,7 +72,7 @@ export default async function EventDetailPage({ params }: Props) {
   const event = await getEvent(slug)
   if (!event) notFound()
 
-  const isPaid = event.priceGhs !== null && Number(event.priceGhs) > 0
+  const isPaid = event.price !== null && Number(event.price) > 0
   const canRegister = event.status !== 'past' && event.status !== 'cancelled'
   const status = statusConfig[event.status] ?? statusConfig.upcoming
 
@@ -170,7 +170,7 @@ export default async function EventDetailPage({ params }: Props) {
                 <EventRegistrationForm
                   eventId={event.id}
                   eventTitle={event.title}
-                  priceGhs={event.priceGhs}
+                  price={event.price}
                 />
               </section>
             )}
@@ -234,7 +234,7 @@ export default async function EventDetailPage({ params }: Props) {
                       Price
                     </dt>
                     <dd className={`mt-0.5 font-semibold ${isPaid ? 'text-primary' : 'text-muted-foreground'}`}>
-                      {isPaid ? `GH₵ ${Number(event.priceGhs).toLocaleString()}` : 'Free'}
+                      {isPaid ? `$${Number(event.price).toLocaleString()}` : 'Free'}
                     </dd>
                   </div>
                 </div>
@@ -260,7 +260,7 @@ export default async function EventDetailPage({ params }: Props) {
                 <EventRegistrationForm
                   eventId={event.id}
                   eventTitle={event.title}
-                  priceGhs={event.priceGhs}
+                  price={event.price}
                 />
               </div>
             )}

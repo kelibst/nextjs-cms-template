@@ -1,15 +1,4 @@
 import { getMediaUrl } from '@/lib/media-url';
-import newsData from "@/data/news.json";
-import healthNewsData from "@/data/health-news.json";
-import blogData from "@/data/blog.json";
-import leadershipData from "@/data/leadership.json";
-import galleryData from "@/data/gallery.json";
-import eventsData from "@/data/events.json";
-import aboutData from "@/data/about.json";
-import contactData from "@/data/contact.json";
-import practiceAreasData from "@/data/practice-areas.json";
-import fundData from "@/data/fund.json";
-import publicationsData from "@/data/publications.json";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -19,7 +8,7 @@ export interface Post {
   content: string;
   excerpt: string;
   date: string;
-  category: "gaphto-news" | "health-news" | "blog" | "announcement";
+  category: "news" | "blog" | "announcement";
   author: string;
   featuredImage: string;
   localImage: string;
@@ -83,16 +72,10 @@ export interface Event {
   isOnline: boolean;
   startDate: string | null;
   endDate: string | null;
-  priceGhs: number;
+  price: number;
   status: "upcoming" | "past" | "cancelled";
   featuredImage: string | null;
   sourceUrl: string;
-}
-
-export interface Fund {
-  description: string;
-  pdfUrl: string | null;
-  localPdf: string | null;
 }
 
 export interface Publication {
@@ -108,92 +91,85 @@ export interface Publication {
 }
 
 // ─── Loaders ──────────────────────────────────────────────────────────────────
+// All static JSON data sources have been removed (scraped data deleted).
+// The DB path (server-data.ts) is the real data source.
+// These functions return empty arrays as safe fallbacks.
 
 export function getNews(): Post[] {
-  return (newsData as Post[]).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return [];
 }
 
 export function getHealthNews(): Post[] {
-  return (healthNewsData as Post[]).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return [];
 }
 
 export function getBlogPosts(): Post[] {
-  return (blogData as Post[]).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return [];
 }
 
 export function getAllPosts(): Post[] {
-  const all = [
-    ...(newsData as Post[]),
-    ...(healthNewsData as Post[]),
-    ...(blogData as Post[]),
-  ];
-  return all.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return [];
 }
 
-export function getPostBySlug(slug: string): Post | undefined {
-  return getAllPosts().find((p) => p.slug === slug);
+export function getPostBySlug(_slug: string): Post | undefined {
+  return undefined;
 }
 
-export function getPostsByCategory(category: Post["category"]): Post[] {
-  return getAllPosts().filter((p) => p.category === category);
+export function getPostsByCategory(_category: Post["category"]): Post[] {
+  return [];
 }
 
-export function getRelatedPosts(post: Post, count = 3): Post[] {
-  return getAllPosts()
-    .filter((p) => p.category === post.category && p.slug !== post.slug)
-    .slice(0, count);
+export function getRelatedPosts(_post: Post, _count = 3): Post[] {
+  return [];
 }
 
 export function getLeadership(): LeadershipMember[] {
-  return (leadershipData as LeadershipMember[]).sort(
-    (a, b) => a.sortOrder - b.sortOrder
-  );
+  return [];
 }
 
 export function getGallery(): GalleryAlbum[] {
-  return galleryData as GalleryAlbum[];
+  return [];
 }
 
 export function getAbout(): About {
-  return aboutData as About;
+  return {
+    background: '',
+    aimsObjectives: '',
+    vision: '',
+    mission: '',
+    objectives: [],
+  };
 }
 
 export function getContact(): Contact {
-  const c = contactData as Partial<Contact>;
   return {
-    phone: c.phone || "030 296 4402",
-    email: c.email || "info@gaphto.org",
-    address: c.address || "GAPHTO National Secretariat, Accra, Ghana",
-    facebook: c.facebook || "https://web.facebook.com/gaphto",
-    twitter: c.twitter || "",
-    youtube: c.youtube || "",
+    phone: '',
+    email: 'contact@example.com',
+    address: '',
+    facebook: '',
+    twitter: '',
+    youtube: '',
   };
 }
 
 export function getGalleryAlbums(): GalleryAlbum[] {
-  return galleryData as GalleryAlbum[];
+  return [];
 }
 
 export function getPracticeAreas(): PracticeArea[] {
-  return practiceAreasData as PracticeArea[];
+  return [];
 }
 
 export function getEvents(): Event[] {
-  return eventsData as Event[];
-}
-
-export function getFund(): Fund {
-  return fundData as Fund;
+  return [];
 }
 
 export function getAllPublications(): Publication[] {
-  return (publicationsData as Publication[]).sort(
-    (a, b) => parseInt(b.year) - parseInt(a.year)
-  );
+  return [];
 }
 
-export function getPublicationBySlug(slug: string): Publication | undefined {
-  return getAllPublications().find((p) => p.slug === slug);
+export function getPublicationBySlug(_slug: string): Publication | undefined {
+  return undefined;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -210,7 +186,7 @@ export function decodeEntities(str: string): string {
     .replace(/&#8217;/g, "\u2019");
 }
 
-/** Return a public image path for a local scraped image */
+/** Return a public image path for a local image */
 export function localImagePath(localPath: string, prefix: "leadership" | "gallery" | "posts"): string {
   const stripped = localPath.startsWith(`${prefix}/`) ? localPath : `${prefix}/${localPath}`;
   return getMediaUrl(`/images/${stripped}`);

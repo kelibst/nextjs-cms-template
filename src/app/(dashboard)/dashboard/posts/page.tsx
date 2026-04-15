@@ -20,8 +20,7 @@ const statusColors: Record<string, string> = {
 }
 
 const categoryLabels: Record<string, string> = {
-  'gaphto-news': 'GAPHTO News',
-  'health-news': 'Health News',
+  'news': 'News',
   'blog': 'Blog',
   'announcement': 'Announcement',
 }

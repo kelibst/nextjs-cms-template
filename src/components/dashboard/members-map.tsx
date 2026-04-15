@@ -3,8 +3,6 @@
 import 'leaflet/dist/leaflet.css'
 import { MapContainer, TileLayer, CircleMarker, Popup, Marker } from 'react-leaflet'
 import L from 'leaflet'
-import { GHANA_REGION_CENTROIDS } from '@/lib/ghana-regions'
-
 // Fix default Leaflet marker icon paths broken by Webpack bundling
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
 import markerIcon from 'leaflet/dist/images/marker-icon.png'
@@ -40,15 +38,15 @@ interface RegionGroup {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const GHANA_CENTER: [number, number] = [7.9465, -1.0232]
+const MAP_CENTER: [number, number] = [0, 0]
 
 function groupByRegion(members: MapMember[]): Record<string, RegionGroup> {
   const groups: Record<string, RegionGroup> = {}
 
   for (const m of members) {
+    if (!m.latitude || !m.longitude) continue
     const region = m.region?.trim() || 'Unknown'
-    const centroid = GHANA_REGION_CENTROIDS[region]
-    if (!centroid) continue // skip members with completely unknown regions
+    const centroid: [number, number] = [parseFloat(m.latitude), parseFloat(m.longitude)]
 
     if (!groups[region]) {
       groups[region] = {
@@ -73,9 +71,9 @@ function groupByRegion(members: MapMember[]): Record<string, RegionGroup> {
 }
 
 const SPECIALTY_LABELS: Record<string, string> = {
-  'disease-control':   'Disease Control',
-  'health-information': 'Health Information',
-  'nutrition':         'Nutrition',
+  'general':    'General',
+  'specialist': 'Specialist',
+  'associate':  'Associate',
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -95,8 +93,8 @@ export default function MembersMap({ members }: MembersMapProps) {
   return (
     <div className="h-125 w-full overflow-hidden rounded-xl border border-border">
       <MapContainer
-        center={GHANA_CENTER}
-        zoom={7}
+        center={MAP_CENTER}
+        zoom={2}
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={true}
       >

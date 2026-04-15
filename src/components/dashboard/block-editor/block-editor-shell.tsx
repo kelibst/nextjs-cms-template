@@ -12,8 +12,7 @@ import type {
   RichTextContent,
   ObjectivesContent,
   TimelineContent,
-  PracticeAreasContent,
-  FundCtaContent,
+  FeaturesGridContent,
   GalleryTeaserContent,
   AboutPreviewContent,
 } from '@/lib/blocks'
@@ -27,9 +26,8 @@ import { StatsBarBlockEditor } from './stats-bar-block-editor'
 import { RichTextBlockEditor } from './rich-text-block-editor'
 import { ObjectivesBlockEditor } from './objectives-block-editor'
 import { TimelineBlockEditor } from './timeline-block-editor'
-import { PracticeAreasBlockEditor } from './practice-areas-block-editor'
+import { FeaturesGridBlockEditor } from './features-grid-block-editor'
 import { SimpleSectionBlockEditor } from './simple-section-block-editor'
-import { FundCtaBlockEditor } from './fund-cta-block-editor'
 import { GalleryTeaserBlockEditor } from './gallery-teaser-block-editor'
 import { ImageBannerBlockEditor } from './image-banner-block-editor'
 import { AboutPreviewBlockEditor } from './about-preview-block-editor'
@@ -55,12 +53,12 @@ const BLOCK_TYPE_LABELS: Record<string, string> = {
   rich_text: 'Rich Text',
   objectives_list: 'Objectives',
   timeline: 'Timeline',
-  practice_areas_grid: 'Practice Areas',
+  features_grid: 'Features Grid',
   news_preview: 'News Preview',
   events_preview: 'Events Preview',
   leadership_preview: 'Leadership',
   gallery_teaser: 'Gallery',
-  fund_cta: 'Fund CTA',
+  cta_section: 'CTA Section',
   image_banner: 'Image Banner',
   about_preview: 'About Preview',
 }
@@ -71,11 +69,9 @@ const defaultStatsBar: StatsBarContent = { items: [] }
 const defaultRichText: RichTextContent = { heading: '', body: '' }
 const defaultObjectives: ObjectivesContent = { heading: '', items: [] }
 const defaultTimeline: TimelineContent = { heading: '', items: [] }
-const defaultPracticeAreas: PracticeAreasContent = { heading: '', items: [] }
-const defaultSimpleSection = { heading: '' }
+const defaultFeaturesGrid: FeaturesGridContent = { heading: '', items: [] }
 const defaultSimpleSectionWithCount = { heading: '', count: 3 }
 const defaultGalleryTeaser: GalleryTeaserContent = { heading: '', count: 6, selectedAlbumSlugs: [] }
-const defaultFundCta: FundCtaContent = { heading: '', subtitle: '', buttonText: '' }
 const defaultAboutPreview: AboutPreviewContent = { heading: '', imageUrl: '', imageAlt: '', linkText: 'Learn More About Us', linkHref: '/about' }
 
 function renderEditor(block: BlockRow, onSave: (content: object) => Promise<void>) {
@@ -120,12 +116,12 @@ function renderEditor(block: BlockRow, onSave: (content: object) => Promise<void
           onSave={onSave as (c: TimelineContent) => Promise<void>}
         />
       )
-    case 'practice_areas_grid':
+    case 'features_grid':
       return (
-        <PracticeAreasBlockEditor
+        <FeaturesGridBlockEditor
           blockId={block.id}
-          initialContent={parseBlockContent<PracticeAreasContent>(block.content, defaultPracticeAreas)}
-          onSave={onSave as (c: PracticeAreasContent) => Promise<void>}
+          initialContent={parseBlockContent<FeaturesGridContent>(block.content, defaultFeaturesGrid)}
+          onSave={onSave as (c: FeaturesGridContent) => Promise<void>}
         />
       )
     case 'news_preview':
@@ -139,20 +135,20 @@ function renderEditor(block: BlockRow, onSave: (content: object) => Promise<void
           showCount
         />
       )
+    case 'cta_section':
+      return (
+        <SimpleSectionBlockEditor
+          blockId={block.id}
+          initialContent={parseBlockContent(block.content, { heading: '' })}
+          onSave={onSave as (c: { heading: string }) => Promise<void>}
+        />
+      )
     case 'gallery_teaser':
       return (
         <GalleryTeaserBlockEditor
           blockId={block.id}
           initialContent={parseBlockContent<GalleryTeaserContent>(block.content, defaultGalleryTeaser)}
           onSave={onSave as (c: GalleryTeaserContent) => Promise<void>}
-        />
-      )
-    case 'fund_cta':
-      return (
-        <FundCtaBlockEditor
-          blockId={block.id}
-          initialContent={parseBlockContent<FundCtaContent>(block.content, defaultFundCta)}
-          onSave={onSave as (c: FundCtaContent) => Promise<void>}
         />
       )
     case 'image_banner':

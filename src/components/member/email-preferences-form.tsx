@@ -26,8 +26,8 @@ export function EmailPreferencesForm({ initialNewsletter, initialEventAlerts }: 
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-foreground">GAPHTO newsletters</p>
-          <p className="text-xs text-muted-foreground">Receive periodic newsletters from GAPHTO</p>
+          <p className="text-sm font-medium text-foreground">Newsletter emails</p>
+          <p className="text-xs text-muted-foreground">Receive periodic newsletters from us</p>
         </div>
         <Switch
           checked={receiveNewsletter}

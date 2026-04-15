@@ -6,9 +6,9 @@ import type { Post } from "@/lib/data";
 
 const CATEGORIES = [
   { id: "all", label: "All" },
-  { id: "gaphto-news", label: "GAPHTO News" },
-  { id: "health-news", label: "Health News" },
+  { id: "news", label: "News" },
   { id: "blog", label: "Blog" },
+  { id: "announcement", label: "Announcements" },
 ] as const;
 
 const PAGE_SIZE = 9;

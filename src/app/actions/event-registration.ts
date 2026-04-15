@@ -57,7 +57,7 @@ export async function registerForEvent(
   }
 
   // 4. Insert registration
-  const isPaid = event.priceGhs !== null && Number(event.priceGhs) > 0
+  const isPaid = event.price !== null && Number(event.price) > 0
   const [registration] = await db
     .insert(eventRegistrations)
     .values({
@@ -72,7 +72,7 @@ export async function registerForEvent(
   // 5. Send confirmation email — failure must NOT abort the registration
   try {
     const eventDate = event.startDate
-      ? new Date(event.startDate).toLocaleDateString('en-GH', {
+      ? new Date(event.startDate).toLocaleDateString('en-US', {
           weekday: 'long',
           year: 'numeric',
           month: 'long',
@@ -90,7 +90,7 @@ export async function registerForEvent(
       location: event.location,
       isOnline: event.isOnline,
       isPaid,
-      amount: event.priceGhs,
+      amount: event.price,
     })
   } catch (err) {
     console.error('[event-registration] Confirmation email failed:', err)
@@ -101,6 +101,6 @@ export async function registerForEvent(
     success: true,
     requiresPayment: isPaid,
     registrationId: registration.id,
-    amount: event.priceGhs,
+    amount: event.price,
   }
 }

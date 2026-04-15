@@ -30,7 +30,7 @@ export default async function DashboardPage() {
       .limit(5),
   ])
 
-  const now = new Date().toLocaleDateString('en-GH', {
+  const now = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',

@@ -3,9 +3,9 @@ import { Badge } from '@/components/ui/badge'
 import { MapPin, Building2 } from 'lucide-react'
 
 const SPECIALTY_LABELS: Record<string, string> = {
-  'disease-control': 'Disease Control',
-  'health-information': 'Health Information Management',
-  nutrition: 'Nutrition',
+  general: 'General',
+  specialist: 'Specialist',
+  associate: 'Associate',
 }
 
 function getInitials(name: string): string {
@@ -17,7 +17,7 @@ function getInitials(name: string): string {
 export interface MemberCardProps {
   id: string
   name: string
-  specialty: 'disease-control' | 'health-information' | 'nutrition' | null
+  specialty: 'general' | 'specialist' | 'associate' | null
   region: string | null
   facility: string | null
   membershipStatus: 'active' | 'inactive' | 'suspended'

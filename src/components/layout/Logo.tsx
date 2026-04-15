@@ -17,7 +17,7 @@ const Logo = ({ variant = 'light' }: LogoProps) => {
       }`}>
         <Image
           src="/images/logo/logo.png"
-          alt="GAPHTO"
+          alt={process.env.NEXT_PUBLIC_SITE_NAME ?? 'My CMS'}
           fill
           className={`object-contain p-1 ${isDark ? 'brightness-0 invert' : ''}`}
           priority
@@ -26,7 +26,7 @@ const Logo = ({ variant = 'light' }: LogoProps) => {
       <span className={`hidden sm:block text-xs leading-tight max-w-35 ${
         isDark ? 'text-white/70' : 'text-muted-foreground'
       }`}>
-        Ghana Association of Public Health Technical Officers
+        {process.env.NEXT_PUBLIC_SITE_NAME ?? 'My CMS'}
       </span>
     </Link>
   )

@@ -1,37 +1,35 @@
-import Link from "next/link"
 import { sanitizeHtml } from "@/lib/utils"
 
 // ─── Default data ─────────────────────────────────────────────────────────────
 
 const TIMELINE_DEFAULTS = [
-  { year: "1984", title: "Association Founded", description: "Association founded for Disease Control Officers and Field Technicians." },
-  { year: "2006", title: "Official Inauguration", description: "Officially inaugurated at Korle-Bu, Accra as PUHTOG." },
-  { year: "2009", title: "Renamed GAPHTO", description: "Re-named Ghana Association of Public Health Technical Officers (GAPHTO) at Cape Coast Conference." },
-  { year: "Present", title: "Continuing the Mission", description: "Continues to advocate for public health professionals across Ghana." },
+  { year: "2010", title: "Organisation Founded", description: "Founded to bring professionals together under a unified platform." },
+  { year: "2015", title: "Growth & Expansion", description: "Expanded membership and launched key programmes for professional development." },
+  { year: "2020", title: "Digital Transformation", description: "Moved to a digital-first platform for member management and communications." },
+  { year: "Present", title: "Continuing the Mission", description: "Continuing to serve members and the wider community with excellence." },
 ]
 
 const PRACTICE_AREAS_DEFAULTS = [
   {
-    title: "Disease Control & Prevention",
-    description: "Protecting communities through surveillance, response, and health promotion.",
+    title: "Professional Development",
+    description: "Supporting members with training, resources, and continuing education opportunities.",
   },
   {
-    title: "Health Information Management",
-    description: "Providing reliable, timely health data to support decision-making.",
+    title: "Community Engagement",
+    description: "Connecting members with the communities they serve through outreach and partnerships.",
   },
   {
-    title: "Nutrition",
-    description: "Advancing nutritional science and health outcomes across communities.",
+    title: "Research & Knowledge",
+    description: "Advancing best practices through research, publications, and knowledge sharing.",
   },
 ]
 
 const OBJECTIVES_DEFAULTS = [
-  "a) To bring all Disease control officers, Nutrition officers, Health Information officers and Field Technicians in public, Christian Health Association of Ghana (CHAG), Non – Governmental Organisations (NGOs) and private institutions in Ghana and beyond into a unified professional association",
-  "b) To develop and recommend appropriate public health strategies to Ghana Health Service",
-  "c) To cooperate with GHS/MoH in the promotion of public health practice in Ghana",
-  "d) To promote the welfare of members and secure equitable and attractive conditions of service to retain them in the profession",
-  "e) To conduct health systems research to enhance public health care in Ghana",
-  "f) To network and collaborate with recognised stakeholders in public health care delivery locally and globally.",
+  "To bring professionals together under a unified association that advances their interests and capabilities.",
+  "To develop and share best practices and professional standards across the sector.",
+  "To promote the welfare of members and secure equitable conditions of service.",
+  "To conduct research and produce knowledge resources that benefit members and the wider community.",
+  "To network and collaborate with recognised stakeholders locally and globally.",
 ]
 
 // SVG icons for practice area cards
@@ -177,28 +175,24 @@ export function AboutPracticeAreasMini({ items, heading = "Areas of Practice" }:
     <section>
       <h2 className="mb-2 text-2xl font-bold text-primary">{heading}</h2>
       <p className="mb-6 text-muted-foreground">
-        GAPHTO members work across three key areas of public health.
+        Our team delivers across key focus areas.
       </p>
       <div className="grid gap-4 sm:grid-cols-3">
         {practiceAreas.map((area, index) => (
-          <Link
+          <div
             key={area.title}
-            href="/practice-areas"
-            className="group rounded-xl border border-border bg-card p-5 shadow-sm hover:border-primary hover:shadow-md transition-all"
+            className="rounded-xl border border-border bg-card p-5 shadow-sm"
           >
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary-muted text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary-muted text-primary">
               {PRACTICE_AREA_ICONS[index % PRACTICE_AREA_ICONS.length]}
             </div>
-            <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+            <h3 className="text-sm font-semibold text-foreground">
               {area.title}
             </h3>
             <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
               {area.description}
             </p>
-            <span className="mt-3 inline-block text-xs font-medium text-primary">
-              Learn more →
-            </span>
-          </Link>
+          </div>
         ))}
       </div>
     </section>

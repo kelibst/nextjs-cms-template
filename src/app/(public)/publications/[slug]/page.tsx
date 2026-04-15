@@ -21,7 +21,7 @@ export async function generateMetadata({
   const pub = getPublicationBySlug(slug);
   if (!pub) return {};
   return {
-    title: `${pub.title} | GAPHTO Publications`,
+    title: `${pub.title} | Publications`,
     description: pub.description,
   };
 }
@@ -55,7 +55,7 @@ export default async function PublicationDetailPage({
       <InnerPageHero
         title={pub.title}
         label={pub.type}
-        subtitle={`${pub.year} · GAPHTO Publications`}
+        subtitle={`${pub.year} · Publications`}
         breadcrumb={[
           { label: "Home", href: "/" },
           { label: "Publications", href: "/publications" },

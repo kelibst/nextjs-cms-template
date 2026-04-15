@@ -18,14 +18,14 @@ interface Props {
 export function AboutSection({
   about,
   galleryImageSrc,
-  heading = 'Building a Healthier Ghana Together',
+  heading = 'About Our Organisation',
   imageUrl,
   imageAlt,
   linkText = 'Learn More About Us',
   linkHref = '/about',
 }: Props) {
   const imgSrc = imageUrl || galleryImageSrc || '/images/placeholder.jpg'
-  const imgAlt = imageAlt || 'GAPHTO events and activities'
+  const imgAlt = imageAlt || 'Organisation activities'
 
   return (
     <section className="py-16 bg-background overflow-hidden">
@@ -41,7 +41,7 @@ export function AboutSection({
           >
             <div>
               <span className="text-sm font-semibold text-primary uppercase tracking-wider">
-                About GAPHTO
+                About Us
               </span>
               <h2 className="text-3xl font-bold text-foreground mt-2 leading-tight">
                 {heading}
@@ -69,10 +69,10 @@ export function AboutSection({
             {/* Stat pills */}
             <div className="flex flex-wrap gap-3 mt-2">
               <span className="inline-flex items-center gap-2 bg-primary-subtle text-primary/90 border border-primary-subtle rounded-full px-4 py-1.5 text-sm font-medium">
-                <span className="text-primary">📅</span> Founded 1984
+                <span className="text-primary">📅</span> Est. 2010
               </span>
               <span className="inline-flex items-center gap-2 bg-primary-subtle text-primary/90 border border-primary-subtle rounded-full px-4 py-1.5 text-sm font-medium">
-                <span className="text-primary">🌍</span> Nationwide Presence
+                <span className="text-primary">🌍</span> Growing Community
               </span>
             </div>
 

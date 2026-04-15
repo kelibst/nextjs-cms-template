@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: "Gallery",
-  description: "Photo gallery from GAPHTO events and activities.",
+  description: "Photo gallery from our events and activities.",
 };
 
 export default async function GalleryPage() {
@@ -21,7 +21,7 @@ export default async function GalleryPage() {
   const hero = getHeroContent(blocks, {
     title: 'Photo Gallery',
     label: 'Visual Stories',
-    subtitle: 'Moments captured from GAPHTO events and activities.',
+    subtitle: 'Moments captured from our events and activities.',
   })
 
   const contentBlocks = blocks.filter(b => b.type !== 'hero')

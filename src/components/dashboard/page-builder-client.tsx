@@ -51,11 +51,9 @@ interface PageBuilderClientProps {
 const PAGE_LABELS: Record<string, string> = {
   homepage: 'Homepage',
   about: 'About Page',
-  fund: 'GAPHTO Fund',
-  'practice-areas': 'Practice Areas',
   news: 'News & Updates',
   blog: 'Blog',
-  events: 'Events & CPD',
+  events: 'Events',
   gallery: 'Photo Gallery',
   leadership: 'Our Leadership',
   contact: 'Contact Us',
@@ -70,12 +68,12 @@ const BLOCK_TYPE_LABELS: Record<string, { label: string; description: string; ic
   rich_text: { label: 'Rich Text', description: 'Formatted text section', icon: '📝' },
   objectives_list: { label: 'Objectives', description: 'Numbered objectives list', icon: '✅' },
   timeline: { label: 'Timeline', description: 'Chronological history entries', icon: '📅' },
-  practice_areas_grid: { label: 'Practice Areas', description: 'Card grid of practice areas', icon: '🗂️' },
+  features_grid: { label: 'Features Grid', description: 'Card grid of features or services', icon: '🗂️' },
   news_preview: { label: 'News Preview', description: 'Latest news section', icon: '📰' },
   events_preview: { label: 'Events', description: 'Upcoming events section', icon: '🗓️' },
   leadership_preview: { label: 'Leadership', description: 'Team member showcase', icon: '👥' },
   gallery_teaser: { label: 'Gallery', description: 'Photo gallery section', icon: '🖼️' },
-  fund_cta: { label: 'Fund CTA', description: 'Call to action for the welfare fund', icon: '💰' },
+  cta_section: { label: 'CTA Section', description: 'Call to action banner', icon: '📣' },
   image_banner: { label: 'Image Banner', description: 'Full-width image', icon: '🖼️' },
   about_preview: { label: 'About Preview', description: 'Two-column about section with image and link', icon: 'ℹ️' },
 }
@@ -83,19 +81,19 @@ const BLOCK_TYPE_LABELS: Record<string, { label: string; description: string; ic
 // ─── Default content for new blocks ───────────────────────────────────────────
 
 const DEFAULT_CONTENT: Record<string, object> = {
-  hero: { title: "We are the backbone of Public Health in Ghana", subtitle: "Uniting Disease Control, Health Information, and Nutrition professionals to build a healthier Ghana.", label: "Ghana's Public Health Association", template: 'carousel' },
+  hero: { title: "Welcome to Our Platform", subtitle: "A modern CMS and membership platform.", label: "Our Organisation", template: 'carousel' },
   stats_bar: { items: [{ count: '0', suffix: '', label: 'Stat' }] },
   rich_text: { heading: 'New Section', body: '<p>Enter content here.</p>' },
   objectives_list: { heading: 'Objectives', items: [''] },
   timeline: { heading: 'Timeline', items: [{ year: '', title: '', description: '' }] },
-  practice_areas_grid: { heading: 'Practice Areas', items: [{ title: '', description: '' }] },
+  features_grid: { heading: 'Our Services', items: [{ title: '', description: '' }] },
   news_preview: { heading: 'Latest News', count: 3 },
   events_preview: { heading: 'Events', count: 3 },
   leadership_preview: { heading: 'Leadership', count: 4 },
   gallery_teaser: { heading: 'Gallery', count: 6, selectedAlbumSlugs: [] },
-  fund_cta: { heading: 'GAPHTO Welfare Fund', subtitle: 'Supporting our members when it matters most.', buttonText: 'Learn More', buttonHref: '/fund', pdfUrl: '', showCalculator: true },
+  cta_section: { heading: 'Get Involved', subtitle: 'Join our community and make a difference.', buttonText: 'Learn More', buttonHref: '/about' },
   image_banner: { imageUrl: '', alt: '', caption: '' },
-  about_preview: { heading: 'Building a Healthier Ghana Together', imageUrl: '', imageAlt: 'GAPHTO events and activities', linkText: 'Learn More About Us', linkHref: '/about' },
+  about_preview: { heading: 'About Our Organisation', imageUrl: '', imageAlt: 'Organisation activities', linkText: 'Learn More About Us', linkHref: '/about' },
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────────

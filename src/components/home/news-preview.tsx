@@ -13,15 +13,15 @@ interface Props {
 }
 
 const categoryLabel: Record<string, string> = {
-  'gaphto-news': 'GAPHTO News',
-  'health-news': 'Health News',
+  'news': 'News',
   'blog': 'Blog',
+  'announcement': 'Announcement',
 }
 
 const categoryColor: Record<string, string> = {
-  'gaphto-news': 'bg-primary-muted text-primary/90 border-primary-muted',
-  'health-news': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800',
+  'news': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800',
   'blog': 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400',
+  'announcement': 'bg-primary-muted text-primary/90 border-primary-muted',
 }
 
 function formatDate(dateStr: string) {
@@ -52,7 +52,7 @@ export function NewsPreview({ posts, heading = 'Latest News', count }: Props) {
         >
           <div>
             <h2 className="text-3xl font-bold text-foreground">{heading}</h2>
-            <p className="text-muted-foreground mt-1">Stay informed with the latest from GAPHTO</p>
+            <p className="text-muted-foreground mt-1">Stay informed with the latest news</p>
           </div>
           <Link
             href="/news"

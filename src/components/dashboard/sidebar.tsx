@@ -17,7 +17,6 @@ import {
   Mail,
   Settings,
   ExternalLink,
-  Banknote,
   ChevronRight,
   PanelLeftClose,
   PanelLeftOpen,
@@ -43,7 +42,6 @@ const navGroups = [
     items: [
       { label: 'Members', href: '/dashboard/members', icon: Users },
       { label: 'Leadership', href: '/dashboard/leadership', icon: Trophy },
-      { label: 'Fund Applications', href: '/dashboard/fund-applications', icon: Banknote },
     ],
   },
   {

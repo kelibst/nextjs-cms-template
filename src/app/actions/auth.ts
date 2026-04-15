@@ -135,8 +135,8 @@ export async function registerUser(data: {
 
     await db.insert(members).values({
       userId: newUser.id,
-      memberNumber: `GAPHTO-${Date.now().toString().slice(-6)}`,
-      specialty: data.specialty as 'disease-control' | 'health-information' | 'nutrition',
+      memberNumber: `MBR-${Date.now().toString().slice(-6)}`,
+      specialty: data.specialty as 'general' | 'specialist' | 'associate',
       membershipStatus: 'active',
       joinedDate: new Date(),
     })

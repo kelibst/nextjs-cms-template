@@ -1,7 +1,7 @@
 import { Client } from 'minio';
 
-const BUCKET = process.env.MINIO_BUCKET || 'gaphto-media';
-const PUBLIC_URL = process.env.NEXT_PUBLIC_MEDIA_BASE_URL || 'http://localhost:9000/gaphto-media';
+const BUCKET = process.env.MINIO_BUCKET || 'cms-media';
+const PUBLIC_URL = process.env.NEXT_PUBLIC_MEDIA_BASE_URL || 'http://localhost:9000/cms-media';
 
 let _client: Client | null = null;
 

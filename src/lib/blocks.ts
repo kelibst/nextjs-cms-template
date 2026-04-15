@@ -41,7 +41,7 @@ export type TimelineContent = {
   items: { year: string; title: string; description: string }[]
 }
 
-export type PracticeAreasContent = {
+export type FeaturesGridContent = {
   heading: string
   items: { title: string; description: string }[]
 }
@@ -54,13 +54,11 @@ export type GalleryTeaserContent = {
   count?: number              // max photos to show (default 6)
   selectedAlbumSlugs?: string[] // empty/undefined = show from all albums
 }
-export type FundCtaContent = {
+export type CtaSectionContent = {
   heading: string
   subtitle: string
   buttonText: string          // Primary CTA button label
-  buttonHref?: string         // Primary CTA button URL (default '/fund')
-  pdfUrl?: string             // If set, shows "View Fund Document" button
-  showCalculator?: boolean    // Show Loan Calculator button (default true)
+  buttonHref?: string         // CTA button URL (default '/register')
 }
 export type ImageBannerContent = { imageUrl: string; alt: string; caption?: string }
 
@@ -74,8 +72,8 @@ export type AboutPreviewContent = {
 
 export type BlockContent =
   | HeroContent | StatsBarContent | RichTextContent | ObjectivesContent
-  | TimelineContent | PracticeAreasContent | NewsPreviewContent | EventsPreviewContent
-  | LeadershipPreviewContent | GalleryTeaserContent | FundCtaContent | ImageBannerContent
+  | TimelineContent | FeaturesGridContent | NewsPreviewContent | EventsPreviewContent
+  | LeadershipPreviewContent | GalleryTeaserContent | CtaSectionContent | ImageBannerContent
   | AboutPreviewContent
 
 // Parse block content JSON safely

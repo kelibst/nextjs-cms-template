@@ -11,7 +11,7 @@ import { LeadershipGrid } from "./leadership-grid";
 export const metadata: Metadata = {
   title: "Our Leadership",
   description:
-    "Meet the National Executive Committee of the Ghana Association of Public Health Technical Officers.",
+    "Meet the team guiding our organisation forward.",
 };
 
 export const dynamic = "force-dynamic";
@@ -25,7 +25,7 @@ export default async function LeadershipPage() {
   const hero = getHeroContent(blocks, {
     title: 'Our Leadership',
     label: 'National Executive Committee',
-    subtitle: 'Meet the dedicated officers guiding GAPHTO\'s mission across Ghana.',
+    subtitle: 'Meet the dedicated team steering our organisation forward.',
   })
 
   const contentBlocks = blocks.filter(b => b.type !== 'hero')

@@ -12,7 +12,7 @@ interface Props {
 }
 
 export function HeroBold({ heroTitle, heroSubtitle, heroLabel, isLoggedIn }: Props) {
-  const fullTitle = heroTitle || 'We are the backbone of Public Health'
+  const fullTitle = heroTitle || 'Welcome to Our Platform'
   const words = fullTitle.split(' ')
   const lastWord = words.pop() ?? ''
   const restWords = words.join(' ')
@@ -72,7 +72,7 @@ export function HeroBold({ heroTitle, heroSubtitle, heroLabel, isLoggedIn }: Pro
           transition={{ duration: 0.55, ease: 'easeOut', delay: 0.4 }}
           className="text-white/60 text-lg max-w-md mt-4"
         >
-          {heroSubtitle || 'Uniting Disease Control, Health Information, and Nutrition professionals to build a healthier Ghana.'}
+          {heroSubtitle || 'Connecting professionals and communities through shared purpose.'}
         </motion.p>
 
         {/* Single CTA button */}

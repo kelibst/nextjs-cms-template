@@ -8,9 +8,9 @@ import { PostCard } from "@/components/shared/post-card";
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: "Blog | GAPHTO",
+  title: "Blog",
   description:
-    "Insights, opinions, and perspectives from GAPHTO members and public health professionals.",
+    "Insights, opinions, and perspectives from our community.",
 };
 
 export default async function BlogPage() {
@@ -22,7 +22,7 @@ export default async function BlogPage() {
   const hero = getHeroContent(blocks, {
     title: 'Blog',
     label: 'Insights & Opinions',
-    subtitle: 'Perspectives from GAPHTO members and public health professionals across Ghana.',
+    subtitle: 'Insights and perspectives from our community.',
   })
 
   const contentBlocks = blocks.filter(b => b.type !== 'hero')

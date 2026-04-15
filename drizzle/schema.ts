@@ -24,8 +24,7 @@ export const roleEnum = pgEnum('role', [
 ])
 
 export const postCategoryEnum = pgEnum('post_category', [
-  'gaphto-news',
-  'health-news',
+  'news',
   'blog',
   'announcement',
 ])
@@ -44,9 +43,9 @@ export const eventStatusEnum = pgEnum('event_status', [
 ])
 
 export const memberSpecialtyEnum = pgEnum('member_specialty', [
-  'disease-control',
-  'health-information',
-  'nutrition',
+  'general',
+  'specialist',
+  'associate',
 ])
 
 export const memberStatusEnum = pgEnum('member_status', [
@@ -124,7 +123,7 @@ export const events = pgTable('events', {
   startDate: timestamp('start_date'),
   endDate: timestamp('end_date'),
   registrationDeadline: timestamp('registration_deadline'),
-  priceGhs: numeric('price_ghs', { precision: 10, scale: 2 }),
+  price: numeric('price', { precision: 10, scale: 2 }),
   maxAttendees: integer('max_attendees'),
   status: eventStatusEnum('status').notNull().default('upcoming'),
   featuredImage: text('featured_image'),
@@ -253,23 +252,6 @@ export const navigationLinks = pgTable('navigation_links', {
 export type NavigationLink = typeof navigationLinks.$inferSelect
 export type NewNavigationLink = typeof navigationLinks.$inferInsert
 
-export const fundApplications = pgTable('fund_applications', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').references(() => users.id).notNull(),
-  applicantName: text('applicant_name').notNull(),
-  email: text('email').notNull(),
-  phone: text('phone').notNull(),
-  region: text('region').notNull(),
-  facility: text('facility').notNull(),
-  loanAmount: numeric('loan_amount', { precision: 10, scale: 2 }).notNull(),
-  loanPurpose: text('loan_purpose').notNull(),
-  repaymentPeriodMonths: integer('repayment_period_months').notNull(),
-  status: text('status').notNull().default('pending'), // pending | reviewing | approved | rejected
-  reviewNotes: text('review_notes'),
-  submittedAt: timestamp('submitted_at').defaultNow(),
-  reviewedAt: timestamp('reviewed_at'),
-  reviewedBy: uuid('reviewed_by').references(() => users.id),
-})
 
 export const courses = pgTable('courses', {
   id:          uuid('id').primaryKey().defaultRandom(),
@@ -394,8 +376,6 @@ export type NewContactSubmission = typeof contactSubmissions.$inferInsert
 export type SiteSetting = typeof siteSettings.$inferSelect
 export type NewSiteSetting = typeof siteSettings.$inferInsert
 
-export type FundApplication = typeof fundApplications.$inferSelect
-export type NewFundApplication = typeof fundApplications.$inferInsert
 
 export type Course = typeof courses.$inferSelect
 export type NewCourse = typeof courses.$inferInsert
@@ -425,14 +405,14 @@ export const blockTypeEnum = pgEnum('block_type', [
   'rich_text',
   'objectives_list',
   'timeline',
-  'practice_areas_grid',
+  'features_grid',
   'news_preview',
   'events_preview',
   'leadership_preview',
   'gallery_teaser',
-  'fund_cta',
   'image_banner',
   'about_preview',
+  'cta_section',
 ])
 
 export const pageBlocks = pgTable('page_blocks', {
@@ -451,7 +431,7 @@ export type NewPageBlock = typeof pageBlocks.$inferInsert
 export const mediaFiles = pgTable('media_files', {
   id: serial('id').primaryKey(),
   key: text('key').notNull().unique(),
-  bucket: text('bucket').notNull().default('gaphto-media'),
+  bucket: text('bucket').notNull().default('cms-media'),
   filename: text('filename').notNull(),
   originalName: text('original_name').notNull(),
   mimeType: text('mime_type').notNull(),

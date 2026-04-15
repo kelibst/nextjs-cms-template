@@ -92,7 +92,7 @@ export async function sendNewsletter(id: string) {
     return pref.receiveNewsletter !== false
   })
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://gaphto.org'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
   let sentCount = 0
 
   for (const recipient of recipients) {

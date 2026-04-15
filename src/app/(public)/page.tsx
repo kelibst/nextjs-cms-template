@@ -1,17 +1,17 @@
 export const dynamic = 'force-dynamic'
 
-import { getAllPosts, getGalleryAlbums, getEvents, getAbout, getPracticeAreas, getFund, getBlocksForPage } from "@/lib/data";
+import { getAllPosts, getGalleryAlbums, getEvents, getAbout, getBlocksForPage } from "@/lib/data";
 import { getLeadershipFromDb } from "@/lib/server-data";
 import { getMediaUrl } from "@/lib/media-url";
 import { HeroCarousel } from "@/components/home/hero-carousel";
 import { StatsBar } from "@/components/home/stats-bar";
 import { NewsPreview } from "@/components/home/news-preview";
 import { EventsPreview } from "@/components/home/events-preview";
-import { PracticeAreas } from "@/components/home/practice-areas";
+import { FeaturesGrid } from "@/components/home/features-grid";
 import { LeadershipPreview } from "@/components/home/leadership-preview";
 import { GalleryTeaser } from "@/components/home/gallery-teaser";
 import { AboutSection } from "@/components/home/about-section";
-import { FundCta } from "@/components/home/fund-cta";
+import { CtaSection } from "@/components/home/cta-section";
 import { BlockRenderer, type BlockDataSources } from "@/components/shared/block-renderer";
 import { auth } from "@/auth";
 
@@ -24,8 +24,6 @@ export default async function Home() {
   const albums = getGalleryAlbums();
   const events = getEvents();
   const about = getAbout();
-  const practiceAreas = getPracticeAreas();
-  const fund = getFund();
 
   // Fetch page blocks from DB (filtered to visible, sorted)
   const homepageBlocks = await getBlocksForPage('homepage');
@@ -43,8 +41,6 @@ export default async function Home() {
       leaders,
       albums,
       about,
-      practiceAreas,
-      fund,
       isLoggedIn,
       galleryImageSrc: aboutGalleryImg,
     }
@@ -76,8 +72,8 @@ export default async function Home() {
       {/* 4. Events & Programs */}
       <EventsPreview events={events} />
 
-      {/* 5. Practice Areas */}
-      <PracticeAreas areas={practiceAreas} />
+      {/* 5. Features Grid */}
+      <FeaturesGrid areas={[]} />
 
       {/* 6. Leadership Preview */}
       <LeadershipPreview leaders={leaders} />
@@ -91,8 +87,8 @@ export default async function Home() {
         galleryImageSrc={aboutGalleryImg}
       />
 
-      {/* 9. Fund CTA */}
-      <FundCta pdfUrl={fund.pdfUrl} />
+      {/* 9. CTA Section */}
+      <CtaSection />
     </>
   );
 }

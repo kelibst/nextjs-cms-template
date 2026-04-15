@@ -10,23 +10,13 @@ import { eq } from 'drizzle-orm'
 const pool = new Pool({ connectionString: process.env.DATABASE_URL! })
 const db = drizzle(pool)
 
-// ─── Data from JSON files ─────────────────────────────────────────────────────
+// ─── Generic feature items for the features_grid block ───────────────────────
 
-import aboutData from '../data/about.json'
-import practiceAreasData from '../data/practice-areas.json'
-import fundData from '../data/fund.json'
-
-// ─── Seed helpers ─────────────────────────────────────────────────────────────
-
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
-}
-
-// Practice areas mapped to {title, description} for blocks
-const practiceAreaItems = (practiceAreasData as { slug: string; title: string; content: string; roles: string[] }[]).map((a) => ({
-  title: a.title.replace(/&#038;/g, '&'),
-  description: stripHtml(a.content).slice(0, 160),
-}))
+const defaultFeatureItems = [
+  { title: 'Research & Development', description: 'Driving innovation through rigorous research and evidence-based practices.' },
+  { title: 'Community Outreach', description: 'Connecting with communities to deliver programmes that create lasting impact.' },
+  { title: 'Professional Development', description: 'Empowering members with training, workshops, and continuing education.' },
+]
 
 // ─── Seed Homepage ────────────────────────────────────────────────────────────
 
@@ -43,8 +33,8 @@ async function seedHomepage() {
       type: 'hero' as const,
       sortOrder: 0,
       content: JSON.stringify({
-        title: 'We are the backbone of Public Health in Ghana',
-        subtitle: aboutData.mission,
+        title: 'Welcome to My CMS',
+        subtitle: 'A modern, full-featured CMS and membership platform for your organisation.',
       }),
     },
     {
@@ -54,9 +44,9 @@ async function seedHomepage() {
       content: JSON.stringify({
         items: [
           { count: '500', suffix: '+', label: 'Members' },
-          { count: '42', suffix: '+', label: 'Years Active' },
-          { count: '3', suffix: '', label: 'Practice Areas' },
-          { count: '16', suffix: '', label: 'Regions' },
+          { count: '10', suffix: '+', label: 'Years Active' },
+          { count: '3', suffix: '', label: 'Programmes' },
+          { count: '12', suffix: '', label: 'Events Per Year' },
         ],
       }),
     },
@@ -70,15 +60,15 @@ async function seedHomepage() {
       page: 'homepage',
       type: 'events_preview' as const,
       sortOrder: 3,
-      content: JSON.stringify({ heading: 'Events & Programs', count: 3 }),
+      content: JSON.stringify({ heading: 'Upcoming Events', count: 3 }),
     },
     {
       page: 'homepage',
-      type: 'practice_areas_grid' as const,
+      type: 'features_grid' as const,
       sortOrder: 4,
       content: JSON.stringify({
-        heading: 'Our Practice Areas',
-        items: practiceAreaItems,
+        heading: 'What We Do',
+        items: defaultFeatureItems,
       }),
     },
     {
@@ -98,21 +88,22 @@ async function seedHomepage() {
       type: 'about_preview' as const,
       sortOrder: 7,
       content: JSON.stringify({
-        heading: 'Building a Healthier Ghana Together',
+        heading: 'About Our Organisation',
         imageUrl: '',
-        imageAlt: 'GAPHTO events and activities',
+        imageAlt: 'Organisation activities',
         linkText: 'Learn More About Us',
         linkHref: '/about',
       }),
     },
     {
       page: 'homepage',
-      type: 'fund_cta' as const,
+      type: 'cta_section' as const,
       sortOrder: 8,
       content: JSON.stringify({
-        heading: 'GAPHTO Welfare Fund',
-        subtitle: 'Supporting our members through financial assistance, welfare loans, and mutual aid. The GAPHTO Welfare Fund exists to strengthen the well-being of every member.',
-        buttonText: 'Apply Now',
+        heading: 'Join Our Community',
+        subtitle: 'Become a member and get access to exclusive resources, events, and professional development opportunities.',
+        buttonText: 'Register Now',
+        buttonHref: '/register',
       }),
     },
   ]
@@ -134,11 +125,12 @@ async function seedAbout() {
   const aboutBlocks = [
     {
       page: 'about',
-      type: 'rich_text' as const,
+      type: 'hero' as const,
       sortOrder: 0,
       content: JSON.stringify({
-        heading: 'Background',
-        body: aboutData.background,
+        title: 'About Our Organisation',
+        subtitle: 'Learn more about who we are, what we do, and where we are headed.',
+        label: 'Our Story',
       }),
     },
     {
@@ -146,39 +138,56 @@ async function seedAbout() {
       type: 'rich_text' as const,
       sortOrder: 1,
       content: JSON.stringify({
+        heading: 'Background',
+        body: '<p>Replace this with your organisation\'s background story. Describe your founding, your mandate, and the communities you serve.</p>',
+      }),
+    },
+    {
+      page: 'about',
+      type: 'rich_text' as const,
+      sortOrder: 2,
+      content: JSON.stringify({
         heading: 'Vision & Mission',
-        body: `<p><strong>Vision:</strong> ${aboutData.vision}</p><p><strong>Mission:</strong> ${aboutData.mission}</p>`,
+        variant: 'vision_mission',
+        vision: 'A world where every community thrives through access to quality services and professional excellence.',
+        mission: 'To unite, represent, and empower our members to deliver outstanding outcomes for the communities we serve.',
+        body: '',
       }),
     },
     {
       page: 'about',
       type: 'objectives_list' as const,
-      sortOrder: 2,
+      sortOrder: 3,
       content: JSON.stringify({
         heading: 'Aims & Objectives',
-        items: aboutData.objectives,
+        items: [
+          'Promote professional development among members',
+          'Advocate for policy changes that benefit the sector',
+          'Foster collaboration between members and partner organisations',
+          'Provide resources and support to members',
+        ],
       }),
     },
     {
       page: 'about',
-      type: 'practice_areas_grid' as const,
-      sortOrder: 3,
+      type: 'features_grid' as const,
+      sortOrder: 4,
       content: JSON.stringify({
-        heading: 'Areas of Practice',
-        items: practiceAreaItems,
+        heading: 'Our Focus Areas',
+        items: defaultFeatureItems,
       }),
     },
     {
       page: 'about',
       type: 'timeline' as const,
-      sortOrder: 4,
+      sortOrder: 5,
       content: JSON.stringify({
         heading: 'Our History',
         items: [
-          { year: '1984', title: 'Founding', description: 'Association founded for Disease Control Officers and Field Technicians.' },
-          { year: '2006', title: 'Official Inauguration', description: 'Officially inaugurated at Korle-Bu, Accra as PUHTOG.' },
-          { year: '2009', title: 'Renamed GAPHTO', description: 'Re-named Ghana Association of Public Health Technical Officers (GAPHTO) at Cape Coast Conference.' },
-          { year: 'Present', title: 'Continuing the Mission', description: 'Continues to advocate for public health professionals across Ghana.' },
+          { year: '2010', title: 'Founded', description: 'Organisation established with a core group of founding members.' },
+          { year: '2015', title: 'Growth Phase', description: 'Membership expanded nationally with new regional chapters.' },
+          { year: '2020', title: 'Digital Transformation', description: 'Launched online member portal and digital services.' },
+          { year: 'Present', title: 'Continuing the Mission', description: 'Continuing to grow and serve members across the country.' },
         ],
       }),
     },
@@ -189,94 +198,54 @@ async function seedAbout() {
   return aboutBlocks.length
 }
 
-// ─── Seed Fund ────────────────────────────────────────────────────────────────
+// ─── Seed Features Page ───────────────────────────────────────────────────────
 
-async function seedFund() {
-  const existing = await db.select().from(pageBlocks).where(eq(pageBlocks.page, 'fund'))
+async function seedFeaturesPage() {
+  const existing = await db.select().from(pageBlocks).where(eq(pageBlocks.page, 'features'))
   if (existing.length > 0) {
-    console.log('Fund blocks already seeded, skipping')
+    console.log('Features blocks already seeded, skipping')
     return 0
   }
 
-  const fundBlocks = [
+  const featuresBlocks = [
     {
-      page: 'fund',
+      page: 'features',
       type: 'hero' as const,
       sortOrder: 0,
       content: JSON.stringify({
-        title: 'GAPHTO Welfare Fund',
-        subtitle: 'Supporting our members in times of need',
+        title: 'What We Do',
+        subtitle: 'Explore the programmes and services our organisation delivers.',
       }),
     },
     {
-      page: 'fund',
-      type: 'rich_text' as const,
+      page: 'features',
+      type: 'features_grid' as const,
       sortOrder: 1,
       content: JSON.stringify({
-        heading: 'About the Fund',
-        body: fundData.description ?? '',
-      }),
-    },
-    {
-      page: 'fund',
-      type: 'fund_cta' as const,
-      sortOrder: 2,
-      content: JSON.stringify({
-        heading: 'Apply for Support',
-        subtitle: 'Applications are reviewed by the welfare committee.',
-        buttonText: 'Apply Now',
+        heading: 'Our Programmes',
+        items: defaultFeatureItems,
       }),
     },
   ]
 
-  await db.insert(pageBlocks).values(fundBlocks)
-  console.log(`Inserted ${fundBlocks.length} fund blocks`)
-  return fundBlocks.length
-}
-
-// ─── Seed Practice Areas ──────────────────────────────────────────────────────
-
-async function seedPracticeAreas() {
-  const existing = await db.select().from(pageBlocks).where(eq(pageBlocks.page, 'practice-areas'))
-  if (existing.length > 0) {
-    console.log('Practice-areas blocks already seeded, skipping')
-    return 0
-  }
-
-  const paBlocks = [
-    {
-      page: 'practice-areas',
-      type: 'hero' as const,
-      sortOrder: 0,
-      content: JSON.stringify({
-        title: 'Our Practice Areas',
-        subtitle: 'GAPHTO unites three specialist areas of public health.',
-      }),
-    },
-    {
-      page: 'practice-areas',
-      type: 'practice_areas_grid' as const,
-      sortOrder: 1,
-      content: JSON.stringify({
-        heading: 'Areas of Practice',
-        items: practiceAreaItems,
-      }),
-    },
-  ]
-
-  await db.insert(pageBlocks).values(paBlocks)
-  console.log(`Inserted ${paBlocks.length} practice-areas blocks`)
-  return paBlocks.length
+  await db.insert(pageBlocks).values(featuresBlocks)
+  console.log(`Inserted ${featuresBlocks.length} features blocks`)
+  return featuresBlocks.length
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-;(async () => {
+export async function seedBlocks() {
   const homeCount = await seedHomepage()
   const aboutCount = await seedAbout()
-  const fundCount = await seedFund()
-  const paCount = await seedPracticeAreas()
-  console.log(`Seed complete — homepage: ${homeCount}, about: ${aboutCount}, fund: ${fundCount}, practice-areas: ${paCount}`)
-  await pool.end()
-  process.exit(0)
-})()
+  const featuresCount = await seedFeaturesPage()
+  console.log(`Block seed complete — homepage: ${homeCount}, about: ${aboutCount}, features: ${featuresCount}`)
+}
+
+// Allow running directly: bun src/lib/seed-blocks.ts
+if (require.main === module) {
+  seedBlocks()
+    .then(() => pool.end())
+    .then(() => process.exit(0))
+    .catch((err) => { console.error(err); process.exit(1) })
+}

@@ -10,6 +10,6 @@ export function getMediaUrl(url: string | null | undefined): string {
   if (!url) return '/images/placeholder.jpg';
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
   if (url.startsWith('/')) return url;
-  const base = process.env.NEXT_PUBLIC_MEDIA_BASE_URL || 'http://localhost:9000/gaphto-media';
+  const base = process.env.NEXT_PUBLIC_MEDIA_BASE_URL || 'http://localhost:9000/cms-media';
   return `${base}/${url}`;
 }

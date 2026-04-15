@@ -9,11 +9,11 @@ export const metadata: Metadata = {
 };
 
 const SAMPLE_PUBLICATIONS = [
-  { title: "GAPHTO Journal Vol. 1", year: "2017", type: "Journal", size: "2.4 MB" },
-  { title: "Annual Conference Report 2016", year: "2016", type: "Report", size: "1.8 MB" },
-  { title: "Disease Control Guidelines", year: "2017", type: "Guideline", size: "3.1 MB" },
-  { title: "Health Information Manual", year: "2016", type: "Manual", size: "4.2 MB" },
-  { title: "Nutrition Policy Brief", year: "2017", type: "Brief", size: "890 KB" },
+  { title: "Sample Publication", year: "2024", type: "Journal", size: "2.4 MB" },
+  { title: "Annual Conference Report", year: "2024", type: "Report", size: "1.8 MB" },
+  { title: "Best Practices Guideline", year: "2024", type: "Guideline", size: "3.1 MB" },
+  { title: "Member Resource Manual", year: "2024", type: "Manual", size: "4.2 MB" },
+  { title: "Policy Brief", year: "2024", type: "Brief", size: "890 KB" },
 ];
 
 const TYPE_COLORS: Record<string, string> = {
@@ -30,7 +30,7 @@ export default function MemberPublicationsPage() {
       <InnerPageHero
         title="Publications"
         label="Knowledge Base"
-        subtitle="GAPHTO member-exclusive publications and resources."
+        subtitle="Member-exclusive publications and resources."
         breadcrumb={[
           { label: "Member Centre", href: "/member-centre" },
           { label: "Publications" },
@@ -42,7 +42,7 @@ export default function MemberPublicationsPage() {
         <div className="mb-6 flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50 px-4 py-4 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
           <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
           <p>
-            Access to publications is available to GAPHTO members only.
+            Access to publications is available to members only.
             Downloads will be enabled after Phase 4 DB migration.
           </p>
         </div>

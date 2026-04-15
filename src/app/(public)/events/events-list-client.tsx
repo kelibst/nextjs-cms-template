@@ -44,7 +44,7 @@ function EventCard({
 }) {
   const chip = formatDateChip(event.startDate)
   const dateStr = formatDate(event.startDate)
-  const isPaid = event.priceGhs !== null && Number(event.priceGhs) > 0
+  const isPaid = event.price !== null && Number(event.price) > 0
 
   return (
     <motion.article
@@ -145,7 +145,7 @@ function EventCard({
         {/* Price + CTA */}
         <div className="mt-auto pt-2 flex items-center justify-between gap-3">
           <span className={`text-sm font-semibold ${isPaid ? 'text-primary' : 'text-muted-foreground'}`}>
-            {isPaid ? `GH₵ ${Number(event.priceGhs).toLocaleString()}` : 'Free'}
+            {isPaid ? `$${Number(event.price).toLocaleString()}` : 'Free'}
           </span>
           <Button
             asChild
@@ -216,7 +216,7 @@ export function EventsListClient({ upcoming, past }: Props) {
                 Past Events
               </h2>
               <p className="text-muted-foreground/70 mt-1 ml-4">
-                A record of previous GAPHTO events and programmes.
+                Previous events and programmes.
               </p>
             </motion.div>
 

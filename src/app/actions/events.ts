@@ -18,7 +18,7 @@ type EventInput = {
   startDate?: string | null
   endDate?: string | null
   registrationDeadline?: string | null
-  priceGhs?: string
+  price?: string
   maxAttendees?: number | null
   status?: string
   featuredImage?: string | null
@@ -44,7 +44,7 @@ export async function createEvent(data: EventInput) {
     startDate: data.startDate ? new Date(data.startDate) : null,
     endDate: data.endDate ? new Date(data.endDate) : null,
     registrationDeadline: data.registrationDeadline ? new Date(data.registrationDeadline) : null,
-    priceGhs: data.priceGhs ?? '0',
+    price: data.price ?? '0',
     maxAttendees: data.maxAttendees ?? null,
     status: (data.status ?? 'upcoming') as typeof events.$inferInsert['status'],
     featuredImage: data.featuredImage ?? null,
@@ -54,7 +54,7 @@ export async function createEvent(data: EventInput) {
   if (data.status === 'upcoming' || data.status === 'ongoing') {
     try {
       const dateStr = data.startDate
-        ? new Date(data.startDate).toLocaleDateString('en-GH', { dateStyle: 'long' })
+        ? new Date(data.startDate).toLocaleDateString('en-US', { dateStyle: 'long' })
         : 'TBD'
 
       // Fetch active members with their user info
@@ -108,7 +108,7 @@ export async function updateEvent(id: string, data: EventInput) {
     startDate: data.startDate ? new Date(data.startDate) : null,
     endDate: data.endDate ? new Date(data.endDate) : null,
     registrationDeadline: data.registrationDeadline ? new Date(data.registrationDeadline) : null,
-    priceGhs: data.priceGhs ?? '0',
+    price: data.price ?? '0',
     maxAttendees: data.maxAttendees ?? null,
     status: (data.status ?? 'upcoming') as typeof events.$inferInsert['status'],
     featuredImage: data.featuredImage ?? null,

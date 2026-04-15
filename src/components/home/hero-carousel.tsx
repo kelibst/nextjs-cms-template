@@ -20,9 +20,9 @@ interface Props {
 }
 
 const CATEGORY_CONFIG: Record<string, { label: string; badge: string }> = {
-  'gaphto-news': { label: 'GAPHTO News',  badge: 'bg-primary-muted text-primary/90' },
-  'health-news': { label: 'Health News',  badge: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' },
-  'blog':        { label: 'Blog',         badge: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' },
+  'news':         { label: 'News',         badge: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' },
+  'blog':         { label: 'Blog',         badge: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' },
+  'announcement': { label: 'Announcement', badge: 'bg-primary-muted text-primary/90' },
 }
 
 function postImageSrc(post: Post): string {
@@ -66,7 +66,7 @@ export function HeroCarousel({ isLoggedIn, heroTitle, heroSubtitle }: Props) {
   }, [isHovered, heroNews.length])
 
   const active = heroNews[activeIndex]
-  const catCfg = active ? (CATEGORY_CONFIG[active.category] ?? CATEGORY_CONFIG['gaphto-news']) : null
+  const catCfg = active ? (CATEGORY_CONFIG[active.category] ?? CATEGORY_CONFIG['news'] ?? { label: active.category, badge: 'bg-muted text-muted-foreground' }) : null
 
   return (
     <section
@@ -97,7 +97,7 @@ export function HeroCarousel({ isLoggedIn, heroTitle, heroSubtitle }: Props) {
             >
               <span className="inline-flex items-center gap-2 bg-white/20 text-white text-sm font-medium px-4 py-1.5 rounded-full border border-white/30">
                 <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                Ghana&apos;s Public Health Association
+                {process.env.NEXT_PUBLIC_SITE_NAME ?? 'My CMS'}
               </span>
             </motion.div>
 
@@ -107,13 +107,7 @@ export function HeroCarousel({ isLoggedIn, heroTitle, heroSubtitle }: Props) {
               transition={{ duration: 0.55, ease: 'easeOut', delay: 0.1 }}
               className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.08] tracking-tight [text-shadow:0_2px_20px_rgba(0,0,0,0.35)]"
             >
-              {heroTitle || (
-                <>
-                  We are the{' '}
-                  <span className="text-primary-muted">backbone</span>
-                  {' '}of Public Health in Ghana
-                </>
-              )}
+              {heroTitle || 'Welcome to Our Platform'}
             </motion.h1>
 
             <motion.p
@@ -122,7 +116,7 @@ export function HeroCarousel({ isLoggedIn, heroTitle, heroSubtitle }: Props) {
               transition={{ duration: 0.55, ease: 'easeOut', delay: 0.2 }}
               className="text-lg text-white/80 max-w-md leading-relaxed"
             >
-              {heroSubtitle || 'Uniting Disease Control, Health Information, and Nutrition professionals to build a healthier Ghana.'}
+              {heroSubtitle || 'Connecting professionals and communities through shared purpose.'}
             </motion.p>
 
             <motion.div
@@ -163,7 +157,7 @@ export function HeroCarousel({ isLoggedIn, heroTitle, heroSubtitle }: Props) {
               <span className="text-muted-foreground/40">·</span>
               <span className="flex items-center gap-1.5">
                 <MapPin className="w-4 h-4 text-primary" />
-                <strong className="text-white/90">16</strong> Regions
+                <strong className="text-white/90">Local</strong> Presence
               </span>
             </motion.div>
           </div>
@@ -184,7 +178,7 @@ export function HeroCarousel({ isLoggedIn, heroTitle, heroSubtitle }: Props) {
                 <div>
                   <h2 className="text-sm font-bold text-foreground">Latest News</h2>
                   <p className="text-[11px] text-muted-foreground/70 mt-0.5">
-                    Stay informed with the latest from GAPHTO
+                    Stay informed with the latest news
                   </p>
                 </div>
                 <Link

@@ -9,8 +9,8 @@ import { getHeroContent } from "@/lib/blocks";
 import { BlockRenderer, type BlockDataSources } from "@/components/shared/block-renderer";
 
 export const metadata: Metadata = {
-  title: "Publications | GAPHTO",
-  description: "GAPHTO knowledge resources — journals, reports, guidelines, and policy documents.",
+  title: "Publications",
+  description: "Knowledge resources — journals, reports, guidelines, and policy documents.",
 };
 
 const typeColors: Record<string, string> = {
@@ -33,7 +33,7 @@ export default async function PublicationsPage() {
   const hero = getHeroContent(blocks, {
     title: 'Publications',
     label: 'Knowledge Base',
-    subtitle: 'Journals, reports, guidelines, and policy documents from GAPHTO.',
+    subtitle: 'Journals, reports, guidelines, and policy documents from our organisation.',
   })
 
   const contentBlocks = blocks.filter(b => b.type !== 'hero')
@@ -107,7 +107,7 @@ export default async function PublicationsPage() {
               <Lock className="mx-auto mb-4 h-12 w-12 text-primary" />
               <h2 className="text-2xl font-bold text-foreground">Members-Only Access</h2>
               <p className="mt-3 max-w-xl mx-auto text-muted-foreground">
-                GAPHTO publications are available exclusively to members. Sign in with your
+                Publications are available exclusively to members. Sign in with your
                 member account to access journals, reports, guidelines, and more.
               </p>
             </div>

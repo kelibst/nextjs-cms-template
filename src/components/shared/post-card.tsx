@@ -4,15 +4,15 @@ import { Post, decodeEntities, postImagePath } from "@/lib/data";
 import { getMediaUrl } from "@/lib/media-url";
 
 const categoryColors: Record<string, string> = {
-  "gaphto-news": "bg-primary-muted text-primary/90",
-  "health-news": "bg-blue-100 text-blue-800",
+  news: "bg-blue-100 text-blue-800",
   blog: "bg-amber-100 text-amber-800",
+  announcement: "bg-primary-muted text-primary/90",
 };
 
 const categoryLabels: Record<string, string> = {
-  "gaphto-news": "GAPHTO News",
-  "health-news": "Health News",
+  news: "News",
   blog: "Blog",
+  announcement: "Announcement",
 };
 
 function formatDate(dateStr: string): string {

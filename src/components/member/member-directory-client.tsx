@@ -24,29 +24,10 @@ const MembersMapWrapper = dynamic(
   },
 )
 
-const GHANA_REGIONS = [
-  'Ahafo',
-  'Ashanti',
-  'Bono',
-  'Bono East',
-  'Central',
-  'Eastern',
-  'Greater Accra',
-  'North East',
-  'Northern',
-  'Oti',
-  'Savannah',
-  'Upper East',
-  'Upper West',
-  'Volta',
-  'Western',
-  'Western North',
-]
-
 const SPECIALTIES = [
-  { value: 'disease-control', label: 'Disease Control' },
-  { value: 'health-information', label: 'Health Information Management' },
-  { value: 'nutrition', label: 'Nutrition' },
+  { value: 'general', label: 'General' },
+  { value: 'specialist', label: 'Specialist' },
+  { value: 'associate', label: 'Associate' },
 ]
 
 interface MemberDirectoryClientProps {
@@ -95,8 +76,12 @@ export function MemberDirectoryClient({
     router.push(buildUrl('specialty', value === 'all' ? '' : value))
   }
 
-  const handleRegionChange = (value: string) => {
-    router.push(buildUrl('region', value === 'all' ? '' : value))
+  const handleRegionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    debounceTimer.current = setTimeout(() => {
+      router.push(buildUrl('region', value))
+    }, 300)
   }
 
   // Shape members for the map component
@@ -140,22 +125,13 @@ export function MemberDirectoryClient({
           </SelectContent>
         </Select>
 
-        <Select
-          defaultValue={initialRegion || 'all'}
-          onValueChange={handleRegionChange}
-        >
-          <SelectTrigger className="w-full sm:w-52">
-            <SelectValue placeholder="All Regions" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Regions</SelectItem>
-            {GHANA_REGIONS.map((r) => (
-              <SelectItem key={r} value={r}>
-                {r}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Input
+          type="search"
+          placeholder="Filter by region..."
+          defaultValue={initialRegion}
+          onChange={handleRegionChange}
+          className="w-full sm:w-52"
+        />
 
         {/* View toggle */}
         <div className="flex shrink-0 items-center gap-1 rounded-lg border border-border bg-muted p-1">

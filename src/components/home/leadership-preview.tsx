@@ -27,7 +27,7 @@ export function LeadershipPreview({ leaders, heading = 'Our Leadership', count }
         >
           <h2 className="text-3xl font-bold text-foreground">{heading}</h2>
           <p className="text-muted-foreground mt-2">
-            The executives steering GAPHTO&apos;s mission forward
+            Meet the team steering our organisation forward.
           </p>
         </motion.div>
 

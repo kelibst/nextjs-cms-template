@@ -22,18 +22,18 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "GAPHTO — Ghana Association of Public Health Technical Officers",
-    template: "%s | GAPHTO",
+    default: process.env.NEXT_PUBLIC_SITE_NAME ?? 'My CMS',
+    template: `%s | ${process.env.NEXT_PUBLIC_SITE_NAME ?? 'My CMS'}`,
   },
   description:
-    "Ghana Association of Public Health Technical Officers — Public Health, Our Concern. Serving since 1984.",
+    'A modern CMS and membership platform template.',
   openGraph: {
     type: "website",
-    locale: "en_GH",
-    url: "https://gaphto.org",
-    siteName: "GAPHTO",
+    locale: "en_US",
+    url: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
+    siteName: process.env.NEXT_PUBLIC_SITE_NAME ?? 'My CMS',
     images: [
-      { url: "/images/placeholder.jpg", width: 1200, height: 630, alt: "GAPHTO" },
+      { url: "/images/placeholder.jpg", width: 1200, height: 630, alt: "My CMS" },
     ],
   },
   twitter: { card: "summary_large_image" },

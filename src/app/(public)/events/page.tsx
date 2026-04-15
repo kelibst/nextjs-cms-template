@@ -10,7 +10,7 @@ import { EventsListClient } from './events-list-client'
 
 export const metadata: Metadata = {
   title: 'Events & CPD',
-  description: 'Upcoming and past CPD events from GAPHTO.',
+  description: 'Upcoming and past CPD events and programmes.',
 }
 
 export default async function EventsPage() {
@@ -25,7 +25,7 @@ export default async function EventsPage() {
   const hero = getHeroContent(blocks, {
     title: 'Events & CPD',
     label: 'Professional Development',
-    subtitle: 'Continuing Professional Development events, conferences, and training opportunities from GAPHTO.',
+    subtitle: 'Continuing Professional Development events, conferences, and training opportunities.',
   })
 
   const contentBlocks = blocks.filter(b => b.type !== 'hero')

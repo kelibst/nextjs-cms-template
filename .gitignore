@@ -58,3 +58,15 @@ public/images/*
 !public/images/globe.svg
 !public/images/file.svg
 !public/images/window.svg
+plan/
+
+# Local env files
+.env
+.env.local
+.env.production
+
+# Uploaded media (populated at runtime)
+public/images/uploads/
+
+# Build artifacts
+tsconfig.tsbuildinfo
