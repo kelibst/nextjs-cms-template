@@ -57,6 +57,7 @@
     "yet-another-react-lightbox": "^3.30.1"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4",
     "@tanstack/react-query-devtools": "^5.96.2",
     "@types/bcryptjs": "^3.0.0",
     "@types/leaflet": "^1.9.21",

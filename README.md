@@ -64,11 +64,19 @@ A full-featured, production-ready CMS and membership platform template built wit
    ```bash
    cp .env.example .env
    ```
-   The defaults in `.env.example` work for local development. At minimum, set `NEXT_PUBLIC_SITE_NAME` to your project name.
+   Generate auth secrets (required even for local dev):
+   ```bash
+   openssl rand -base64 32
+   ```
+   Paste the output into both `NEXTAUTH_SECRET` and `AUTH_SECRET` in `.env`. Everything else in `.env.example` works out of the box for local development.
 
-4. **Start infrastructure** (PostgreSQL + MinIO)
+4. **Start infrastructure** (PostgreSQL on port 5434 + MinIO)
    ```bash
    docker compose -f infrastructure/docker-compose.yml up -d
+   ```
+   Wait for containers to become healthy before continuing:
+   ```bash
+   docker compose -f infrastructure/docker-compose.yml ps
    ```
 
 5. **Run database migrations**
@@ -90,6 +98,7 @@ A full-featured, production-ready CMS and membership platform template built wit
    - Site: [http://localhost:3000](http://localhost:3000)
    - Admin dashboard: [http://localhost:3000/dashboard](http://localhost:3000/dashboard)
    - MinIO console: [http://localhost:9001](http://localhost:9001) (login: `minioadmin` / `minioadmin`)
+   - pgAdmin: [http://localhost:5050](http://localhost:5050) (login: `admin@example.com` / `admin_secret`)
 
 9. **Log in** with any of the demo accounts below.
 
@@ -114,9 +123,9 @@ All demo accounts use the same password: **`Demo1234!`**
 
 | Variable | Required | Description |
 |---|---|---|
-| `DATABASE_URL` | Yes | PostgreSQL connection string |
-| `NEXTAUTH_SECRET` | Yes | NextAuth signing secret — run `openssl rand -base64 32` |
-| `AUTH_SECRET` | Yes | Same value as `NEXTAUTH_SECRET` (NextAuth v5 dual requirement) |
+| `DATABASE_URL` | Yes | PostgreSQL connection string — default local: `postgresql://cms:cms_secret@127.0.0.1:5434/cms` (note port **5434** for Docker Compose) |
+| `NEXTAUTH_SECRET` | Yes | NextAuth signing secret — generate with `openssl rand -base64 32` |
+| `AUTH_SECRET` | Yes | Same value as `NEXTAUTH_SECRET` (NextAuth v5 requires both) |
 | `NEXTAUTH_URL` | Yes | Full public URL of the app, e.g. `https://example.com` |
 | `NEXT_PUBLIC_APP_URL` | Yes | Same as `NEXTAUTH_URL` — used in client components |
 | `NEXT_PUBLIC_SITE_NAME` | Yes | Display name of the site, e.g. `"My Organisation"` |
