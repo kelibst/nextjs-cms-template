@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = {
@@ -15,6 +16,18 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-4 py-16">
+      {/* Back to site */}
+      <div className="w-full max-w-sm mb-4 flex">
+        <Link
+          href="/"
+          className="flex items-center gap-1 text-sm text-white/80 hover:text-white transition-colors"
+          style={{ textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}
+        >
+          <ArrowLeft className="size-3.5" />
+          Back to site
+        </Link>
+      </div>
+
       {/* Card */}
       <div className="w-full max-w-sm rounded-2xl bg-card shadow-2xl border border-border">
         {/* Header */}
@@ -71,7 +84,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       </div>
 
       {/* Footer note */}
-      <p className="mt-8 text-sm text-muted-foreground/60">
+      <p
+        className="mt-8 text-xs text-white/80"
+        style={{ textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}
+      >
         &copy; {new Date().getFullYear()} {process.env.NEXT_PUBLIC_SITE_NAME ?? 'My CMS'}. All rights reserved.
       </p>
     </div>

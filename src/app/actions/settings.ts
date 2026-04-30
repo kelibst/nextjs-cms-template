@@ -3,7 +3,7 @@
 import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { siteSettings } from '../../../drizzle/schema'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 export async function saveSettings(values: Record<string, string>) {
   const session = await auth()
@@ -17,5 +17,6 @@ export async function saveSettings(values: Record<string, string>) {
     )
   )
 
-  revalidatePath('/dashboard/settings')
+  revalidatePath('/dashboard/settings', 'page')
+  revalidateTag('site-settings', {})
 }

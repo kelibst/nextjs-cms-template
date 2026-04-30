@@ -1,13 +1,17 @@
-
 import Link from 'next/link'
 import Image from 'next/image'
 
 interface LogoProps {
   variant?: 'light' | 'dark'
+  logoUrl?: string
+  siteName?: string
 }
 
-const Logo = ({ variant = 'light' }: LogoProps) => {
+const Logo = ({ variant = 'light', logoUrl, siteName }: LogoProps) => {
   const isDark = variant === 'dark'
+  const name = siteName || process.env.NEXT_PUBLIC_SITE_NAME || 'My CMS'
+  const src = logoUrl || '/images/logo/logo.png'
+
   return (
     <Link href="/" className="flex items-center gap-2 group">
       <div className={`relative h-10 w-10 rounded-full overflow-hidden shadow-sm shrink-0 ${
@@ -16,8 +20,8 @@ const Logo = ({ variant = 'light' }: LogoProps) => {
           : 'border border-border bg-white'
       }`}>
         <Image
-          src="/images/logo/logo.png"
-          alt={process.env.NEXT_PUBLIC_SITE_NAME ?? 'My CMS'}
+          src={src}
+          alt={name}
           fill
           className={`object-contain p-1 ${isDark ? 'brightness-0 invert' : ''}`}
           priority
@@ -26,7 +30,7 @@ const Logo = ({ variant = 'light' }: LogoProps) => {
       <span className={`hidden sm:block text-xs leading-tight max-w-35 ${
         isDark ? 'text-white/70' : 'text-muted-foreground'
       }`}>
-        {process.env.NEXT_PUBLIC_SITE_NAME ?? 'My CMS'}
+        {name}
       </span>
     </Link>
   )

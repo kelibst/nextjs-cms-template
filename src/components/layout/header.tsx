@@ -18,6 +18,7 @@ import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import Logo from './Logo'
+import type { SiteSettings } from '@/lib/site-settings'
 
 const fallbackNavLinks = [
   { label: 'Home', href: '/' },
@@ -32,6 +33,7 @@ const fallbackNavLinks = [
 
 interface HeaderProps {
   navLinks?: { label: string; href: string; openInNewTab?: boolean }[]
+  settings?: SiteSettings
 }
 
 function UserAvatar({ name }: { name: string }) {
@@ -48,7 +50,7 @@ function UserAvatar({ name }: { name: string }) {
   )
 }
 
-export function Header({ navLinks = fallbackNavLinks }: HeaderProps) {
+export function Header({ navLinks = fallbackNavLinks, settings }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const { data: session, status } = useSession()
@@ -82,7 +84,7 @@ export function Header({ navLinks = fallbackNavLinks }: HeaderProps) {
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Logo />
+          <Logo logoUrl={settings?.logoUrl} siteName={settings?.siteName} />
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">

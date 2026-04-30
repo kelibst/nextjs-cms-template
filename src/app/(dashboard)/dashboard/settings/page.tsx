@@ -7,8 +7,11 @@ import { SettingsForm } from '@/components/dashboard/settings-form'
 export const dynamic = 'force-dynamic'
 
 const SETTING_KEYS = [
-  'org_name', 'tagline', 'contact_email', 'contact_phone', 'contact_address',
+  'org_name', 'tagline', 'site_description', 'copyright_text', 'logo_url',
+  'contact_email', 'contact_phone', 'contact_address',
   'social_facebook', 'social_twitter', 'social_youtube',
+  'theme_primary', 'theme_accent',
+  'auth_layout_style', 'auth_bg_image_url',
 ]
 
 export default async function SettingsPage() {
