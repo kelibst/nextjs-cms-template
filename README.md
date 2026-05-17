@@ -219,6 +219,7 @@ nextjs-cms-template/
 |---|---|
 | [docs/ROUTES.md](docs/ROUTES.md) | Complete route reference — public, auth, member, dashboard, and API routes |
 | [docs/COMPONENTS.md](docs/COMPONENTS.md) | Component directory — every significant component with description and location |
+| [docs/SEO_GUIDE.md](docs/SEO_GUIDE.md) | SEO Configuration Guide — how to configure global SEO and search visibility |
 
 ---
 

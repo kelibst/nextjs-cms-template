@@ -18,6 +18,11 @@ export type SiteSettings = {
   socialFacebook: string
   socialTwitter: string
   socialYoutube: string
+  seoTitle: string
+  seoDescription: string
+  seoKeywords: string
+  seoDefaultImage: string
+  allowSearchIndexing: string
 }
 
 export const getSiteSettings = unstable_cache(
@@ -43,6 +48,11 @@ export const getSiteSettings = unstable_cache(
       socialFacebook: map.social_facebook || '',
       socialTwitter: map.social_twitter || '',
       socialYoutube: map.social_youtube || '',
+      seoTitle: map.seo_title || '',
+      seoDescription: map.seo_description || '',
+      seoKeywords: map.seo_keywords || '',
+      seoDefaultImage: map.seo_default_image || '',
+      allowSearchIndexing: map.allow_search_indexing || 'true',
     }
   },
   ['site-settings'],

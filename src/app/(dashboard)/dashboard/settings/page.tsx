@@ -12,6 +12,7 @@ const SETTING_KEYS = [
   'social_facebook', 'social_twitter', 'social_youtube',
   'theme_primary', 'theme_accent',
   'auth_layout_style', 'auth_bg_image_url',
+  'seo_title', 'seo_description', 'seo_keywords', 'seo_default_image', 'allow_search_indexing',
 ]
 
 export default async function SettingsPage() {

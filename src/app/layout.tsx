@@ -23,22 +23,40 @@ const geistMono = Geist_Mono({
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings()
+  const title = settings.seoTitle || settings.siteName
+  const description = settings.seoDescription || settings.siteDescription || 'A modern CMS and membership platform template.'
+  const images = settings.seoDefaultImage
+    ? [{ url: settings.seoDefaultImage, width: 1200, height: 630, alt: title }]
+    : [{ url: "/images/placeholder.jpg", width: 1200, height: 630, alt: title }]
+  
+  const allowIndexing = settings.allowSearchIndexing !== 'false'
+
   return {
     title: {
-      default: settings.siteName,
-      template: `%s | ${settings.siteName}`,
+      default: title,
+      template: `%s | ${title}`,
     },
-    description: settings.siteDescription || 'A modern CMS and membership platform template.',
+    description,
+    keywords: settings.seoKeywords ? settings.seoKeywords.split(',').map(k => k.trim()) : undefined,
+    robots: {
+      index: allowIndexing,
+      follow: allowIndexing,
+    },
     openGraph: {
       type: "website",
       locale: "en_US",
       url: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
-      siteName: settings.siteName,
-      images: [
-        { url: "/images/placeholder.jpg", width: 1200, height: 630, alt: settings.siteName },
-      ],
+      siteName: title,
+      title,
+      description,
+      images,
     },
-    twitter: { card: "summary_large_image" },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images,
+    },
   }
 }
 

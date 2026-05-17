@@ -6,10 +6,11 @@ import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
 import { saveSettings } from '@/app/actions/settings'
 import { MediaPickerModal } from '@/components/dashboard/media-picker-modal'
 import Image from 'next/image'
-import { ImageIcon, Palette, Settings, Globe, Monitor } from 'lucide-react'
+import { ImageIcon, Palette, Settings, Globe, Monitor, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface SettingsFormProps {
@@ -83,6 +84,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
   const [values, setValues] = useState<Record<string, string>>(settings)
   const [logoPickerOpen, setLogoPickerOpen] = useState(false)
   const [authBgPickerOpen, setAuthBgPickerOpen] = useState(false)
+  const [seoImagePickerOpen, setSeoImagePickerOpen] = useState(false)
 
   const mutation = useMutation({
     mutationFn: (data: Record<string, string>) => saveSettings(data),
@@ -320,6 +322,85 @@ export function SettingsForm({ settings }: SettingsFormProps) {
         </div>
       </section>
 
+      {/* SEO & Search */}
+      <section className="bg-card rounded-xl border border-border p-5 space-y-4">
+        <div className="flex items-center gap-2">
+          <Search className="size-4 text-muted-foreground" />
+          <h2 className="text-sm font-semibold text-foreground/80 uppercase tracking-wide">SEO & Search</h2>
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-sm text-muted-foreground">SEO Title</label>
+          <Input
+            value={values.seo_title ?? ''}
+            onChange={(e) => set('seo_title', e.target.value)}
+            placeholder="Default Meta Title (leave blank to use org name)"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-sm text-muted-foreground">SEO Description</label>
+          <Textarea
+            value={values.seo_description ?? ''}
+            onChange={(e) => set('seo_description', e.target.value)}
+            placeholder="Meta description for search engines and social sharing"
+            rows={2}
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-sm text-muted-foreground">SEO Keywords</label>
+          <Input
+            value={values.seo_keywords ?? ''}
+            onChange={(e) => set('seo_keywords', e.target.value)}
+            placeholder="comma, separated, keywords"
+          />
+        </div>
+
+        <div className="space-y-2 pt-1">
+          <label className="text-sm text-muted-foreground">Default Social Share Image</label>
+          <div className="flex items-center gap-4">
+            {values.seo_default_image && (
+              <div className="relative h-14 w-24 rounded-lg border border-border overflow-hidden shrink-0">
+                <Image src={values.seo_default_image} alt="SEO Share Image" fill className="object-cover" />
+              </div>
+            )}
+            <div className="flex flex-col gap-1.5">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setSeoImagePickerOpen(true)}
+              >
+                {values.seo_default_image ? 'Change Image' : 'Select Image'}
+              </Button>
+              {values.seo_default_image && (
+                <button
+                  type="button"
+                  onClick={() => set('seo_default_image', '')}
+                  className="text-xs text-muted-foreground hover:text-destructive transition-colors text-left"
+                >
+                  Remove image
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between rounded-lg border p-3 mt-4">
+          <div className="space-y-0.5">
+            <label className="text-sm font-medium">Search Engine Visibility</label>
+            <p className="text-xs text-muted-foreground">
+              Allow search engines to index this site.
+            </p>
+          </div>
+          <Switch
+            checked={(values.allow_search_indexing ?? 'true') === 'true'}
+            onCheckedChange={(checked) => set('allow_search_indexing', checked ? 'true' : 'false')}
+          />
+        </div>
+      </section>
+
       {/* Auth Pages */}
       <section className="bg-card rounded-xl border border-border p-5 space-y-4">
         <div className="flex items-center gap-2">
@@ -413,6 +494,13 @@ export function SettingsForm({ settings }: SettingsFormProps) {
         onSelect={(url) => { set('auth_bg_image_url', url); setAuthBgPickerOpen(false) }}
         accept="image"
         title="Select Auth Background Image"
+      />
+      <MediaPickerModal
+        open={seoImagePickerOpen}
+        onClose={() => setSeoImagePickerOpen(false)}
+        onSelect={(url) => { set('seo_default_image', url); setSeoImagePickerOpen(false) }}
+        accept="image"
+        title="Select SEO Share Image"
       />
     </div>
   )
